@@ -14,3 +14,181 @@ import * as zod from "zod";
 export const HealthCheckResponse = zod.object({
   status: zod.string(),
 });
+
+/**
+ * @summary List all products
+ */
+export const GetProductsQueryParams = zod.object({
+  userId: zod.coerce
+    .string()
+    .optional()
+    .describe("Current user ID for like status"),
+});
+
+export const GetProductsResponseItem = zod.object({
+  id: zod.string(),
+  name: zod.string(),
+  price: zod.number(),
+  imageUrl: zod.string(),
+  category: zod.string(),
+  ownerId: zod.string(),
+  ownerName: zod.string(),
+  likesCount: zod.number(),
+  userLiked: zod.boolean(),
+  comments: zod.array(
+    zod.object({
+      id: zod.string(),
+      productId: zod.string(),
+      userId: zod.string(),
+      username: zod.string(),
+      text: zod.string(),
+      createdAt: zod.string(),
+    }),
+  ),
+  createdAt: zod.string(),
+});
+export const GetProductsResponse = zod.array(GetProductsResponseItem);
+
+/**
+ * @summary Create a new product listing
+ */
+
+export const createProductBodyPriceMin = 0;
+
+export const CreateProductBody = zod.object({
+  name: zod.string().min(1),
+  price: zod.number().min(createProductBodyPriceMin),
+  imageObjectPath: zod.string(),
+  category: zod.string(),
+  ownerId: zod.string(),
+  ownerName: zod.string(),
+});
+
+/**
+ * @summary Update product name and price (owner only)
+ */
+export const UpdateProductParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const updateProductBodyPriceMin = 0;
+
+export const UpdateProductBody = zod.object({
+  userId: zod.string(),
+  name: zod.string().min(1),
+  price: zod.number().min(updateProductBodyPriceMin),
+});
+
+export const UpdateProductResponse = zod.object({
+  id: zod.string(),
+  name: zod.string(),
+  price: zod.number(),
+  imageUrl: zod.string(),
+  category: zod.string(),
+  ownerId: zod.string(),
+  ownerName: zod.string(),
+  likesCount: zod.number(),
+  userLiked: zod.boolean(),
+  comments: zod.array(
+    zod.object({
+      id: zod.string(),
+      productId: zod.string(),
+      userId: zod.string(),
+      username: zod.string(),
+      text: zod.string(),
+      createdAt: zod.string(),
+    }),
+  ),
+  createdAt: zod.string(),
+});
+
+/**
+ * @summary Delete a product (owner only)
+ */
+export const DeleteProductParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const DeleteProductQueryParams = zod.object({
+  userId: zod.coerce.string(),
+});
+
+/**
+ * @summary Toggle like on a product
+ */
+export const ToggleLikeParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const ToggleLikeBody = zod.object({
+  userId: zod.string(),
+});
+
+export const ToggleLikeResponse = zod.object({
+  liked: zod.boolean(),
+  likesCount: zod.number(),
+});
+
+/**
+ * @summary Add a comment to a product
+ */
+export const AddCommentParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const AddCommentBody = zod.object({
+  userId: zod.string(),
+  username: zod.string(),
+  text: zod.string().min(1),
+});
+
+/**
+ * @summary Get community chat messages
+ */
+export const GetChatMessagesResponseItem = zod.object({
+  id: zod.string(),
+  userId: zod.string(),
+  username: zod.string(),
+  text: zod.string(),
+  createdAt: zod.string(),
+});
+export const GetChatMessagesResponse = zod.array(GetChatMessagesResponseItem);
+
+/**
+ * @summary Send a chat message
+ */
+
+export const SendChatMessageBody = zod.object({
+  userId: zod.string(),
+  username: zod.string(),
+  text: zod.string().min(1),
+});
+
+/**
+ * @summary Request a presigned URL for file upload
+ */
+
+export const RequestUploadUrlBody = zod.object({
+  name: zod.string().min(1),
+  size: zod.number().min(1),
+  contentType: zod.string().min(1),
+});
+
+export const RequestUploadUrlResponse = zod.object({
+  uploadURL: zod.string().url(),
+  objectPath: zod.string(),
+});
+
+/**
+ * @summary Serve a public asset
+ */
+export const GetPublicObjectParams = zod.object({
+  filePath: zod.coerce.string(),
+});
+
+/**
+ * @summary Serve an object entity
+ */
+export const GetStorageObjectParams = zod.object({
+  objectPath: zod.coerce.string(),
+});

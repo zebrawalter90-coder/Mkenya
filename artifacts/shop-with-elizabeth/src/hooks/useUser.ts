@@ -8,6 +8,10 @@ export interface User {
 const USER_ID_KEY = "elizabeth_user_id";
 const USERNAME_KEY = "elizabeth_username";
 
+function generateName(id: string): string {
+  return "User_" + id.replace(/-/g, "").slice(0, 6).toUpperCase();
+}
+
 export function useUser() {
   const [user, setUser] = useState<User>({ id: "", name: "" });
 
@@ -17,15 +21,13 @@ export function useUser() {
       id = crypto.randomUUID();
       localStorage.setItem(USER_ID_KEY, id);
     }
-    const name = localStorage.getItem(USERNAME_KEY) || "";
+    let name = localStorage.getItem(USERNAME_KEY);
+    if (!name) {
+      name = generateName(id);
+      localStorage.setItem(USERNAME_KEY, name);
+    }
     setUser({ id, name });
   }, []);
 
-  const setUsername = (name: string) => {
-    const trimmed = name.trim();
-    localStorage.setItem(USERNAME_KEY, trimmed);
-    setUser((prev) => ({ ...prev, name: trimmed }));
-  };
-
-  return { user, setUsername };
+  return { user };
 }

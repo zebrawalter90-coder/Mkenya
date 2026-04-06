@@ -1,22 +1,34 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, MessageCircle } from "lucide-react";
-import { useChat } from "@/hooks/useChat";
+import { useGetChatMessages, useSendChatMessage, getGetChatMessagesQueryKey } from "@workspace/api-client-react";
 import { useUser } from "@/hooks/useUser";
 import { Layout } from "@/components/Layout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { UserSetup } from "@/components/UserSetup";
+import { useQueryClient } from "@tanstack/react-query";
 
 function formatTime(ts: string) {
   return new Date(ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
 export default function Chat() {
-  const { messages, sendMessage } = useChat();
   const { user } = useUser();
+  const queryClient = useQueryClient();
   const [text, setText] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  const { data: messages = [] } = useGetChatMessages({
+    query: { refetchInterval: 2000 },
+  });
+
+  const sendMessage = useSendChatMessage({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getGetChatMessagesQueryKey() });
+      },
+    },
+  });
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -24,17 +36,14 @@ export default function Chat() {
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!text.trim() || !user.name || !user.id) return;
-    sendMessage(user.id, user.name, text);
+    if (!text.trim() || !user.id) return;
+    sendMessage.mutate({ data: { userId: user.id, username: user.name, text: text.trim() } });
     setText("");
   };
 
   return (
     <Layout>
-      <UserSetup />
-
       <div className="flex flex-col flex-1 max-w-2xl mx-auto w-full px-4 py-6">
-        {/* Header */}
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
             <MessageCircle className="w-5 h-5 text-primary" />
@@ -45,7 +54,6 @@ export default function Chat() {
           </div>
         </div>
 
-        {/* Messages */}
         <div className="flex-1 overflow-y-auto space-y-3 mb-4 min-h-[300px] max-h-[60vh] pr-1 scrollbar-thin">
           <AnimatePresence initial={false}>
             {messages.length === 0 && (
@@ -80,7 +88,7 @@ export default function Chat() {
                       {msg.text}
                     </div>
                     <span className={`text-[10px] text-muted-foreground px-1 ${isOwn ? "text-right" : "text-left"}`}>
-                      {formatTime(msg.timestamp)}
+                      {formatTime(msg.createdAt)}
                     </span>
                   </div>
                 </motion.div>
@@ -90,32 +98,26 @@ export default function Chat() {
           <div ref={bottomRef} />
         </div>
 
-        {/* Input */}
-        {!user.name ? (
-          <div className="text-center py-4 text-muted-foreground text-sm bg-muted/30 rounded-2xl">
-            Set your display name to join the chat
-          </div>
-        ) : (
-          <form onSubmit={handleSend} className="flex gap-2 sticky bottom-0 bg-background pt-2">
-            <Input
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              placeholder="Type a message…"
-              className="flex-1 h-12 rounded-2xl bg-muted/40 border-border text-sm"
-              autoComplete="off"
-              data-testid="input-chat"
-            />
-            <Button
-              type="submit"
-              size="icon"
-              className="h-12 w-12 rounded-2xl bg-primary hover:bg-primary/90 text-white shrink-0"
-              disabled={!text.trim()}
-              data-testid="button-send-chat"
-            >
-              <Send className="w-5 h-5" />
-            </Button>
-          </form>
-        )}
+        <form onSubmit={handleSend} className="flex gap-2 sticky bottom-0 bg-background pt-2">
+          <Input
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Type a message…"
+            className="flex-1 h-12 rounded-2xl bg-muted/40 border-border text-sm"
+            autoComplete="off"
+            data-testid="input-chat"
+            disabled={!user.id}
+          />
+          <Button
+            type="submit"
+            size="icon"
+            className="h-12 w-12 rounded-2xl bg-primary hover:bg-primary/90 text-white shrink-0"
+            disabled={!text.trim() || !user.id || sendMessage.isPending}
+            data-testid="button-send-chat"
+          >
+            <Send className="w-5 h-5" />
+          </Button>
+        </form>
       </div>
     </Layout>
   );

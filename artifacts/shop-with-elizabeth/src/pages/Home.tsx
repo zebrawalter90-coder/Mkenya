@@ -1,32 +1,33 @@
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 import { ShoppingBag } from "lucide-react";
-import { useProducts } from "@/hooks/useProducts";
+import { useGetProducts } from "@workspace/api-client-react";
 import { useUser } from "@/hooks/useUser";
 import { Layout } from "@/components/Layout";
 import { ProductCard } from "@/components/ProductCard";
-import { UserSetup } from "@/components/UserSetup";
 import { Button } from "@/components/ui/button";
+import { SEED_PRODUCTS } from "@/lib/seed";
 
 const heroWords = ["Your", "Trusted", "Kenyan", "Fashion", "Marketplace"];
 
 export default function Home() {
-  const { products, toggleLike, addComment, deleteProduct, editProduct } = useProducts();
   const { user } = useUser();
+  const { data: products, isLoading } = useGetProducts(
+    user.id ? { userId: user.id } : undefined,
+    { query: { enabled: true } }
+  );
+
+  const showSeeds = !isLoading && (!products || products.length === 0);
+  const displayProducts = showSeeds ? SEED_PRODUCTS : (products ?? []);
 
   return (
     <Layout>
-      <UserSetup />
-
-      {/* Hero */}
       <section className="relative w-full min-h-[55vh] flex items-center justify-center overflow-hidden">
-        {/* Animated background gradient */}
         <motion.div
           className="absolute inset-0 bg-gradient-to-br from-foreground via-foreground/95 to-secondary"
           animate={{ background: ["linear-gradient(135deg,#0a0a0a,#006400)", "linear-gradient(135deg,#006400,#b22222)", "linear-gradient(135deg,#b22222,#0a0a0a)"] }}
           transition={{ repeat: Infinity, duration: 8, ease: "easeInOut" }}
         />
-        {/* Floating bubbles */}
         {[...Array(8)].map((_, i) => (
           <motion.div
             key={i}
@@ -54,7 +55,6 @@ export default function Home() {
             </motion.span>
           </div>
 
-          {/* Animated word-by-word headline */}
           <h1 className="text-5xl md:text-7xl font-black text-white mb-6 tracking-tight leading-none">
             {heroWords.map((word, i) => (
               <motion.span
@@ -77,7 +77,7 @@ export default function Home() {
             transition={{ delay: 0.9 }}
             className="text-white/80 text-lg md:text-xl max-w-xl mx-auto mb-8 leading-relaxed"
           >
-            Discover vibrant African fashion — beads, kangas, kitenga, and more.
+            Discover vibrant African fashion — beads, kangas, kitenge, and more.
           </motion.p>
 
           <motion.div
@@ -100,7 +100,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Latest arrivals */}
       <section className="container mx-auto px-4 py-14">
         <div className="flex items-center justify-between mb-8">
           <motion.h2
@@ -108,7 +107,7 @@ export default function Home() {
             animate={{ opacity: 1, x: 0 }}
             className="text-3xl font-black text-foreground"
           >
-            Latest Arrivals
+            {showSeeds ? "Featured Items" : "Latest Arrivals"}
           </motion.h2>
           <Link href="/explore">
             <Button variant="ghost" className="text-primary font-bold hover:text-primary/80">
@@ -117,40 +116,37 @@ export default function Home() {
           </Link>
         </div>
 
-        {products.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 text-center bg-card rounded-3xl border border-dashed border-border">
-            <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-6 text-muted-foreground">
-              <ShoppingBag className="w-12 h-12" />
-            </div>
-            <h3 className="text-2xl font-black mb-2">The shop is empty</h3>
-            <p className="text-muted-foreground max-w-sm mb-6">Be the first to list a beautiful fashion item!</p>
-            <Link href="/add-product">
-              <Button size="lg" className="bg-primary hover:bg-primary/90 text-white rounded-full font-bold px-8">
-                Add First Product
-              </Button>
-            </Link>
-          </div>
-        ) : (
+        {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {products.slice(0, 6).map((product, index) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                index={index}
-                onLike={() => toggleLike(product.id, user.id)}
-                onComment={(text) => addComment(product.id, user.id, user.name || "Anonymous", text)}
-                onDelete={() => deleteProduct(product.id, user.id)}
-                onEdit={(name, price) => editProduct(product.id, user.id, name, price)}
-              />
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="bg-card border border-border rounded-3xl overflow-hidden animate-pulse aspect-[4/5]" />
             ))}
           </div>
+        ) : (
+          <>
+            {showSeeds && (
+              <div className="mb-6 p-4 bg-muted/40 rounded-2xl text-center text-sm text-muted-foreground">
+                Upload your first product to replace these samples with your real listings
+              </div>
+            )}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {displayProducts.slice(0, 6).map((product, index) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  index={index}
+                  readOnly={showSeeds}
+                />
+              ))}
+            </div>
+          </>
         )}
 
-        {products.length > 6 && (
+        {!showSeeds && displayProducts.length > 6 && (
           <div className="text-center mt-10">
             <Link href="/explore">
               <Button size="lg" variant="outline" className="rounded-full font-bold px-10 border-border hover:border-primary hover:text-primary">
-                View All {products.length} Products
+                View All {displayProducts.length} Products
               </Button>
             </Link>
           </div>

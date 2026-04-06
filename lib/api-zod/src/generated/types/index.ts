@@ -6,4 +6,18 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from "./addCommentBody";
+export * from "./chatMessage";
+export * from "./createProductBody";
+export * from "./deleteProductParams";
+export * from "./errorEnvelope";
+export * from "./getProductsParams";
 export * from "./healthStatus";
+export * from "./product";
+export * from "./productComment";
+export * from "./sendChatMessageBody";
+export * from "./toggleLikeBody";
+export * from "./toggleLikeResponse";
+export * from "./updateProductBody";
+export * from "./uploadUrlRequest";
+export * from "./uploadUrlResponse";

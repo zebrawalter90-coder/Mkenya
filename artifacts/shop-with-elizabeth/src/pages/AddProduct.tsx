@@ -3,53 +3,93 @@ import { useLocation } from "wouter";
 import { Upload, Plus, X } from "lucide-react";
 import { motion } from "framer-motion";
 import { Layout } from "@/components/Layout";
-import { UserSetup } from "@/components/UserSetup";
-import { useProducts, type Category } from "@/hooks/useProducts";
+import { useCreateProduct } from "@workspace/api-client-react";
 import { useUser } from "@/hooks/useUser";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useQueryClient } from "@tanstack/react-query";
+import { getGetProductsQueryKey } from "@workspace/api-client-react";
 
+type Category = "Clothing" | "Accessories" | "Fabric" | "Footwear" | "Jewelry" | "Beauty" | "Other";
 const CATEGORIES: Category[] = ["Clothing", "Accessories", "Fabric", "Footwear", "Jewelry", "Beauty", "Other"];
+
+const BASE_URL = import.meta.env.BASE_URL?.replace(/\/$/, "") ?? "";
 
 export default function AddProduct() {
   const [, setLocation] = useLocation();
-  const { addProduct } = useProducts();
   const { user } = useUser();
+  const queryClient = useQueryClient();
+  const createProduct = useCreateProduct();
 
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [category, setCategory] = useState<Category>("Clothing");
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setImageFile(file);
     const reader = new FileReader();
     reader.onloadend = () => setImagePreview(reader.result as string);
     reader.readAsDataURL(file);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !price || !imagePreview || !user.id) return;
-    addProduct({
-      name: name.trim(),
-      price: Number(price),
-      imageDataUrl: imagePreview,
-      category,
-      ownerId: user.id,
-      ownerName: user.name || "Anonymous",
-    });
-    setLocation("/");
+    if (!name || !price || !imageFile || !user.id) return;
+    setUploading(true);
+
+    try {
+      const urlRes = await fetch(`${BASE_URL}/api/storage/uploads/request-url`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: imageFile.name,
+          size: imageFile.size,
+          contentType: imageFile.type,
+        }),
+      });
+
+      if (!urlRes.ok) throw new Error("Failed to get upload URL");
+      const { uploadURL, objectPath } = await urlRes.json() as { uploadURL: string; objectPath: string };
+
+      const uploadRes = await fetch(uploadURL, {
+        method: "PUT",
+        headers: { "Content-Type": imageFile.type },
+        body: imageFile,
+      });
+
+      if (!uploadRes.ok) throw new Error("Failed to upload image");
+
+      await createProduct.mutateAsync({
+        data: {
+          name: name.trim(),
+          price: Number(price),
+          imageObjectPath: objectPath,
+          category,
+          ownerId: user.id,
+          ownerName: user.name,
+        },
+      });
+
+      queryClient.invalidateQueries({ queryKey: getGetProductsQueryKey() });
+      setLocation("/");
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setUploading(false);
+    }
   };
 
-  const canSubmit = name.trim() && price && imagePreview && user.id;
+  const canSubmit = name.trim() && price && imageFile && user.id && !uploading && !createProduct.isPending;
 
   return (
     <Layout>
-      <UserSetup />
       <div className="container mx-auto px-4 py-12 max-w-2xl">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -67,7 +107,6 @@ export default function AddProduct() {
           className="bg-card border border-border rounded-3xl p-6 md:p-10 shadow-sm"
         >
           <form onSubmit={handleSubmit} className="space-y-7">
-            {/* Image */}
             <div className="space-y-3">
               <Label className="text-base font-bold">Product Image</Label>
               <div
@@ -80,7 +119,11 @@ export default function AddProduct() {
                     <img src={imagePreview} alt="Preview" className="max-w-full max-h-full object-contain p-4" />
                     <button
                       type="button"
-                      onClick={() => { setImagePreview(null); if (fileInputRef.current) fileInputRef.current.value = ""; }}
+                      onClick={() => {
+                        setImagePreview(null);
+                        setImageFile(null);
+                        if (fileInputRef.current) fileInputRef.current.value = "";
+                      }}
                       className="absolute top-3 right-3 w-9 h-9 bg-foreground/80 hover:bg-destructive text-background rounded-full flex items-center justify-center transition-colors"
                     >
                       <X className="w-4 h-4" />
@@ -88,10 +131,10 @@ export default function AddProduct() {
                   </div>
                 ) : (
                   <label htmlFor="image" className="cursor-pointer flex flex-col items-center justify-center py-16 px-4 text-center">
-                    <div className="w-18 h-18 w-16 h-16 bg-background shadow rounded-full flex items-center justify-center mb-5">
+                    <div className="w-16 h-16 bg-background shadow rounded-full flex items-center justify-center mb-5">
                       <Upload className="w-7 h-7 text-primary" />
                     </div>
-                    <span className="font-black text-lg mb-1 text-foreground">Click to upload image</span>
+                    <span className="font-black text-lg mb-1 text-foreground">Click to upload your photo</span>
                     <span className="text-sm text-muted-foreground">JPG, PNG or WEBP (max 5MB)</span>
                   </label>
                 )}
@@ -99,7 +142,6 @@ export default function AddProduct() {
               </div>
             </div>
 
-            {/* Name */}
             <div className="space-y-2">
               <Label htmlFor="name" className="text-base font-bold">Product Name</Label>
               <Input
@@ -107,13 +149,12 @@ export default function AddProduct() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. Handmade Maasai Shuka Wrap"
-                className="h-13 h-12 text-base bg-muted/30 border-border rounded-xl px-4"
+                className="h-12 text-base bg-muted/30 border-border rounded-xl px-4"
                 required
                 data-testid="input-product-name"
               />
             </div>
 
-            {/* Category */}
             <div className="space-y-2">
               <Label className="text-base font-bold">Category</Label>
               <div className="flex flex-wrap gap-2">
@@ -134,7 +175,6 @@ export default function AddProduct() {
               </div>
             </div>
 
-            {/* Price */}
             <div className="space-y-2">
               <Label htmlFor="price" className="text-base font-bold">Price (KES)</Label>
               <div className="relative">
@@ -160,8 +200,17 @@ export default function AddProduct() {
               disabled={!canSubmit}
               data-testid="button-list-product"
             >
-              <Plus className="w-5 h-5 mr-2" />
-              List Product
+              {uploading || createProduct.isPending ? (
+                <span className="flex items-center gap-2">
+                  <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Uploading…
+                </span>
+              ) : (
+                <>
+                  <Plus className="w-5 h-5 mr-2" />
+                  List Product
+                </>
+              )}
             </Button>
           </form>
         </motion.div>

@@ -1,6 +1,5 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
   description: API specification
@@ -10,6 +9,12 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: Products
+    description: Fashion product operations
+  - name: Chat
+    description: Community chat operations
+  - name: Storage
+    description: Object storage upload and serving endpoints
 paths:
   /healthz:
     get:
@@ -24,6 +29,293 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /products:
+    get:
+      operationId: getProducts
+      tags: [Products]
+      summary: List all products
+      parameters:
+        - name: userId
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Current user ID for like status
+      responses:
+        "200":
+          description: List of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+    post:
+      operationId: createProduct
+      tags: [Products]
+      summary: Create a new product listing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProductBody"
+      responses:
+        "201":
+          description: Product created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /products/{id}:
+    put:
+      operationId: updateProduct
+      tags: [Products]
+      summary: Update product name and price (owner only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProductBody"
+      responses:
+        "200":
+          description: Product updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "403":
+          description: Not the owner
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+    delete:
+      operationId: deleteProduct
+      tags: [Products]
+      summary: Delete a product (owner only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: userId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Product deleted
+        "403":
+          description: Not the owner
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /products/{id}/like:
+    post:
+      operationId: toggleLike
+      tags: [Products]
+      summary: Toggle like on a product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ToggleLikeBody"
+      responses:
+        "200":
+          description: Like toggled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ToggleLikeResponse"
+        "404":
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /products/{id}/comments:
+    post:
+      operationId: addComment
+      tags: [Products]
+      summary: Add a comment to a product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddCommentBody"
+      responses:
+        "201":
+          description: Comment added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductComment"
+        "404":
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /chat:
+    get:
+      operationId: getChatMessages
+      tags: [Chat]
+      summary: Get community chat messages
+      responses:
+        "200":
+          description: List of chat messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ChatMessage"
+    post:
+      operationId: sendChatMessage
+      tags: [Chat]
+      summary: Send a chat message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendChatMessageBody"
+      responses:
+        "201":
+          description: Message sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatMessage"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /storage/uploads/request-url:
+    post:
+      tags: [Storage]
+      operationId: requestUploadUrl
+      summary: Request a presigned URL for file upload
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UploadUrlRequest"
+      responses:
+        "200":
+          description: Presigned upload URL generated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UploadUrlResponse"
+        "400":
+          description: Missing or invalid required fields
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "500":
+          description: Failed to generate upload URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /storage/public-objects/{filePath}:
+    get:
+      tags: [Storage]
+      operationId: getPublicObject
+      summary: Serve a public asset
+      parameters:
+        - name: filePath
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Object content
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: File not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /storage/objects/{objectPath}:
+    get:
+      tags: [Storage]
+      operationId: getStorageObject
+      summary: Serve an object entity
+      parameters:
+        - name: objectPath
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Object content
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Object not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +325,155 @@ components:
           type: string
       required:
         - status
-
+    Product:
+      type: object
+      required: [id, name, price, imageUrl, category, ownerId, ownerName, likesCount, userLiked, comments, createdAt]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        price:
+          type: integer
+        imageUrl:
+          type: string
+        category:
+          type: string
+        ownerId:
+          type: string
+        ownerName:
+          type: string
+        likesCount:
+          type: integer
+        userLiked:
+          type: boolean
+        comments:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductComment"
+        createdAt:
+          type: string
+    ProductComment:
+      type: object
+      required: [id, productId, userId, username, text, createdAt]
+      properties:
+        id:
+          type: string
+        productId:
+          type: string
+        userId:
+          type: string
+        username:
+          type: string
+        text:
+          type: string
+        createdAt:
+          type: string
+    CreateProductBody:
+      type: object
+      required: [name, price, imageObjectPath, category, ownerId, ownerName]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        price:
+          type: integer
+          minimum: 0
+        imageObjectPath:
+          type: string
+        category:
+          type: string
+        ownerId:
+          type: string
+        ownerName:
+          type: string
+    UpdateProductBody:
+      type: object
+      required: [userId, name, price]
+      properties:
+        userId:
+          type: string
+        name:
+          type: string
+          minLength: 1
+        price:
+          type: integer
+          minimum: 0
+    ToggleLikeBody:
+      type: object
+      required: [userId]
+      properties:
+        userId:
+          type: string
+    ToggleLikeResponse:
+      type: object
+      required: [liked, likesCount]
+      properties:
+        liked:
+          type: boolean
+        likesCount:
+          type: integer
+    AddCommentBody:
+      type: object
+      required: [userId, username, text]
+      properties:
+        userId:
+          type: string
+        username:
+          type: string
+        text:
+          type: string
+          minLength: 1
+    ChatMessage:
+      type: object
+      required: [id, userId, username, text, createdAt]
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        username:
+          type: string
+        text:
+          type: string
+        createdAt:
+          type: string
+    SendChatMessageBody:
+      type: object
+      required: [userId, username, text]
+      properties:
+        userId:
+          type: string
+        username:
+          type: string
+        text:
+          type: string
+          minLength: 1
+    UploadUrlRequest:
+      type: object
+      required: [name, size, contentType]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        size:
+          type: integer
+          minimum: 1
+        contentType:
+          type: string
+          minLength: 1
+    UploadUrlResponse:
+      type: object
+      required: [uploadURL, objectPath]
+      properties:
+        uploadURL:
+          type: string
+          format: uri
+        objectPath:
+          type: string
+    ErrorEnvelope:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string

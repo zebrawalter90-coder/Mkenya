@@ -8,3 +8,105 @@
 export interface HealthStatus {
   status: string;
 }
+
+export interface ProductComment {
+  id: string;
+  productId: string;
+  userId: string;
+  username: string;
+  text: string;
+  createdAt: string;
+}
+
+export interface Product {
+  id: string;
+  name: string;
+  price: number;
+  imageUrl: string;
+  category: string;
+  ownerId: string;
+  ownerName: string;
+  likesCount: number;
+  userLiked: boolean;
+  comments: ProductComment[];
+  createdAt: string;
+}
+
+export interface CreateProductBody {
+  /** @minLength 1 */
+  name: string;
+  /** @minimum 0 */
+  price: number;
+  imageObjectPath: string;
+  category: string;
+  ownerId: string;
+  ownerName: string;
+}
+
+export interface UpdateProductBody {
+  userId: string;
+  /** @minLength 1 */
+  name: string;
+  /** @minimum 0 */
+  price: number;
+}
+
+export interface ToggleLikeBody {
+  userId: string;
+}
+
+export interface ToggleLikeResponse {
+  liked: boolean;
+  likesCount: number;
+}
+
+export interface AddCommentBody {
+  userId: string;
+  username: string;
+  /** @minLength 1 */
+  text: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  userId: string;
+  username: string;
+  text: string;
+  createdAt: string;
+}
+
+export interface SendChatMessageBody {
+  userId: string;
+  username: string;
+  /** @minLength 1 */
+  text: string;
+}
+
+export interface UploadUrlRequest {
+  /** @minLength 1 */
+  name: string;
+  /** @minimum 1 */
+  size: number;
+  /** @minLength 1 */
+  contentType: string;
+}
+
+export interface UploadUrlResponse {
+  uploadURL: string;
+  objectPath: string;
+}
+
+export interface ErrorEnvelope {
+  error: string;
+}
+
+export type GetProductsParams = {
+  /**
+   * Current user ID for like status
+   */
+  userId?: string;
+};
+
+export type DeleteProductParams = {
+  userId: string;
+};
