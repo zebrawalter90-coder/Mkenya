@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "BOLMmP6WXZVhWM5NIiOUc"
+uri = "file://artifacts/shop-with-elizabeth/public/hero-banner.jpg"
+type = "image"
+title = "African fashion marketplace colorful Nairobi vibrant people outdoors"
