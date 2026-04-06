@@ -1,117 +1,144 @@
 import { useState, useRef } from "react";
 import { useLocation } from "wouter";
 import { Upload, Plus, X } from "lucide-react";
+import { motion } from "framer-motion";
 import { Layout } from "@/components/Layout";
-import { useProducts } from "@/hooks/useProducts";
+import { UserSetup } from "@/components/UserSetup";
+import { useProducts, type Category } from "@/hooks/useProducts";
+import { useUser } from "@/hooks/useUser";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+const CATEGORIES: Category[] = ["Clothing", "Accessories", "Fabric", "Footwear", "Jewelry", "Beauty", "Other"];
+
 export default function AddProduct() {
   const [, setLocation] = useLocation();
   const { addProduct } = useProducts();
-  
+  const { user } = useUser();
+
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [category, setCategory] = useState<Category>("Clothing");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => setImagePreview(reader.result as string);
+    reader.readAsDataURL(file);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !price || !imagePreview) return;
-
+    if (!name || !price || !imagePreview || !user.id) return;
     addProduct({
-      name,
+      name: name.trim(),
       price: Number(price),
       imageDataUrl: imagePreview,
+      category,
+      ownerId: user.id,
+      ownerName: user.name || "Anonymous",
     });
-    
     setLocation("/");
   };
 
+  const canSubmit = name.trim() && price && imagePreview && user.id;
+
   return (
     <Layout>
+      <UserSetup />
       <div className="container mx-auto px-4 py-12 max-w-2xl">
-        <div className="mb-10 text-center">
-          <h1 className="text-4xl font-black text-foreground mb-3">Add New Product</h1>
-          <p className="text-lg text-muted-foreground">List a new beautiful fashion item in your store.</p>
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-10 text-center"
+        >
+          <h1 className="text-4xl font-black text-foreground mb-2">Add New Product</h1>
+          <p className="text-muted-foreground text-lg">List a beautiful fashion item in the shop</p>
+        </motion.div>
 
-        <div className="bg-card border border-border rounded-3xl p-6 md:p-10 shadow-sm">
-          <form onSubmit={handleSubmit} className="space-y-8">
-            
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.08 }}
+          className="bg-card border border-border rounded-3xl p-6 md:p-10 shadow-sm"
+        >
+          <form onSubmit={handleSubmit} className="space-y-7">
+            {/* Image */}
             <div className="space-y-3">
-              <Label htmlFor="image" className="text-lg font-bold">Product Image</Label>
-              <div 
+              <Label className="text-base font-bold">Product Image</Label>
+              <div
                 className={`border-2 border-dashed rounded-2xl overflow-hidden transition-all duration-200 ${
-                  imagePreview ? 'border-primary/50 bg-muted/10' : 'border-border bg-muted/30 hover:border-primary hover:bg-muted/50'
+                  imagePreview ? "border-primary/50" : "border-border hover:border-primary"
                 }`}
               >
                 {imagePreview ? (
-                  <div className="relative aspect-[4/5] md:aspect-video bg-muted/30 flex items-center justify-center">
+                  <div className="relative aspect-video bg-muted/30 flex items-center justify-center">
                     <img src={imagePreview} alt="Preview" className="max-w-full max-h-full object-contain p-4" />
                     <button
                       type="button"
-                      onClick={() => {
-                        setImageFile(null);
-                        setImagePreview(null);
-                        if (fileInputRef.current) fileInputRef.current.value = "";
-                      }}
-                      className="absolute top-4 right-4 w-10 h-10 bg-foreground/80 hover:bg-destructive text-background rounded-full flex items-center justify-center transition-colors shadow-sm"
+                      onClick={() => { setImagePreview(null); if (fileInputRef.current) fileInputRef.current.value = ""; }}
+                      className="absolute top-3 right-3 w-9 h-9 bg-foreground/80 hover:bg-destructive text-background rounded-full flex items-center justify-center transition-colors"
                     >
-                      <X className="w-5 h-5" />
+                      <X className="w-4 h-4" />
                     </button>
                   </div>
                 ) : (
-                  <label htmlFor="image" className="cursor-pointer flex flex-col items-center justify-center py-20 px-4 text-center">
-                    <div className="w-20 h-20 bg-background shadow-sm rounded-full flex items-center justify-center mb-6">
-                      <Upload className="w-8 h-8 text-primary" />
+                  <label htmlFor="image" className="cursor-pointer flex flex-col items-center justify-center py-16 px-4 text-center">
+                    <div className="w-18 h-18 w-16 h-16 bg-background shadow rounded-full flex items-center justify-center mb-5">
+                      <Upload className="w-7 h-7 text-primary" />
                     </div>
-                    <span className="font-black text-xl mb-2 text-foreground">Click to upload image</span>
-                    <span className="text-base text-muted-foreground">High quality JPG, PNG, WEBP (Max 5MB)</span>
+                    <span className="font-black text-lg mb-1 text-foreground">Click to upload image</span>
+                    <span className="text-sm text-muted-foreground">JPG, PNG or WEBP (max 5MB)</span>
                   </label>
                 )}
-                <input
-                  ref={fileInputRef}
-                  id="image"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="hidden"
-                />
+                <input ref={fileInputRef} id="image" type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
               </div>
             </div>
 
-            <div className="space-y-3">
-              <Label htmlFor="name" className="text-lg font-bold">Product Name</Label>
+            {/* Name */}
+            <div className="space-y-2">
+              <Label htmlFor="name" className="text-base font-bold">Product Name</Label>
               <Input
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. Handmade Maasai Shuka Wrap"
-                className="h-14 text-lg bg-muted/30 border-border rounded-xl px-4"
+                className="h-13 h-12 text-base bg-muted/30 border-border rounded-xl px-4"
                 required
+                data-testid="input-product-name"
               />
             </div>
 
-            <div className="space-y-3">
-              <Label htmlFor="price" className="text-lg font-bold">Price (KES)</Label>
+            {/* Category */}
+            <div className="space-y-2">
+              <Label className="text-base font-bold">Category</Label>
+              <div className="flex flex-wrap gap-2">
+                {CATEGORIES.map((cat) => (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => setCategory(cat)}
+                    className={`px-4 py-2 rounded-full text-sm font-semibold border transition-all ${
+                      category === cat
+                        ? "bg-primary text-white border-primary"
+                        : "bg-background text-foreground border-border hover:border-primary hover:text-primary"
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Price */}
+            <div className="space-y-2">
+              <Label htmlFor="price" className="text-base font-bold">Price (KES)</Label>
               <div className="relative">
-                <span className="absolute left-5 top-1/2 -translate-y-1/2 font-bold text-muted-foreground">KES</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-muted-foreground text-sm">KES</span>
                 <Input
                   id="price"
                   type="number"
@@ -120,24 +147,24 @@ export default function AddProduct() {
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
                   placeholder="1500"
-                  className="h-14 text-lg pl-16 bg-muted/30 border-border rounded-xl"
+                  className="h-12 text-base pl-14 bg-muted/30 border-border rounded-xl"
                   required
+                  data-testid="input-product-price"
                 />
               </div>
             </div>
 
-            <div className="pt-4">
-              <Button 
-                type="submit" 
-                className="w-full h-16 text-xl font-bold rounded-2xl bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 transition-all hover:-translate-y-1"
-                disabled={!name || !price || !imagePreview}
-              >
-                <Plus className="w-6 h-6 mr-2" />
-                List Product
-              </Button>
-            </div>
+            <Button
+              type="submit"
+              className="w-full h-14 text-lg font-bold rounded-2xl bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 transition-all hover:-translate-y-0.5"
+              disabled={!canSubmit}
+              data-testid="button-list-product"
+            >
+              <Plus className="w-5 h-5 mr-2" />
+              List Product
+            </Button>
           </form>
-        </div>
+        </motion.div>
       </div>
     </Layout>
   );

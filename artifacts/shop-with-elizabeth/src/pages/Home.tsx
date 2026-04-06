@@ -1,177 +1,161 @@
-import { useState } from "react";
 import { Link } from "wouter";
-import { motion, AnimatePresence } from "framer-motion";
-import { Heart, MessageCircle, ShoppingBag } from "lucide-react";
-import { useProducts, Product } from "@/hooks/useProducts";
+import { motion } from "framer-motion";
+import { ShoppingBag } from "lucide-react";
+import { useProducts } from "@/hooks/useProducts";
+import { useUser } from "@/hooks/useUser";
 import { Layout } from "@/components/Layout";
+import { ProductCard } from "@/components/ProductCard";
+import { UserSetup } from "@/components/UserSetup";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+
+const heroWords = ["Your", "Trusted", "Kenyan", "Fashion", "Marketplace"];
 
 export default function Home() {
-  const { products, likeProduct, addComment } = useProducts();
+  const { products, toggleLike, addComment, deleteProduct, editProduct } = useProducts();
+  const { user } = useUser();
 
   return (
     <Layout>
-      <section className="relative w-full h-[50vh] min-h-[400px] flex items-center justify-center overflow-hidden bg-foreground">
-        <div className="absolute inset-0">
-          <img 
-            src="/hero-banner.jpg" 
-            alt="African fashion marketplace" 
-            className="w-full h-full object-cover opacity-60"
+      <UserSetup />
+
+      {/* Hero */}
+      <section className="relative w-full min-h-[55vh] flex items-center justify-center overflow-hidden">
+        {/* Animated background gradient */}
+        <motion.div
+          className="absolute inset-0 bg-gradient-to-br from-foreground via-foreground/95 to-secondary"
+          animate={{ background: ["linear-gradient(135deg,#0a0a0a,#006400)", "linear-gradient(135deg,#006400,#b22222)", "linear-gradient(135deg,#b22222,#0a0a0a)"] }}
+          transition={{ repeat: Infinity, duration: 8, ease: "easeInOut" }}
+        />
+        {/* Floating bubbles */}
+        {[...Array(8)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute rounded-full opacity-10 bg-white"
+            style={{
+              width: 60 + i * 30,
+              height: 60 + i * 30,
+              left: `${(i * 13) % 100}%`,
+              top: `${(i * 17) % 100}%`,
+            }}
+            animate={{ y: [-20, 20, -20], x: [-10, 10, -10], scale: [1, 1.1, 1] }}
+            transition={{ repeat: Infinity, duration: 4 + i * 0.8, ease: "easeInOut", delay: i * 0.3 }}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-foreground/20 to-transparent" />
-        </div>
-        <div className="relative z-10 text-center px-4 max-w-3xl mx-auto">
-          <motion.h1 
+        ))}
+
+        <div className="relative z-10 text-center px-6 max-w-4xl mx-auto py-16">
+          <div className="mb-4 overflow-hidden">
+            <motion.span
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.05 }}
+              className="text-primary font-black text-lg tracking-widest uppercase"
+            >
+              ShopWithElizabeth 🇰🇪
+            </motion.span>
+          </div>
+
+          {/* Animated word-by-word headline */}
+          <h1 className="text-5xl md:text-7xl font-black text-white mb-6 tracking-tight leading-none">
+            {heroWords.map((word, i) => (
+              <motion.span
+                key={word}
+                initial={{ opacity: 0, y: 40, rotateX: -30 }}
+                animate={{ opacity: 1, y: 0, rotateX: 0 }}
+                transition={{ delay: 0.15 + i * 0.13, type: "spring", stiffness: 130, damping: 18 }}
+                className={`inline-block mr-4 last:mr-0 drop-shadow-xl ${
+                  word === "Kenyan" ? "text-primary" : word === "Fashion" ? "text-yellow-300" : "text-white"
+                }`}
+              >
+                {word}
+              </motion.span>
+            ))}
+          </h1>
+
+          <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight drop-shadow-xl"
+            transition={{ delay: 0.9 }}
+            className="text-white/80 text-lg md:text-xl max-w-xl mx-auto mb-8 leading-relaxed"
           >
-            Welcome to <span className="text-primary drop-shadow-md">ShopWithElizabeth</span>
-          </motion.h1>
-          <motion.p 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-xl md:text-2xl text-white/95 font-medium drop-shadow-md max-w-xl mx-auto leading-relaxed"
-          >
-            Vibrant, authentic, and culturally proud Kenyan fashion. Handpicked for you.
+            Discover vibrant African fashion — beads, kangas, kitenga, and more.
           </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 1.0, type: "spring" }}
+            className="flex gap-3 justify-center flex-wrap"
+          >
+            <Link href="/explore">
+              <Button size="lg" className="bg-primary hover:bg-primary/90 text-white rounded-full font-bold px-8 h-14 text-base shadow-lg shadow-primary/30">
+                Explore Collection
+              </Button>
+            </Link>
+            <Link href="/add-product">
+              <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10 rounded-full font-bold px-8 h-14 text-base">
+                List Your Item
+              </Button>
+            </Link>
+          </motion.div>
         </div>
       </section>
 
-      <section className="container mx-auto px-4 py-16 flex-1">
-        <div className="flex items-center justify-between mb-10">
-          <h2 className="text-3xl font-black tracking-tight text-foreground">Latest Arrivals</h2>
-          {products.length > 0 && (
-            <Link href="/add-product">
-              <Button variant="outline" className="border-border text-foreground hover:border-primary hover:text-primary font-bold rounded-full px-6">
-                Add Item
-              </Button>
-            </Link>
-          )}
+      {/* Latest arrivals */}
+      <section className="container mx-auto px-4 py-14">
+        <div className="flex items-center justify-between mb-8">
+          <motion.h2
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="text-3xl font-black text-foreground"
+          >
+            Latest Arrivals
+          </motion.h2>
+          <Link href="/explore">
+            <Button variant="ghost" className="text-primary font-bold hover:text-primary/80">
+              See all →
+            </Button>
+          </Link>
         </div>
 
         {products.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 text-center bg-card rounded-3xl border border-dashed border-border shadow-sm">
+          <div className="flex flex-col items-center justify-center py-24 text-center bg-card rounded-3xl border border-dashed border-border">
             <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-6 text-muted-foreground">
               <ShoppingBag className="w-12 h-12" />
             </div>
-            <h3 className="text-3xl font-black mb-3">Karibu! The shop is empty.</h3>
-            <p className="text-lg text-muted-foreground max-w-md mb-8">
-              Welcome to ShopWithElizabeth. Be the first to add a beautiful piece to the collection.
-            </p>
+            <h3 className="text-2xl font-black mb-2">The shop is empty</h3>
+            <p className="text-muted-foreground max-w-sm mb-6">Be the first to list a beautiful fashion item!</p>
             <Link href="/add-product">
-              <Button size="lg" className="bg-primary hover:bg-primary/90 text-white rounded-full font-bold px-8 shadow-md h-14 text-lg">
+              <Button size="lg" className="bg-primary hover:bg-primary/90 text-white rounded-full font-bold px-8">
                 Add First Product
               </Button>
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <AnimatePresence>
-              {products.map((product, index) => (
-                <ProductCard 
-                  key={product.id} 
-                  product={product} 
-                  index={index}
-                  onLike={() => likeProduct(product.id)}
-                  onComment={(text) => addComment(product.id, text)}
-                />
-              ))}
-            </AnimatePresence>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {products.slice(0, 6).map((product, index) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                index={index}
+                onLike={() => toggleLike(product.id, user.id)}
+                onComment={(text) => addComment(product.id, user.id, user.name || "Anonymous", text)}
+                onDelete={() => deleteProduct(product.id, user.id)}
+                onEdit={(name, price) => editProduct(product.id, user.id, name, price)}
+              />
+            ))}
+          </div>
+        )}
+
+        {products.length > 6 && (
+          <div className="text-center mt-10">
+            <Link href="/explore">
+              <Button size="lg" variant="outline" className="rounded-full font-bold px-10 border-border hover:border-primary hover:text-primary">
+                View All {products.length} Products
+              </Button>
+            </Link>
           </div>
         )}
       </section>
     </Layout>
-  );
-}
-
-function ProductCard({ 
-  product, 
-  index,
-  onLike,
-  onComment
-}: { 
-  product: Product; 
-  index: number;
-  onLike: () => void;
-  onComment: (text: string) => void;
-}) {
-  const [commentText, setCommentText] = useState("");
-
-  const handleCommentSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (commentText.trim()) {
-      onComment(commentText.trim());
-      setCommentText("");
-    }
-  };
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 40 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.05, type: "spring", stiffness: 100, damping: 20 }}
-      className="bg-card border border-border rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group"
-    >
-      <div className="relative aspect-[4/5] bg-muted overflow-hidden">
-        <img 
-          src={product.imageDataUrl} 
-          alt={product.name}
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        <div className="absolute top-4 right-4 z-10">
-          <motion.button
-            whileTap={{ scale: 0.8 }}
-            onClick={onLike}
-            className="w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg text-foreground hover:text-primary transition-colors"
-          >
-            <Heart className={`w-6 h-6 ${product.likes > 0 ? 'fill-primary text-primary' : ''}`} />
-          </motion.button>
-        </div>
-      </div>
-      
-      <div className="p-6 flex-1 flex flex-col">
-        <div className="flex justify-between items-start mb-3 gap-4">
-          <h3 className="text-xl font-bold text-foreground line-clamp-2 leading-tight">{product.name}</h3>
-          <span className="font-black text-secondary whitespace-nowrap bg-secondary/10 px-3 py-1.5 rounded-lg text-sm">
-            KES {product.price.toLocaleString()}
-          </span>
-        </div>
-        
-        <div className="flex items-center text-sm text-muted-foreground mb-6 font-medium">
-          <Heart className="w-4 h-4 mr-1.5 fill-muted-foreground/30" />
-          <span className="mr-4">{product.likes}</span>
-          <MessageCircle className="w-4 h-4 mr-1.5" />
-          <span>{product.comments.length}</span>
-        </div>
-        
-        <div className="mt-auto pt-5 border-t border-border">
-          {product.comments.length > 0 && (
-            <div className="space-y-3 mb-5 max-h-40 overflow-y-auto pr-2 scrollbar-thin">
-              {product.comments.map((comment, i) => (
-                <div key={i} className="text-sm bg-muted/50 p-3 rounded-xl text-foreground">
-                  {comment}
-                </div>
-              ))}
-            </div>
-          )}
-          
-          <form onSubmit={handleCommentSubmit} className="flex gap-2 relative">
-            <Input
-              value={commentText}
-              onChange={(e) => setCommentText(e.target.value)}
-              placeholder="Leave a comment..."
-              className="h-11 bg-muted/50 border-none focus-visible:ring-1 focus-visible:ring-primary text-sm rounded-full pl-4 pr-16"
-            />
-            <Button type="submit" size="sm" className="absolute right-1 top-1 bottom-1 h-9 rounded-full bg-primary hover:bg-primary/90 text-white font-bold" disabled={!commentText.trim()}>
-              Post
-            </Button>
-          </form>
-        </div>
-      </div>
-    </motion.div>
   );
 }
