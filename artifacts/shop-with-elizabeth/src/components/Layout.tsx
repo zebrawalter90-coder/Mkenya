@@ -60,20 +60,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </div>
         </div>
 
-        {/* ── M-Pesa payment strip — visible on ALL screen sizes ── */}
-        <div className="bg-green-600 text-white">
-          <div className="container mx-auto px-4 py-1.5 flex items-center justify-center gap-2 text-sm font-bold tracking-wide">
-            <CreditCard className="w-4 h-4 shrink-0" />
-            <span>Pay via M-Pesa:</span>
-            <a
-              href={`tel:${CONTACT}`}
-              className="underline underline-offset-2 hover:text-green-100 transition-colors"
-            >
-              {CONTACT_DISPLAY}
-            </a>
-            <span className="hidden sm:inline text-green-200 font-normal">· Lipa namba hii</span>
-          </div>
-        </div>
       </header>
 
       <main className="flex-1 flex flex-col pb-16 md:pb-0">
