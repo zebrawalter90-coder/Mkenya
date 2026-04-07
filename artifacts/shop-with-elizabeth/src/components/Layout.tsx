@@ -13,6 +13,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
     { href: "/", label: "Home", icon: Home },
     { href: "/explore", label: "Explore", icon: Compass },
     { href: "/chat", label: "Chat", icon: MessageCircle },
+    { href: "/payment", label: "Payment", icon: CreditCard },
   ];
 
   return (
