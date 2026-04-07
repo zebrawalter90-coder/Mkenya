@@ -1,12 +1,24 @@
-import { Router, type IRouter, type Request, type Response } from "express";
+import { Router, type IRouter, type Request, type Response, type NextFunction } from "express";
 import { Readable } from "stream";
-import multer from "multer";
+import multer, { MulterError } from "multer";
 import { randomUUID } from "crypto";
 import { ObjectStorageService, ObjectNotFoundError, objectStorageClient } from "../lib/objectStorage";
 
 const router: IRouter = Router();
 const objectStorageService = new ObjectStorageService();
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
+
+const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: MAX_FILE_SIZE },
+  fileFilter: (_req, file, cb) => {
+    if (!file.mimetype.startsWith("image/")) {
+      cb(new Error("Only image files are allowed"));
+    } else {
+      cb(null, true);
+    }
+  },
+});
 
 /**
  * POST /storage/uploads
@@ -15,32 +27,49 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 
  * with direct-to-GCS presigned URLs from the browser).
  * Returns { objectPath } which is stored in the DB and used to serve the image.
  */
-router.post("/storage/uploads", upload.single("file"), async (req: Request, res: Response) => {
-  if (!req.file) {
-    res.status(400).json({ error: "No file provided" });
-    return;
-  }
+router.post("/storage/uploads", (req: Request, res: Response) => {
+  // Run multer manually so we can handle its errors gracefully
+  upload.single("file")(req, res, async (err: unknown) => {
+    if (err instanceof MulterError) {
+      if (err.code === "LIMIT_FILE_SIZE") {
+        res.status(413).json({ error: `File too large. Maximum size is ${MAX_FILE_SIZE / 1024 / 1024}MB.` });
+      } else {
+        res.status(400).json({ error: `Upload error: ${err.message}` });
+      }
+      return;
+    }
 
-  try {
-    const privateObjectDir = objectStorageService.getPrivateObjectDir();
-    const objectId = randomUUID();
-    const fullPath = `${privateObjectDir}/uploads/${objectId}`;
+    if (err instanceof Error) {
+      res.status(400).json({ error: err.message });
+      return;
+    }
 
-    const { bucketName, objectName } = parsePath(fullPath);
-    const bucket = objectStorageClient.bucket(bucketName);
-    const file = bucket.file(objectName);
+    if (!req.file) {
+      res.status(400).json({ error: "No file provided" });
+      return;
+    }
 
-    await file.save(req.file.buffer, {
-      contentType: req.file.mimetype,
-      resumable: false,
-    });
+    try {
+      const privateObjectDir = objectStorageService.getPrivateObjectDir();
+      const objectId = randomUUID();
+      const fullPath = `${privateObjectDir}/uploads/${objectId}`;
 
-    const objectPath = `/objects/uploads/${objectId}`;
-    res.json({ objectPath });
-  } catch (error) {
-    req.log.error({ err: error }, "Error uploading file");
-    res.status(500).json({ error: "Failed to upload file" });
-  }
+      const { bucketName, objectName } = parsePath(fullPath);
+      const bucket = objectStorageClient.bucket(bucketName);
+      const file = bucket.file(objectName);
+
+      await file.save(req.file.buffer, {
+        contentType: req.file.mimetype,
+        resumable: false,
+      });
+
+      const objectPath = `/objects/uploads/${objectId}`;
+      res.json({ objectPath });
+    } catch (error) {
+      (req as any).log?.error({ err: error }, "Error saving file to storage");
+      res.status(500).json({ error: "Failed to save file. Please try again." });
+    }
+  });
 });
 
 /**
@@ -71,7 +100,7 @@ router.get("/storage/objects/*path", async (req: Request, res: Response) => {
       res.status(404).json({ error: "Object not found" });
       return;
     }
-    req.log.error({ err: error }, "Error serving object");
+    (req as any).log?.error({ err: error }, "Error serving object");
     res.status(500).json({ error: "Failed to serve object" });
   }
 });
@@ -101,7 +130,7 @@ router.get("/storage/public-objects/*filePath", async (req: Request, res: Respon
       res.end();
     }
   } catch (error) {
-    req.log.error({ err: error }, "Error serving public object");
+    (req as any).log?.error({ err: error }, "Error serving public object");
     res.status(500).json({ error: "Failed to serve public object" });
   }
 });

@@ -31,6 +31,20 @@ export default function AddProduct() {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    const MAX_MB = 50;
+    if (file.size > MAX_MB * 1024 * 1024) {
+      setError(`Image is too large (${(file.size / 1024 / 1024).toFixed(1)}MB). Please use an image under ${MAX_MB}MB.`);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      setError("Please select an image file (JPG, PNG, WEBP, etc.)");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
     setImageFile(file);
     setError(null);
     const reader = new FileReader();
