@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Heart, MessageCircle, Trash2, Pencil, Send } from "lucide-react";
+import { Heart, MessageCircle, Trash2, Pencil, Send, Bookmark, ShoppingCart, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useUser } from "@/hooks/useUser";
+import { useCart } from "@/hooks/useCart";
+import { useWishlist } from "@/hooks/useWishlist";
+import { ProductDetailModal } from "@/components/ProductDetailModal";
 import {
   useToggleLike,
   useAddComment,
@@ -23,11 +26,15 @@ interface ProductCardProps {
 export function ProductCard({ product, index, readOnly = false }: ProductCardProps) {
   const { user } = useUser();
   const queryClient = useQueryClient();
+  const { addToCart } = useCart();
+  const { isWishlisted, toggleWishlist } = useWishlist();
   const [commentText, setCommentText] = useState("");
   const [showAllComments, setShowAllComments] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(product.name);
   const [editPrice, setEditPrice] = useState(String(product.price));
+  const [showAddedFeedback, setShowAddedFeedback] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: getGetProductsQueryKey() });
@@ -71,6 +78,21 @@ export function ProductCard({ product, index, readOnly = false }: ProductCardPro
     deleteProduct.mutate({ id: product.id, params: { userId: user.id } });
   };
 
+  const handleAddToCart = () => {
+    addToCart(product);
+    setShowAddedFeedback(true);
+    setTimeout(() => setShowAddedFeedback(false), 2000);
+  };
+
+  const handleWishlistToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toggleWishlist(product);
+  };
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 50 }}
@@ -79,7 +101,10 @@ export function ProductCard({ product, index, readOnly = false }: ProductCardPro
       className="bg-card border border-border rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-300 flex flex-col group"
       data-testid={`card-product-${product.id}`}
     >
-      <div className="relative aspect-[4/5] bg-muted overflow-hidden">
+      <div 
+        className="relative aspect-[4/5] bg-muted overflow-hidden cursor-pointer"
+        onClick={handleOpenModal}
+      >
         <motion.div
           className="absolute inset-0"
           animate={{ y: [0, -10, 0], scale: [1, 1.015, 1] }}
@@ -100,11 +125,30 @@ export function ProductCard({ product, index, readOnly = false }: ProductCardPro
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
 
-        <div className="absolute top-3 right-3 z-10">
+        <div className="absolute top-3 right-3 z-10 flex flex-col gap-2">
           <motion.button
             whileTap={{ scale: 0.75 }}
             whileHover={{ scale: 1.1 }}
-            onClick={handleLike}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleWishlistToggle(e);
+            }}
+            data-testid={`button-wishlist-${product.id}`}
+            className={`w-11 h-11 rounded-full flex items-center justify-center shadow-lg transition-colors backdrop-blur-sm ${
+              isWishlisted(product.id)
+                ? "bg-secondary text-white"
+                : "bg-white/85 text-foreground hover:bg-secondary/10"
+            }`}
+          >
+            <Bookmark className={`w-5 h-5 ${isWishlisted(product.id) ? "fill-white" : ""}`} />
+          </motion.button>
+          <motion.button
+            whileTap={{ scale: 0.75 }}
+            whileHover={{ scale: 1.1 }}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleLike();
+            }}
             disabled={readOnly || !user.id || toggleLike.isPending}
             data-testid={`button-like-${product.id}`}
             className={`w-11 h-11 rounded-full flex items-center justify-center shadow-lg transition-colors backdrop-blur-sm ${
@@ -175,24 +219,32 @@ export function ProductCard({ product, index, readOnly = false }: ProductCardPro
             </div>
           </form>
         ) : (
-          <div className="flex justify-between items-start mb-3 gap-3">
-            <motion.h3
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.04 + 0.1 }}
-              className="text-lg font-bold text-foreground line-clamp-2 leading-snug"
-            >
-              {product.name}
-            </motion.h3>
-            <motion.span
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: index * 0.04 + 0.18, type: "spring" }}
-              className="font-black text-secondary whitespace-nowrap bg-secondary/10 px-3 py-1 rounded-lg text-sm shrink-0"
-            >
-              KES {product.price.toLocaleString()}
-            </motion.span>
-          </div>
+          <>
+            <div className="flex justify-between items-start mb-2 gap-3">
+              <motion.h3
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.04 + 0.1 }}
+                className="text-lg font-bold text-foreground line-clamp-2 leading-snug cursor-pointer hover:text-primary transition-colors"
+                onClick={handleOpenModal}
+              >
+                {product.name}
+              </motion.h3>
+              <motion.span
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: index * 0.04 + 0.18, type: "spring" }}
+                className="font-black text-secondary whitespace-nowrap bg-secondary/10 px-3 py-1 rounded-lg text-sm shrink-0"
+              >
+                KES {product.price.toLocaleString()}
+              </motion.span>
+            </div>
+            {product.description && (
+              <p className="text-sm text-muted-foreground line-clamp-1 mb-3">
+                {product.description}
+              </p>
+            )}
+          </>
         )}
 
         <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4 font-medium">
@@ -207,7 +259,32 @@ export function ProductCard({ product, index, readOnly = false }: ProductCardPro
           <span className="text-xs text-muted-foreground/70 ml-auto">by {product.ownerName}</span>
         </div>
 
-        <div className="mt-auto pt-4 border-t border-border">
+        <Button
+          onClick={(e) => {
+            e.stopPropagation();
+            handleAddToCart();
+          }}
+          className="w-full h-10 rounded-xl font-bold bg-secondary hover:bg-secondary/90 text-white mb-4 relative overflow-hidden"
+          data-testid={`button-add-to-cart-${product.id}`}
+        >
+          {showAddedFeedback ? (
+            <motion.span
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              className="flex items-center gap-2"
+            >
+              <Check className="w-4 h-4" />
+              Added!
+            </motion.span>
+          ) : (
+            <span className="flex items-center gap-2">
+              <ShoppingCart className="w-4 h-4" />
+              Add to Cart
+            </span>
+          )}
+        </Button>
+
+        <div className="pt-4 border-t border-border">
           {product.comments.length > 0 && (
             <div className="space-y-2 mb-3">
               {product.comments.length > 3 && !showAllComments && (
@@ -254,6 +331,14 @@ export function ProductCard({ product, index, readOnly = false }: ProductCardPro
           )}
         </div>
       </div>
+
+      <ProductDetailModal
+        product={product}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onAddToCart={addToCart}
+        readOnly={readOnly}
+      />
     </motion.div>
   );
 }

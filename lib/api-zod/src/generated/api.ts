@@ -28,6 +28,7 @@ export const GetProductsQueryParams = zod.object({
 export const GetProductsResponseItem = zod.object({
   id: zod.string(),
   name: zod.string(),
+  description: zod.string().optional(),
   price: zod.number(),
   imageUrl: zod.string(),
   category: zod.string(),
@@ -57,6 +58,7 @@ export const createProductBodyPriceMin = 0;
 
 export const CreateProductBody = zod.object({
   name: zod.string().min(1),
+  description: zod.string().optional(),
   price: zod.number().min(createProductBodyPriceMin),
   imageObjectPath: zod.string(),
   category: zod.string(),
@@ -76,12 +78,14 @@ export const updateProductBodyPriceMin = 0;
 export const UpdateProductBody = zod.object({
   userId: zod.string(),
   name: zod.string().min(1),
+  description: zod.string().optional(),
   price: zod.number().min(updateProductBodyPriceMin),
 });
 
 export const UpdateProductResponse = zod.object({
   id: zod.string(),
   name: zod.string(),
+  description: zod.string().optional(),
   price: zod.number(),
   imageUrl: zod.string(),
   category: zod.string(),

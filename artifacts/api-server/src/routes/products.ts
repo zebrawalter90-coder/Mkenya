@@ -35,6 +35,7 @@ async function buildProductResponse(product: typeof productsTable.$inferSelect, 
   return {
     id: product.id,
     name: product.name,
+    description: product.description ?? undefined,
     price: product.price,
     imageUrl: buildImageUrl(product.imageObjectPath),
     category: product.category,
@@ -86,6 +87,7 @@ router.get("/products", async (req, res): Promise<void> => {
     return {
       id: p.id,
       name: p.name,
+      description: p.description ?? undefined,
       price: p.price,
       imageUrl: buildImageUrl(p.imageObjectPath),
       category: p.category,
@@ -115,13 +117,14 @@ router.post("/products", async (req, res): Promise<void> => {
     return;
   }
 
-  const { name, price, imageObjectPath, category, ownerId, ownerName } = parsed.data;
+  const { name, description, price, imageObjectPath, category, ownerId, ownerName } = parsed.data;
 
   const [product] = await db
     .insert(productsTable)
     .values({
       id: randomUUID(),
       name,
+      description: description ?? null,
       price,
       imageObjectPath,
       category,
@@ -164,7 +167,7 @@ router.put("/products/:id", async (req, res): Promise<void> => {
 
   const [updated] = await db
     .update(productsTable)
-    .set({ name: parsed.data.name, price: parsed.data.price })
+    .set({ name: parsed.data.name, description: parsed.data.description ?? null, price: parsed.data.price })
     .where(eq(productsTable.id, params.data.id))
     .returning();
 

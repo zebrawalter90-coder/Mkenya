@@ -333,6 +333,8 @@ components:
           type: string
         name:
           type: string
+        description:
+          type: string
         price:
           type: integer
         imageUrl:
@@ -376,6 +378,8 @@ components:
         name:
           type: string
           minLength: 1
+        description:
+          type: string
         price:
           type: integer
           minimum: 0
@@ -396,6 +400,8 @@ components:
         name:
           type: string
           minLength: 1
+        description:
+          type: string
         price:
           type: integer
           minimum: 0

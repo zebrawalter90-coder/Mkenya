@@ -51,7 +51,7 @@ export default function Home() {
               transition={{ delay: 0.05 }}
               className="text-primary font-black text-lg tracking-widest uppercase"
             >
-              ShopWithElizabeth 🇰🇪
+              Mkenya Shop 🇰🇪
             </motion.span>
           </div>
 

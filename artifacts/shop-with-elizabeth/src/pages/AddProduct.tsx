@@ -20,6 +20,7 @@ export default function AddProduct() {
   const createProduct = useCreateProduct();
 
   const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [category, setCategory] = useState<Category>("Clothing");
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -79,6 +80,7 @@ export default function AddProduct() {
       await createProduct.mutateAsync({
         data: {
           name: name.trim(),
+          description: description.trim() || undefined,
           price: Number(price),
           imageObjectPath: objectPath,
           category,
@@ -177,6 +179,18 @@ export default function AddProduct() {
                 placeholder="e.g. Handmade Maasai Shuka Wrap"
                 className="h-12 text-base bg-muted/30 border-border rounded-xl px-4"
                 required
+              />
+            </div>
+
+            {/* Description */}
+            <div className="space-y-2">
+              <Label htmlFor="description" className="text-base font-bold">Description (optional)</Label>
+              <textarea
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Describe your item — material, size, condition, etc."
+                className="w-full h-24 text-base bg-muted/30 border border-border rounded-xl px-4 py-3 focus:outline-none focus:ring-1 focus:ring-primary resize-none"
               />
             </div>
 

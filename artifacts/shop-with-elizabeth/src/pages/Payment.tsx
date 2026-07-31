@@ -11,9 +11,9 @@ import {
 } from "lucide-react";
 import { Layout } from "@/components/Layout";
 
-const CONTACT = "+254715743098";
-const CONTACT_DISPLAY = "+254 715 743 098";
-const WA_LINK = "https://wa.me/254715743098";
+const CONTACT = "+254743035900";
+const CONTACT_DISPLAY = "+254 743 035 900";
+const WA_LINK = "https://wa.me/254743035900";
 
 const steps = [
   { icon: ShoppingBag, title: "1. Pick your item", desc: "Browse and choose what you love from the collection." },
@@ -192,7 +192,7 @@ export default function Payment() {
           className="mt-10 flex items-start gap-3 bg-muted/50 rounded-2xl p-5 text-sm text-muted-foreground"
         >
           <Info className="w-4 h-4 mt-0.5 shrink-0" />
-          <p>For bulk orders, business inquiries, or if you'd like to list your products on ShopWithElizabeth, reach us on WhatsApp or call the number above.</p>
+          <p>For bulk orders, business inquiries, or if you'd like to list your products on Mkenya Shop, reach us on WhatsApp or call the number above.</p>
         </motion.div>
 
       </div>

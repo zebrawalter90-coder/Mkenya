@@ -10,6 +10,7 @@ export interface UpdateProductBody {
   userId: string;
   /** @minLength 1 */
   name: string;
+  description?: string;
   /** @minimum 0 */
   price: number;
 }

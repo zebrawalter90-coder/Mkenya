@@ -1,8 +1,9 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Search, SlidersHorizontal } from "lucide-react";
+import { Search, SlidersHorizontal, Bookmark } from "lucide-react";
 import { useGetProducts } from "@workspace/api-client-react";
 import { useUser } from "@/hooks/useUser";
+import { useWishlist } from "@/hooks/useWishlist";
 import { Layout } from "@/components/Layout";
 import { ProductCard } from "@/components/ProductCard";
 import { Input } from "@/components/ui/input";
@@ -21,6 +22,7 @@ const SORT_OPTIONS = [
 
 export default function Explore() {
   const { user } = useUser();
+  const { wishlistItems } = useWishlist();
   const { data: products, isLoading } = useGetProducts(
     user.id ? { userId: user.id } : undefined
   );
@@ -31,13 +33,18 @@ export default function Explore() {
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<Category | "All">("All");
   const [sort, setSort] = useState("newest");
+  const [showWishlistOnly, setShowWishlistOnly] = useState(false);
 
   const filtered = useMemo(() => {
     let result = [...allProducts];
+    if (showWishlistOnly) {
+      const wishlistIds = new Set(wishlistItems.map((item) => item.id));
+      result = result.filter((p) => wishlistIds.has(p.id));
+    }
     if (activeCategory !== "All") result = result.filter((p) => p.category === activeCategory);
     if (search.trim()) {
       const q = search.toLowerCase();
-      result = result.filter((p) => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q));
+      result = result.filter((p) => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q) || (p.description && p.description.toLowerCase().includes(q)));
     }
     if (sort === "newest") result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     else if (sort === "oldest") result.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
@@ -45,7 +52,7 @@ export default function Explore() {
     else if (sort === "priceasc") result.sort((a, b) => a.price - b.price);
     else if (sort === "pricedesc") result.sort((a, b) => b.price - a.price);
     return result;
-  }, [allProducts, search, activeCategory, sort]);
+  }, [allProducts, search, activeCategory, sort, showWishlistOnly, wishlistItems]);
 
   return (
     <Layout>
@@ -58,14 +65,31 @@ export default function Explore() {
           >
             Explore
           </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.08 }}
-            className="text-muted-foreground mb-6"
-          >
-            Browse all {allProducts.length} items in the collection
-          </motion.p>
+          <div className="flex items-center justify-between mb-6">
+            <motion.p
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.08 }}
+              className="text-muted-foreground"
+            >
+              Browse all {allProducts.length} items in the collection
+            </motion.p>
+            <motion.button
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.1 }}
+              onClick={() => setShowWishlistOnly(!showWishlistOnly)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold border transition-all ${
+                showWishlistOnly
+                  ? "bg-secondary text-white border-secondary shadow"
+                  : "bg-background text-foreground border-border hover:border-secondary hover:text-secondary"
+              }`}
+              data-testid="button-wishlist-filter"
+            >
+              <Bookmark className={`w-4 h-4 ${showWishlistOnly ? "fill-white" : ""}`} />
+              Wishlist {wishlistItems.length > 0 && `(${wishlistItems.length})`}
+            </motion.button>
+          </div>
 
           <div className="relative mb-5">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />

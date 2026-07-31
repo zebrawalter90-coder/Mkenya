@@ -9,6 +9,7 @@
 export interface CreateProductBody {
   /** @minLength 1 */
   name: string;
+  description?: string;
   /** @minimum 0 */
   price: number;
   imageObjectPath: string;

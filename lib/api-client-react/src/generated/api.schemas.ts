@@ -21,6 +21,7 @@ export interface ProductComment {
 export interface Product {
   id: string;
   name: string;
+  description?: string;
   price: number;
   imageUrl: string;
   category: string;
@@ -35,6 +36,7 @@ export interface Product {
 export interface CreateProductBody {
   /** @minLength 1 */
   name: string;
+  description?: string;
   /** @minimum 0 */
   price: number;
   imageObjectPath: string;
@@ -47,6 +49,7 @@ export interface UpdateProductBody {
   userId: string;
   /** @minLength 1 */
   name: string;
+  description?: string;
   /** @minimum 0 */
   price: number;
 }
