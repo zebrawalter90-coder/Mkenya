@@ -12,9 +12,10 @@ const heroWords = ["Your", "Trusted", "Kenyan", "Fashion", "Marketplace"];
 
 export default function Home() {
   const { user } = useUser();
+  const params = user.id ? { userId: user.id } : undefined;
   const { data: products, isLoading } = useGetProducts(
-    user.id ? { userId: user.id } : undefined,
-    { query: { enabled: true } }
+    params,
+    { query: { enabled: true, queryKey: getGetProductsQueryKey(params) } }
   );
 
   const showSeeds = !isLoading && (!products || products.length === 0);

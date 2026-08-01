@@ -64,10 +64,10 @@ function loadProducts(): Product[] {
       const parsed = JSON.parse(stored) as unknown[];
       return (parsed as Record<string, unknown>[]).map(migrateProduct);
     } catch {
-      return SEED_PRODUCTS;
+      return [];
     }
   }
-  return SEED_PRODUCTS;
+  return [];
 }
 
 function saveToStorage(products: Product[]) {

@@ -19,7 +19,7 @@ export default function Chat() {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const { data: messages = [] } = useGetChatMessages({
-    query: { refetchInterval: 2000 },
+    query: { refetchInterval: 2000, queryKey: getGetChatMessagesQueryKey() },
   });
 
   const sendMessage = useSendChatMessage({
