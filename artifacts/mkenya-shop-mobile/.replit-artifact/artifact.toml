@@ -1,0 +1,24 @@
+kind = "mobile"
+previewPath = "/mkenya-shop-mobile/"
+title = "Mkenya Shop Mobile"
+description = "The installable Android companion for Mkenya Shop, connected to the shared product catalog and checkout API."
+version = "1.0.0"
+id = "artifacts/mkenya-shop-mobile"
+router = "expo-domain"
+
+[[services]]
+name = "expo"
+ensurePreviewReachable = "/status"
+paths = [ "/mkenya-shop-mobile/" ]
+localPort = 19931
+
+[services.development]
+run = "pnpm --filter @workspace/mkenya-shop-mobile run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/mkenya-shop-mobile", "run", "build" ]
+run = [ "pnpm", "--filter", "@workspace/mkenya-shop-mobile", "run", "serve" ]
+
+[services.env]
+PORT = "19931"
+BASE_PATH = "/mkenya-shop-mobile/"
