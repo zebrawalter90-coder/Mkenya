@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 import { ShoppingBag } from "lucide-react";
-import { useGetProducts } from "@workspace/api-client-react";
+import { getGetProductsQueryKey, useGetProducts } from "@workspace/api-client-react";
 import { useUser } from "@/hooks/useUser";
 import { Layout } from "@/components/Layout";
 import { ProductCard } from "@/components/ProductCard";

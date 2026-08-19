@@ -8,6 +8,7 @@ import AddProduct from "@/pages/AddProduct";
 import Explore from "@/pages/Explore";
 import Chat from "@/pages/Chat";
 import Payment from "@/pages/Payment";
+import { InstallAppPrompt } from "@/components/InstallAppPrompt";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ function App() {
           <Router />
         </WouterRouter>
         <Toaster />
+        <InstallAppPrompt />
       </TooltipProvider>
     </QueryClientProvider>
   );

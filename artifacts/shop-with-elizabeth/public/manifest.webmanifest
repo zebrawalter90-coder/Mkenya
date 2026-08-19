@@ -1,0 +1,17 @@
+{
+  "name": "Mkenya Shop",
+  "short_name": "Mkenya Shop",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fdfaf5",
+  "theme_color": "#a9001f",
+  "description": "Kenyan fashion, accessories, and community shopping.",
+  "icons": [
+    {
+      "src": "/mkenya-shop-icon.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

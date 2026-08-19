@@ -13,6 +13,13 @@ import {
 } from '@expo-google-fonts/inter';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
+import { setBaseUrl } from '@workspace/api-client-react';
+import { ShopProvider } from '@/context/ShopContext';
+
+const apiDomain = process.env.EXPO_PUBLIC_DOMAIN;
+if (apiDomain) {
+  setBaseUrl(`https://${apiDomain}`);
+}
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -49,7 +56,9 @@ export default function RootLayout() {
         <QueryClientProvider client={queryClient}>
           <GestureHandlerRootView>
             <KeyboardProvider>
-              <RootLayoutNav />
+              <ShopProvider>
+                <RootLayoutNav />
+              </ShopProvider>
             </KeyboardProvider>
           </GestureHandlerRootView>
         </QueryClientProvider>
