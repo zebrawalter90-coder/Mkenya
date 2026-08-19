@@ -3,7 +3,9 @@ import { useGetChatMessages, useGetProducts, useSendChatMessage, getGetChatMessa
 import type { Product } from '@workspace/api-client-react';
 import * as Haptics from 'expo-haptics';
 import * as Linking from 'expo-linking';
-import React, { useMemo, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { LinearGradient } from 'expo-linear-gradient';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, Image, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@/hooks/useColors';
@@ -13,6 +15,29 @@ const categories = ['All', 'Clothing', 'Accessories', 'Fabric', 'Footwear', 'Jew
 const formatKES = (amount: number) => 'KES ' + amount.toLocaleString();
 const makeId = () => 'mobile-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7);
 type Tab = 'home' | 'explore' | 'cart' | 'chat';
+
+function LaunchCover({ onEnter }: { onEnter: () => void }) {
+  const colors = useColors();
+  const insets = useSafeAreaInsets();
+  return <View style={[s.cover, { backgroundColor: colors.secondary }]}>
+    <LinearGradient colors={[colors.secondary, colors.primary]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFillObject} />
+    <View style={[s.coverOrb, s.coverOrbOne, { backgroundColor: colors.accent }]} />
+    <View style={[s.coverOrb, s.coverOrbTwo, { backgroundColor: colors.primary }]} />
+    <View style={[s.coverContent, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}>
+      <View style={s.coverTopline}><View style={[s.coverLine, { backgroundColor: colors.accent }]} /><Text style={[s.coverToplineText, { color: colors.accent }]}>MADE FOR KENYA</Text></View>
+      <View style={s.coverCenter}>
+        <View style={[s.coverIconFrame, { backgroundColor: colors.card }]}><Image source={require('../../assets/images/icon.png')} style={s.coverIcon} /></View>
+        <Text style={s.coverBrand}>Mkenya Shop</Text>
+        <Text style={s.coverTitle}>Wear your story.</Text>
+        <Text style={s.coverBody}>A vibrant marketplace for Kenyan fashion, handcrafted treasures, and pieces made to be remembered.</Text>
+      </View>
+      <View>
+        <Pressable onPress={onEnter} style={[s.coverButton, { backgroundColor: colors.accent }]}><Text style={[s.coverButtonText, { color: colors.accentForeground }]}>Enter the shop</Text><Ionicons name="arrow-forward" size={19} color={colors.accentForeground} /></Pressable>
+        <Text style={[s.coverFootnote, { color: 'rgba(255,255,255,0.7)' }]}>Browse local. Shop confidently.</Text>
+      </View>
+    </View>
+  </View>;
+}
 
 function Header({ setTab }: { setTab: (tab: Tab) => void }) { const colors = useColors(); const { cartCount } = useShop(); const insets = useSafeAreaInsets(); return <View style={[s.header, { paddingTop: insets.top + 10, borderBottomColor: colors.border }]}><View><Text style={[s.brand, { color: colors.primary }]}>Mkenya Shop</Text><Text style={[s.kicker, { color: colors.mutedForeground }]}>Kenyan fashion, delivered</Text></View><Pressable onPress={() => setTab('cart')} style={[s.cartButton, { backgroundColor: colors.secondary }]}><Ionicons name="bag-handle-outline" size={21} color={colors.secondaryForeground}/>{cartCount > 0 && <View style={[s.badge, { backgroundColor: colors.primary }]}><Text style={s.badgeText}>{cartCount}</Text></View>}</Pressable></View>; }
 function BottomTabs({ tab, setTab }: { tab: Tab; setTab: (tab: Tab) => void }) { const colors = useColors(); const items: [Tab, string, string][] = [['home','home','Home'],['explore','compass','Explore'],['cart','shopping-bag','Cart'],['chat','message-circle','Chat']]; return <View style={[s.tabs, { backgroundColor: colors.card, borderTopColor: colors.border }]}>{items.map(([key, icon, label]) => <Pressable key={key} onPress={() => setTab(key)} style={s.tab}><Feather name={icon as never} size={20} color={tab === key ? colors.primary : colors.mutedForeground}/><Text style={[s.tabLabel, { color: tab === key ? colors.primary : colors.mutedForeground }]}>{label}</Text></Pressable>)}</View>; }
