@@ -11,6 +11,7 @@ export function InstallAppPrompt() {
   const [installEvent, setInstallEvent] = useState<InstallPromptEvent | null>(null);
   const [visible, setVisible] = useState(false);
   const [isIos, setIsIos] = useState(false);
+  const [showInstructions, setShowInstructions] = useState(false);
 
   useEffect(() => {
     const isStandalone =
@@ -46,11 +47,19 @@ export function InstallAppPrompt() {
   if (!visible) return null;
 
   const install = async () => {
-    if (!installEvent) return;
-    await installEvent.prompt();
-    await installEvent.userChoice;
-    setVisible(false);
-    setInstallEvent(null);
+    if (!installEvent) {
+      setShowInstructions(true);
+      return;
+    }
+
+    try {
+      await installEvent.prompt();
+      await installEvent.userChoice;
+      setVisible(false);
+      setInstallEvent(null);
+    } catch {
+      setShowInstructions(true);
+    }
   };
 
   const fallbackText = isIos
@@ -90,10 +99,23 @@ export function InstallAppPrompt() {
               Install app
             </Button>
           ) : (
-            <p className="mt-3 flex items-start gap-2 rounded-lg bg-muted px-3 py-2 text-xs leading-4 text-muted-foreground">
-              <Share2 className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-              {fallbackText}
-            </p>
+            <>
+              <Button
+                type="button"
+                onClick={install}
+                variant="outline"
+                className="mt-3 h-9 rounded-lg border-primary/30 text-foreground"
+              >
+                <Download className="mr-2 h-4 w-4" />
+                Show install steps
+              </Button>
+              {showInstructions && (
+                <p className="mt-2 flex items-start gap-2 rounded-lg bg-muted px-3 py-2 text-xs leading-4 text-muted-foreground">
+                  <Share2 className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                  {fallbackText}
+                </p>
+              )}
+            </>
           )}
         </div>
       </div>
