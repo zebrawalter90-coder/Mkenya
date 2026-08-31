@@ -24,6 +24,9 @@ export function InstallAppPrompt() {
         .catch(() => undefined);
     }
 
+    // Keep the install reminder visible even while the browser is deciding
+    // whether it can offer its native install prompt.
+    const timer = window.setTimeout(() => setVisible(true), 1400);
     const handler = (event: Event) => {
       event.preventDefault();
       setInstallEvent(event as InstallPromptEvent);
@@ -32,6 +35,7 @@ export function InstallAppPrompt() {
 
     window.addEventListener('beforeinstallprompt', handler);
     return () => {
+      window.clearTimeout(timer);
       window.removeEventListener('beforeinstallprompt', handler);
     };
   }, []);
