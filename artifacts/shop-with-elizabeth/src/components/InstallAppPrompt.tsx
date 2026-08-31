@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Download, Smartphone, X } from 'lucide-react';
+import { Download, Share2, Smartphone, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface InstallPromptEvent extends Event {
@@ -11,6 +11,8 @@ export function InstallAppPrompt() {
   const [installEvent, setInstallEvent] = useState<InstallPromptEvent | null>(null);
   const [visible, setVisible] = useState(false);
   const [installMessage, setInstallMessage] = useState('');
+  const [platform, setPlatform] = useState<'ios' | 'android' | 'desktop'>('desktop');
+  const [showFallback, setShowFallback] = useState(false);
 
   useEffect(() => {
     const isStandalone =
@@ -25,19 +27,34 @@ export function InstallAppPrompt() {
         .catch(() => undefined);
     }
 
+    const userAgent = navigator.userAgent.toLowerCase();
+    if (/iphone|ipad|ipod/.test(userAgent)) {
+      setPlatform('ios');
+    } else if (/android/.test(userAgent)) {
+      setPlatform('android');
+    }
+
     // Keep the install reminder visible even while the browser is deciding
     // whether it can offer its native install prompt.
     const timer = window.setTimeout(() => setVisible(true), 1400);
     const handler = (event: Event) => {
       event.preventDefault();
       setInstallEvent(event as InstallPromptEvent);
+      setShowFallback(false);
+      setInstallMessage('');
       setVisible(true);
+    };
+    const installedHandler = () => {
+      setVisible(false);
+      setInstallEvent(null);
     };
 
     window.addEventListener('beforeinstallprompt', handler);
+    window.addEventListener('appinstalled', installedHandler);
     return () => {
       window.clearTimeout(timer);
       window.removeEventListener('beforeinstallprompt', handler);
+      window.removeEventListener('appinstalled', installedHandler);
     };
   }, []);
 
@@ -45,7 +62,7 @@ export function InstallAppPrompt() {
 
   const install = async () => {
     if (!installEvent) {
-      setInstallMessage('Your browser did not provide a direct install prompt.');
+      setShowFallback(true);
       return;
     }
 
@@ -59,9 +76,22 @@ export function InstallAppPrompt() {
         setInstallMessage('The install prompt was dismissed. You can try again later.');
       }
     } catch {
-      setInstallMessage('This browser cannot open the direct install prompt here.');
+      setShowFallback(true);
     }
   };
+
+  const fallbackText =
+    platform === 'ios'
+      ? 'Tap Share in Safari, then choose Add to Home Screen.'
+      : platform === 'android'
+        ? 'Open your browser menu and choose Install app or Add to Home screen.'
+        : 'Open your browser menu and choose Install app or Add to home screen.';
+
+  const installLabel = installEvent
+    ? 'Install app'
+    : platform === 'ios'
+      ? 'Add to Home Screen'
+      : 'Install on this device';
 
   return (
     <div
@@ -89,18 +119,22 @@ export function InstallAppPrompt() {
             </button>
           </div>
           <p className="mt-1 text-sm leading-5 text-muted-foreground">
-            Keep Mkenya Shop on your phone for faster shopping and easy access to local sellers.
+            Add Mkenya Shop to your device for faster shopping and easy access to local sellers.
           </p>
           <Button
             onClick={install}
             className="mt-3 h-10 w-full rounded-lg bg-primary text-primary-foreground shadow-sm transition-transform hover:bg-primary/90 active:scale-[0.98] sm:w-auto"
           >
             <Download className="mr-2 h-4 w-4" />
-            Install app
+            {installLabel}
           </Button>
-          {installMessage && (
-            <p role="alert" className="mt-2 text-xs leading-4 text-muted-foreground">
-              {installMessage}
+          {(showFallback || installMessage) && (
+            <p
+              role="alert"
+              className="mt-2 flex items-start gap-2 rounded-lg bg-muted px-3 py-2 text-xs leading-4 text-muted-foreground"
+            >
+              <Share2 className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+              {installMessage || fallbackText}
             </p>
           )}
         </div>
