@@ -2,6 +2,7 @@
 
 # compiled output
 dist
+artifacts/mkenya-shop-mobile/static-build/
 tmp
 out-tsc
 *.tsbuildinfo
