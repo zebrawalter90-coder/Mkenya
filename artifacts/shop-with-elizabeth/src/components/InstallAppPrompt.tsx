@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Download, Share2, Smartphone, X } from 'lucide-react';
+import { Download, Smartphone, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface InstallPromptEvent extends Event {
@@ -10,8 +10,6 @@ interface InstallPromptEvent extends Event {
 export function InstallAppPrompt() {
   const [installEvent, setInstallEvent] = useState<InstallPromptEvent | null>(null);
   const [visible, setVisible] = useState(false);
-  const [isIos, setIsIos] = useState(false);
-  const [showInstructions, setShowInstructions] = useState(false);
 
   useEffect(() => {
     const isStandalone =
@@ -26,11 +24,6 @@ export function InstallAppPrompt() {
         .catch(() => undefined);
     }
 
-    setIsIos(/iphone|ipad|ipod/i.test(navigator.userAgent));
-
-    // Deliberately do not persist dismissal: visitors should see the install
-    // reminder again the next time they visit until the site is installed.
-    const timer = window.setTimeout(() => setVisible(true), 1400);
     const handler = (event: Event) => {
       event.preventDefault();
       setInstallEvent(event as InstallPromptEvent);
@@ -39,7 +32,6 @@ export function InstallAppPrompt() {
 
     window.addEventListener('beforeinstallprompt', handler);
     return () => {
-      window.clearTimeout(timer);
       window.removeEventListener('beforeinstallprompt', handler);
     };
   }, []);
@@ -47,24 +39,15 @@ export function InstallAppPrompt() {
   if (!visible) return null;
 
   const install = async () => {
-    if (!installEvent) {
-      setShowInstructions(true);
-      return;
-    }
+    if (!installEvent) return;
 
     try {
       await installEvent.prompt();
       await installEvent.userChoice;
       setVisible(false);
       setInstallEvent(null);
-    } catch {
-      setShowInstructions(true);
-    }
+    } catch {}
   };
-
-  const fallbackText = isIos
-    ? 'Tap Share, then “Add to Home Screen” to install Mkenya Shop.'
-    : 'Open your browser menu and choose “Install app” or “Add to Home screen”.';
 
   return (
     <div
@@ -94,33 +77,13 @@ export function InstallAppPrompt() {
           <p className="mt-1 text-sm leading-5 text-muted-foreground">
             Keep Mkenya Shop on your phone for faster shopping and easy access to local sellers.
           </p>
-          {installEvent ? (
-            <Button
-              onClick={install}
-              className="mt-3 h-10 w-full rounded-lg bg-primary text-primary-foreground shadow-sm transition-transform hover:bg-primary/90 active:scale-[0.98] sm:w-auto"
-            >
-              <Download className="mr-2 h-4 w-4" />
-              Install app
-            </Button>
-          ) : (
-            <>
-              <Button
-                type="button"
-                onClick={install}
-                variant="outline"
-                className="mt-3 h-10 w-full rounded-lg border-primary/30 text-foreground transition-transform active:scale-[0.98] sm:w-auto"
-              >
-                <Download className="mr-2 h-4 w-4" />
-                Show install steps
-              </Button>
-              {showInstructions && (
-                <p className="mt-2 flex items-start gap-2 rounded-lg bg-muted px-3 py-2 text-xs leading-4 text-muted-foreground">
-                  <Share2 className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                  {fallbackText}
-                </p>
-              )}
-            </>
-          )}
+          <Button
+            onClick={install}
+            className="mt-3 h-10 w-full rounded-lg bg-primary text-primary-foreground shadow-sm transition-transform hover:bg-primary/90 active:scale-[0.98] sm:w-auto"
+          >
+            <Download className="mr-2 h-4 w-4" />
+            Install app
+          </Button>
         </div>
       </div>
     </div>
