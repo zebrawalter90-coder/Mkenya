@@ -7,8 +7,6 @@ interface InstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
-const ANDROID_APP_LINK = 'https://t.me/FreeProAppsGalaxy';
-
 export function InstallAppPrompt() {
   const [installEvent, setInstallEvent] = useState<InstallPromptEvent | null>(null);
   const [visible, setVisible] = useState(false);
@@ -83,19 +81,10 @@ export function InstallAppPrompt() {
           <p className="mt-1 text-sm leading-5 text-muted-foreground">
             Keep Mkenya Shop on your phone for faster shopping and easy access to local sellers.
           </p>
-          <a
-            href={ANDROID_APP_LINK}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-3 inline-flex h-9 items-center rounded-lg bg-secondary px-3 text-sm font-bold text-secondary-foreground transition-colors hover:bg-secondary/90"
-          >
-            <Download className="mr-2 h-4 w-4" />
-            Get Android app on Telegram
-          </a>
           {installEvent ? (
             <Button
               onClick={install}
-              className="mt-2 h-9 rounded-lg bg-primary text-primary-foreground"
+              className="mt-3 h-9 rounded-lg bg-primary text-primary-foreground"
             >
               <Download className="mr-2 h-4 w-4" />
               Install app
