@@ -10,8 +10,20 @@
   "description": "Kenyan fashion, accessories, and community shopping.",
   "icons": [
     {
+      "src": "/mkenya-shop-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/mkenya-shop-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
       "src": "/mkenya-shop-icon.png",
-      "sizes": "192x192 512x512 1024x1024",
+      "sizes": "1024x1024",
       "type": "image/png",
       "purpose": "any maskable"
     }
