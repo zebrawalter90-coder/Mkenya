@@ -10,6 +10,7 @@ interface InstallPromptEvent extends Event {
 export function InstallAppPrompt() {
   const [installEvent, setInstallEvent] = useState<InstallPromptEvent | null>(null);
   const [visible, setVisible] = useState(false);
+  const [installMessage, setInstallMessage] = useState('');
 
   useEffect(() => {
     const isStandalone =
@@ -43,14 +44,23 @@ export function InstallAppPrompt() {
   if (!visible) return null;
 
   const install = async () => {
-    if (!installEvent) return;
+    if (!installEvent) {
+      setInstallMessage('Your browser did not provide a direct install prompt.');
+      return;
+    }
 
     try {
       await installEvent.prompt();
-      await installEvent.userChoice;
-      setVisible(false);
-      setInstallEvent(null);
-    } catch {}
+      const choice = await installEvent.userChoice;
+      if (choice.outcome === 'accepted') {
+        setVisible(false);
+        setInstallEvent(null);
+      } else {
+        setInstallMessage('The install prompt was dismissed. You can try again later.');
+      }
+    } catch {
+      setInstallMessage('This browser cannot open the direct install prompt here.');
+    }
   };
 
   return (
@@ -88,6 +98,11 @@ export function InstallAppPrompt() {
             <Download className="mr-2 h-4 w-4" />
             Install app
           </Button>
+          {installMessage && (
+            <p role="alert" className="mt-2 text-xs leading-4 text-muted-foreground">
+              {installMessage}
+            </p>
+          )}
         </div>
       </div>
     </div>
