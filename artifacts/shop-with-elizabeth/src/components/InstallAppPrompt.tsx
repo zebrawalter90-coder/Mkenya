@@ -70,19 +70,23 @@ export function InstallAppPrompt() {
     <div
       role="status"
       aria-live="polite"
-      className="fixed bottom-5 left-1/2 z-[80] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 rounded-2xl border border-primary/20 bg-card p-4 shadow-2xl sm:bottom-6"
+      aria-labelledby="install-mkenya-shop-title"
+      className="fixed bottom-[calc(env(safe-area-inset-bottom)+1.25rem)] left-1/2 z-[80] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 animate-in slide-in-from-bottom-4 fade-in duration-500 rounded-2xl border border-primary/20 bg-card/95 p-4 shadow-2xl backdrop-blur-sm sm:bottom-6"
     >
       <div className="flex items-start gap-3">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
           <Smartphone className="h-5 w-5" />
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-2">
-            <p className="font-black text-foreground">Install Mkenya Shop</p>
+            <p id="install-mkenya-shop-title" className="font-black text-foreground">
+              Install Mkenya Shop
+            </p>
             <button
+              type="button"
               aria-label="Dismiss app install notification"
               onClick={() => setVisible(false)}
-              className="text-muted-foreground hover:text-foreground"
+              className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
               <X className="h-4 w-4" />
             </button>
@@ -93,7 +97,7 @@ export function InstallAppPrompt() {
           {installEvent ? (
             <Button
               onClick={install}
-              className="mt-3 h-9 rounded-lg bg-primary text-primary-foreground"
+              className="mt-3 h-10 w-full rounded-lg bg-primary text-primary-foreground shadow-sm transition-transform hover:bg-primary/90 active:scale-[0.98] sm:w-auto"
             >
               <Download className="mr-2 h-4 w-4" />
               Install app
@@ -104,7 +108,7 @@ export function InstallAppPrompt() {
                 type="button"
                 onClick={install}
                 variant="outline"
-                className="mt-3 h-9 rounded-lg border-primary/30 text-foreground"
+                className="mt-3 h-10 w-full rounded-lg border-primary/30 text-foreground transition-transform active:scale-[0.98] sm:w-auto"
               >
                 <Download className="mr-2 h-4 w-4" />
                 Show install steps
