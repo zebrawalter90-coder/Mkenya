@@ -61,23 +61,41 @@ export function InstallAppPrompt() {
   if (!visible) return null;
 
   const install = async () => {
-    if (!installEvent) {
-      setShowFallback(true);
+    setInstallMessage('');
+
+    if (installEvent) {
+      const deferredPrompt = installEvent;
+      setInstallEvent(null);
+
+      try {
+        await deferredPrompt.prompt();
+        const choice = await deferredPrompt.userChoice;
+        if (choice.outcome === 'accepted') {
+          setVisible(false);
+          return;
+        }
+        setInstallMessage('The install prompt was dismissed. You can try again later.');
+      } catch {
+        setShowFallback(true);
+      }
       return;
     }
 
-    try {
-      await installEvent.prompt();
-      const choice = await installEvent.userChoice;
-      if (choice.outcome === 'accepted') {
-        setVisible(false);
-        setInstallEvent(null);
-      } else {
-        setInstallMessage('The install prompt was dismissed. You can try again later.');
+    if (platform === 'ios' && 'share' in navigator) {
+      try {
+        await navigator.share({
+          title: 'Mkenya Shop',
+          text: 'Install Mkenya Shop on your device',
+          url: window.location.href,
+        });
+        setInstallMessage('Choose Add to Home Screen from the share sheet.');
+      } catch {
+        setShowFallback(true);
       }
-    } catch {
-      setShowFallback(true);
+      return;
     }
+
+    setShowFallback(true);
   };
 
   const fallbackText =
