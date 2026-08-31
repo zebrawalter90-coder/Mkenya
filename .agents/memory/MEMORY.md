@@ -1,0 +1,1 @@
+- [PWA install versus APK](pwa-install-vs-apk.md) — home-screen web installs and native APK downloads are separate delivery paths.
