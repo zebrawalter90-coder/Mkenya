@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { Link, useLocation } from "wouter";
 import { Home, Compass, MessageCircle, PlusCircle, User, Phone, CreditCard, ShoppingCart } from "lucide-react";
 import { useUser } from "@/hooks/useUser";
@@ -83,9 +84,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
       </header>
 
-      <main className="flex-1 flex flex-col pb-16 md:pb-0">
+      <motion.main
+        key={location}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.28, ease: "easeOut" }}
+        className="flex-1 flex flex-col pb-16 md:pb-0"
+      >
         {children}
-      </main>
+      </motion.main>
 
       {/* ── Mobile bottom nav ── */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-t border-border flex">
@@ -176,6 +183,23 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       </footer>
+
+      <motion.a
+        href="https://wa.me/254743035900?text=Hi%20Mkenya%20Shop%2C%20I%27d%20like%20some%20help%20shopping."
+        target="_blank"
+        rel="noopener noreferrer"
+        whileHover={{ scale: 1.04, y: -2 }}
+        whileTap={{ scale: 0.96 }}
+        animate={{ y: [0, -3, 0] }}
+        transition={{ y: { repeat: Infinity, duration: 3.2, ease: "easeInOut" } }}
+        className="fixed bottom-20 md:bottom-6 right-4 z-40 flex items-center gap-2 rounded-full bg-[#25D366] px-4 py-3 text-sm font-black text-white shadow-xl shadow-[#25D366]/25 ring-4 ring-white/70"
+        aria-label="Chat with Mkenya Shop on WhatsApp"
+        data-testid="button-whatsapp-concierge"
+      >
+        <MessageCircle className="h-5 w-5" />
+        <span className="hidden sm:inline">Need help?</span>
+        <span className="sm:hidden">WhatsApp</span>
+      </motion.a>
 
       <CartDrawer 
         isOpen={isCartOpen} 

@@ -1,6 +1,7 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Search, SlidersHorizontal, Bookmark } from "lucide-react";
+import { Search, SlidersHorizontal, Bookmark, RotateCcw } from "lucide-react";
+import { useLocation } from "wouter";
 import { useGetProducts } from "@workspace/api-client-react";
 import { useUser } from "@/hooks/useUser";
 import { useWishlist } from "@/hooks/useWishlist";
@@ -21,6 +22,7 @@ const SORT_OPTIONS = [
 ];
 
 export default function Explore() {
+  const [location] = useLocation();
   const { user } = useUser();
   const { wishlistItems } = useWishlist();
   const { data: products, isLoading } = useGetProducts(
@@ -34,6 +36,14 @@ export default function Explore() {
   const [activeCategory, setActiveCategory] = useState<Category | "All">("All");
   const [sort, setSort] = useState("newest");
   const [showWishlistOnly, setShowWishlistOnly] = useState(false);
+
+  useEffect(() => {
+    const categoryParam = new URLSearchParams(window.location.search).get("category");
+    const nextCategory = categoryParam && CATEGORIES.includes(categoryParam as Category | "All")
+      ? categoryParam as Category | "All"
+      : "All";
+    setActiveCategory(nextCategory);
+  }, [location]);
 
   const filtered = useMemo(() => {
     let result = [...allProducts];
@@ -53,6 +63,14 @@ export default function Explore() {
     else if (sort === "pricedesc") result.sort((a, b) => b.price - a.price);
     return result;
   }, [allProducts, search, activeCategory, sort, showWishlistOnly, wishlistItems]);
+
+  const hasFilters = Boolean(search.trim()) || activeCategory !== "All" || sort !== "newest" || showWishlistOnly;
+  const clearFilters = () => {
+    setSearch("");
+    setActiveCategory("All");
+    setSort("newest");
+    setShowWishlistOnly(false);
+  };
 
   return (
     <Layout>
@@ -90,6 +108,25 @@ export default function Explore() {
               Wishlist {wishlistItems.length > 0 && `(${wishlistItems.length})`}
             </motion.button>
           </div>
+
+          {hasFilters && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              className="mb-4 flex items-center justify-between rounded-xl border border-primary/15 bg-primary/5 px-3 py-2 text-xs"
+            >
+              <span className="font-semibold text-primary">Filters are active</span>
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="flex items-center gap-1 font-black text-foreground transition-colors hover:text-primary"
+                data-testid="button-clear-filters"
+              >
+                <RotateCcw className="h-3.5 w-3.5" />
+                Clear
+              </button>
+            </motion.div>
+          )}
 
           <div className="relative mb-5">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
@@ -153,7 +190,7 @@ export default function Explore() {
             <p className="text-muted-foreground">Try a different search or category</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+           <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filtered.map((product, index) => (
               <ProductCard
                 key={product.id}
@@ -162,7 +199,7 @@ export default function Explore() {
                 readOnly={showSeeds}
               />
             ))}
-          </div>
+           </motion.div>
         )}
       </div>
     </Layout>

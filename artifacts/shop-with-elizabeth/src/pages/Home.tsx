@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { motion } from "framer-motion";
-import { ShoppingBag } from "lucide-react";
+import { BadgeCheck, Footprints, Gem, Layers3, MessageCircle, Shirt, Sparkles, Truck } from "lucide-react";
 import { getGetProductsQueryKey, useGetProducts } from "@workspace/api-client-react";
 import { useUser } from "@/hooks/useUser";
 import { Layout } from "@/components/Layout";
@@ -9,6 +9,12 @@ import { Button } from "@/components/ui/button";
 import { SEED_PRODUCTS } from "@/lib/seed";
 
 const heroWords = ["Your", "Trusted", "Kenyan", "Fashion", "Marketplace"];
+const categorySpotlight = [
+  { label: "Clothing", caption: "Kitenge, dresses & everyday looks", icon: Shirt, color: "bg-primary/10 text-primary" },
+  { label: "Accessories", caption: "Finish your look with local flair", icon: Gem, color: "bg-secondary/10 text-secondary" },
+  { label: "Fabric", caption: "Bold prints ready for your next piece", icon: Layers3, color: "bg-amber-100 text-amber-700" },
+  { label: "Footwear", caption: "Comfortable steps, standout style", icon: Footprints, color: "bg-sky-100 text-sky-700" },
+];
 
 export default function Home() {
   const { user } = useUser();
@@ -98,6 +104,69 @@ export default function Home() {
               </Button>
             </Link>
           </motion.div>
+        </div>
+      </section>
+
+      <section className="border-y border-border bg-card/80">
+        <div className="container mx-auto grid grid-cols-1 gap-4 px-4 py-5 sm:grid-cols-3">
+          {[
+            { icon: BadgeCheck, title: "Local sellers", text: "Discover pieces from Kenya's creative community" },
+            { icon: Truck, title: "Easy ordering", text: "Pay by M-Pesa and confirm your order on WhatsApp" },
+            { icon: MessageCircle, title: "Real community", text: "Ask questions and share finds with other shoppers" },
+          ].map(({ icon: Icon, title, text }, index) => (
+            <motion.div
+              key={title}
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.5 }}
+              transition={{ delay: index * 0.08 }}
+              className="flex items-center gap-3 rounded-2xl px-3 py-2"
+            >
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary/10 text-secondary">
+                <Icon className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="font-black text-foreground">{title}</p>
+                <p className="text-xs leading-relaxed text-muted-foreground">{text}</p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      <section className="container mx-auto px-4 pt-14">
+        <div className="mb-7 flex items-end justify-between gap-4">
+          <div>
+            <p className="mb-1 flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-primary">
+              <Sparkles className="h-4 w-4" />
+              Find your next favourite
+            </p>
+            <h2 className="text-3xl font-black text-foreground">Shop by category</h2>
+          </div>
+          <Link href="/explore" className="hidden text-sm font-black text-primary transition-colors hover:text-secondary sm:block">
+            Browse everything →
+          </Link>
+        </div>
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          {categorySpotlight.map(({ label, caption, icon: Icon, color }, index) => (
+            <Link key={label} href={`/explore?category=${encodeURIComponent(label)}`}>
+              <motion.div
+                initial={{ opacity: 0, y: 18 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.35 }}
+                transition={{ delay: index * 0.07 }}
+                whileHover={{ y: -5 }}
+                whileTap={{ scale: 0.98 }}
+                className="group h-full rounded-3xl border border-border bg-card p-4 shadow-sm transition-shadow hover:shadow-lg"
+              >
+                <div className={`mb-8 flex h-12 w-12 items-center justify-center rounded-2xl ${color}`}>
+                  <Icon className="h-6 w-6 transition-transform duration-300 group-hover:scale-110" />
+                </div>
+                <h3 className="font-black text-foreground">{label}</h3>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{caption}</p>
+              </motion.div>
+            </Link>
+          ))}
         </div>
       </section>
 

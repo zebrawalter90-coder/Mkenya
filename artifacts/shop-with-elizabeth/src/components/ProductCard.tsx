@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Heart, MessageCircle, Trash2, Pencil, Send, Bookmark, ShoppingCart, Check } from "lucide-react";
+import { Heart, MessageCircle, Trash2, Pencil, Send, Bookmark, ShoppingCart, Check, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useUser } from "@/hooks/useUser";
@@ -15,6 +15,7 @@ import {
   getGetProductsQueryKey,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
 import type { Product } from "@workspace/api-client-react";
 
 interface ProductCardProps {
@@ -28,6 +29,7 @@ export function ProductCard({ product, index, readOnly = false }: ProductCardPro
   const queryClient = useQueryClient();
   const { addToCart } = useCart();
   const { isWishlisted, toggleWishlist } = useWishlist();
+  const { toast } = useToast();
   const [commentText, setCommentText] = useState("");
   const [showAllComments, setShowAllComments] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -91,6 +93,22 @@ export function ProductCard({ product, index, readOnly = false }: ProductCardPro
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
+  };
+
+  const handleShare = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const shareText = `${product.name} · KES ${product.price.toLocaleString()} on Mkenya Shop`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: product.name, text: shareText, url: window.location.href });
+      } else if (navigator.clipboard) {
+        await navigator.clipboard.writeText(`${shareText} — ${window.location.href}`);
+        toast({ title: "Product link copied", description: "Share it with a friend or in the community." });
+      }
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      toast({ title: "Sharing is unavailable", description: "Try copying the page link from your browser." });
+    }
   };
 
   return (
@@ -158,6 +176,16 @@ export function ProductCard({ product, index, readOnly = false }: ProductCardPro
             } ${readOnly ? "opacity-60 cursor-default" : ""}`}
           >
             <Heart className={`w-5 h-5 ${hasLiked ? "fill-white" : ""}`} />
+          </motion.button>
+          <motion.button
+            whileTap={{ scale: 0.75 }}
+            whileHover={{ scale: 1.1 }}
+            onClick={handleShare}
+            data-testid={`button-share-${product.id}`}
+            className="w-11 h-11 rounded-full flex items-center justify-center shadow-lg transition-colors backdrop-blur-sm bg-white/85 text-foreground hover:bg-white"
+            aria-label={`Share ${product.name}`}
+          >
+            <Share2 className="w-5 h-5" />
           </motion.button>
         </div>
 
