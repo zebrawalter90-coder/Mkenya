@@ -1,2 +1,3 @@
 - [PWA install versus APK](pwa-install-vs-apk.md) — home-screen web installs and native APK downloads are separate delivery paths.
 - [Vercel deployment readiness](vercel-deploy-readiness.md) — the frontend is Vercel-ready; live API features require a configured external API origin.
+- [Mobile build and publish stability](mobile-build-publish.md) — Expo builds need an isolated Metro port and a pnpm Babel dependency extension.

@@ -23,7 +23,9 @@ function findWorkspaceRoot(startDir) {
 
 const workspaceRoot = findWorkspaceRoot(projectRoot);
 const basePath = (process.env.BASE_PATH || '/').replace(/\/+$/, '');
-const metroPort = Number(process.env.EXPO_BUILD_PORT || 8082);
+// Keep production bundling separate from the Expo dev workflow, which uses
+// Metro's conventional 8082 port.
+const metroPort = Number(process.env.EXPO_BUILD_PORT || 8092);
 const metroBaseUrl = `http://localhost:${metroPort}`;
 
 function exitWithError(message) {
