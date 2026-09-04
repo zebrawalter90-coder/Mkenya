@@ -29,5 +29,12 @@ export function useUser() {
     setUser({ id, name });
   }, []);
 
-  return { user };
+  const setUsername = (name: string) => {
+    const normalizedName = name.trim();
+    if (!normalizedName) return;
+    localStorage.setItem(USERNAME_KEY, normalizedName);
+    setUser((currentUser) => ({ ...currentUser, name: normalizedName }));
+  };
+
+  return { user, setUsername };
 }

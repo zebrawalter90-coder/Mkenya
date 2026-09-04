@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "framework": "vite",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "buildCommand": "pnpm --filter @workspace/shop-with-elizabeth run build",
+  "outputDirectory": "artifacts/shop-with-elizabeth/dist/public",
+  "rewrites": [
+    {
+      "source": "/((?!api(?:/|$)).*)",
+      "destination": "/index.html"
+    }
+  ]
+}

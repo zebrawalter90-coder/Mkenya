@@ -1,1 +1,2 @@
 - [PWA install versus APK](pwa-install-vs-apk.md) — home-screen web installs and native APK downloads are separate delivery paths.
+- [Vercel deployment readiness](vercel-deploy-readiness.md) — the frontend is Vercel-ready; live API features require a configured external API origin.
