@@ -151,16 +151,17 @@ export function ProductCard({ product, index, readOnly = false }: ProductCardPro
       className="group flex flex-col overflow-hidden border border-border bg-card shadow-sm transition-[box-shadow,transform] duration-300 hover:-translate-y-1 hover:shadow-editorial"
       data-testid={`card-product-${product.id}`}
     >
-      <div className="relative aspect-[4/5] cursor-pointer overflow-hidden bg-muted" onClick={() => setIsModalOpen(true)}>
+      <div className="relative aspect-square cursor-pointer overflow-hidden bg-white" onClick={() => setIsModalOpen(true)}>
         <ProductImage
           src={product.imageUrl}
           alt={product.name}
           category={product.category}
           priority={index < 2}
           objectPosition={index % 3 === 1 ? "center 28%" : "center 38%"}
+          fit="contain"
           className="transition-transform duration-700 group-hover:scale-[1.035]"
         />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-foreground/70 via-transparent to-foreground/10" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-foreground/10 to-transparent" />
 
         <div className="absolute left-4 top-4 z-10 flex items-center gap-2">
           <span className="bg-accent px-2.5 py-1 font-mono-ui text-[9px] font-bold uppercase tracking-[0.15em] text-accent-foreground">
@@ -242,7 +243,7 @@ export function ProductCard({ product, index, readOnly = false }: ProductCardPro
         )}
       </div>
 
-      <div className="flex flex-1 flex-col p-5">
+      <div className="flex flex-1 flex-col p-4 sm:p-5">
         {isEditing ? (
           <form onSubmit={handleEditSave} className="mb-4 space-y-3">
             <Input value={editName} onChange={(event) => setEditName(event.target.value)} placeholder="Product name" className="h-10 text-sm" />

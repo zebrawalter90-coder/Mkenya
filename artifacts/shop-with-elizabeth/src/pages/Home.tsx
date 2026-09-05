@@ -196,8 +196,8 @@ export default function Home() {
             </Link>
           </div>
           {isLoading ? (
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {[0, 1, 2].map((item) => <div key={item} className="aspect-[4/5] animate-pulse bg-muted" />)}
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
+              {[0, 1, 2].map((item) => <div key={item} className="aspect-square animate-pulse bg-muted" />)}
             </div>
           ) : isError ? (
             <div className="border border-destructive/30 bg-destructive/5 p-8 text-center">
@@ -207,7 +207,7 @@ export default function Home() {
           ) : (
             <>
               {showSeeds && <p className="mb-5 text-sm text-muted-foreground">Preview pieces while local sellers add their next listings.</p>}
-              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
                 {displayProducts.slice(0, 6).map((product, index) => (
                   <ProductCard key={product.id} product={product} index={index} readOnly={showSeeds} />
                 ))}

@@ -8,6 +8,7 @@ interface ProductImageProps {
   className?: string;
   priority?: boolean;
   objectPosition?: string;
+  fit?: "cover" | "contain";
 }
 
 const categoryStyles: Record<string, string> = {
@@ -26,6 +27,7 @@ export function ProductImage({
   className = "",
   priority = false,
   objectPosition = "center 38%",
+  fit = "cover",
 }: ProductImageProps) {
   const isPlaceholder = src.includes("picsum.photos");
   const safeSrc = isPlaceholder ? "" : src;
@@ -72,7 +74,9 @@ export function ProductImage({
           onLoad={() => setIsLoaded(true)}
           onError={() => setHasError(true)}
           style={{ objectPosition }}
-          className={`h-full w-full object-cover transition-[opacity,transform] duration-700 ${
+          className={`h-full w-full transition-[opacity,transform] duration-700 ${
+            fit === "contain" ? "bg-white object-contain p-3 sm:p-5" : "object-cover"
+          } ${
             isLoaded ? "opacity-100" : "opacity-0"
           }`}
         />
