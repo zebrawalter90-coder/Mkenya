@@ -11,6 +11,7 @@ import {
   MessageCircle,
   Search,
   Shirt,
+  ShoppingBag,
   Sparkles,
   Truck,
 } from "lucide-react";
@@ -43,7 +44,11 @@ export default function Home() {
 
   const showSeeds = !isLoading && !isError && (!products || products.length === 0);
   const displayProducts = showSeeds ? SEED_PRODUCTS : products ?? [];
-  const leadProduct = displayProducts[0];
+  const leadProduct =
+    displayProducts.find((product) =>
+      ["Clothing", "Fabric", "Footwear", "Jewelry", "Beauty"].includes(product.category)
+        && (product.description?.trim().length ?? 0) >= 20,
+    ) ?? (showSeeds ? SEED_PRODUCTS[1] : undefined);
 
   return (
     <Layout>
@@ -102,10 +107,22 @@ export default function Home() {
             </div>
             <div className="relative aspect-[.88] overflow-hidden bg-secondary shadow-editorial">
               {leadProduct ? (
-                <ProductImage src={leadProduct.imageUrl} alt={leadProduct.name} priority className="opacity-95" />
+                <ProductImage
+                  src={leadProduct.imageUrl}
+                  alt={leadProduct.name}
+                  category={leadProduct.category}
+                  priority
+                  className="opacity-95"
+                />
               ) : (
-                <div className="grid h-full place-items-center bg-secondary p-10 text-center text-secondary-foreground">
-                  <p className="font-display text-4xl font-bold">Find the piece that feels like you.</p>
+                <div className="relative grid h-full place-items-center overflow-hidden bg-secondary p-10 text-center text-secondary-foreground">
+                  <div className="absolute -right-16 -top-16 h-64 w-64 rounded-full border-[32px] border-background/10" aria-hidden="true" />
+                  <div className="absolute -bottom-24 -left-16 h-72 w-72 rotate-12 border border-background/15" aria-hidden="true" />
+                  <div className="relative max-w-xs">
+                    <ShoppingBag className="mx-auto mb-6 h-12 w-12 text-accent" strokeWidth={1.5} />
+                    <p className="font-mono-ui text-[10px] font-bold uppercase tracking-[0.2em] text-background/65">Mkenya Shop edit</p>
+                    <p className="mt-4 font-display text-4xl font-bold leading-tight">Find the piece that feels like you.</p>
+                  </div>
                 </div>
               )}
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-foreground/75 via-transparent to-transparent" />

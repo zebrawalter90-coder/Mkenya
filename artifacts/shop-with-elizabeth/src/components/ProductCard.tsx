@@ -138,6 +138,7 @@ export function ProductCard({ product, index, readOnly = false }: ProductCardPro
         <ProductImage
           src={product.imageUrl}
           alt={product.name}
+          category={product.category}
           priority={index < 2}
           objectPosition={index % 3 === 1 ? "center 28%" : "center 38%"}
           className="transition-transform duration-700 group-hover:scale-[1.035]"

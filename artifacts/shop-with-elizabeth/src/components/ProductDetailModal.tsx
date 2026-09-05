@@ -116,7 +116,14 @@ export function ProductDetailModal({
               data-testid="product-modal"
             >
               <div className="relative h-[42vh] shrink-0 bg-muted sm:h-auto sm:w-[48%]">
-                <ProductImage src={product.imageUrl} alt={product.name} className="h-full" priority objectPosition="center 32%" />
+                <ProductImage
+                  src={product.imageUrl}
+                  alt={product.name}
+                  category={product.category}
+                  className="h-full"
+                  priority
+                  objectPosition="center 32%"
+                />
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-foreground/50 via-transparent to-transparent" />
                 <span className="absolute bottom-5 left-5 bg-accent px-3 py-1.5 font-mono-ui text-[10px] font-bold uppercase tracking-[0.18em] text-accent-foreground">
                   {product.category}
