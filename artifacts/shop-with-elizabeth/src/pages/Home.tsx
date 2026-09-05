@@ -18,6 +18,7 @@ import {
 import { getGetProductsQueryKey, useGetProducts } from "@workspace/api-client-react";
 import { useUser } from "@/hooks/useUser";
 import { Layout } from "@/components/Layout";
+import { MarketplaceProductRail } from "@/components/MarketplaceProductRail";
 import { ProductCard } from "@/components/ProductCard";
 import { ProductImage } from "@/components/ProductImage";
 import { SEED_PRODUCTS } from "@/lib/seed";
@@ -181,6 +182,8 @@ export default function Home() {
           ))}
         </div>
       </section>
+
+      <MarketplaceProductRail products={displayProducts} />
 
       <section className="bg-muted/45">
         <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
