@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { X, Heart, MessageCircle, Send, ShoppingCart, Check, Share2 } from "lucide-react";
+import { X, Heart, MessageCircle, Send, ShoppingCart, Check, Share2, Zap } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { getGetProductsQueryKey, useAddComment, useToggleLike } from "@workspace/api-client-react";
 import type { Product } from "@workspace/api-client-react";
@@ -74,6 +74,21 @@ export function ProductDetailModal({
     onAddToCart(product);
     setShowAddedFeedback(true);
     window.setTimeout(() => setShowAddedFeedback(false), 2000);
+  };
+
+  const handleBuyNow = () => {
+    window.dispatchEvent(
+      new CustomEvent("mkenya:buy-now", {
+        detail: {
+          id: product.id,
+          name: product.name,
+          imageUrl: product.imageUrl,
+          price: product.price,
+          category: product.category,
+        },
+      }),
+    );
+    onClose();
   };
 
   const handleShare = async () => {
@@ -207,6 +222,13 @@ export function ProductDetailModal({
                     </AnimatePresence>
                   </Button>
                 </div>
+                <Button
+                  onClick={handleBuyNow}
+                  className="mt-2 h-12 w-full rounded-none bg-primary font-bold text-primary-foreground hover:bg-primary/90"
+                  data-testid="button-buy-now-modal"
+                >
+                  <Zap className="mr-2 h-4 w-4" /> Buy now with M-Pesa
+                </Button>
 
                 <div className="mt-7 border-t border-border pt-5">
                   <h3 className="mb-3 text-sm font-bold text-foreground">Community notes ({product.comments.length})</h3>

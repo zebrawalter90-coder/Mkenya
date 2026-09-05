@@ -1,14 +1,20 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ArrowRight, ArrowLeft, Package, CreditCard, MessageCircle, PartyPopper } from "lucide-react";
+import { X, ArrowRight, ArrowLeft, Package, CreditCard, MessageCircle, PartyPopper, Smartphone, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useCart } from "@/hooks/useCart";
+import { useCart, type CartItem } from "@/hooks/useCart";
+import {
+  getGetMpesaPaymentStatusQueryKey,
+  useGetMpesaPaymentStatus,
+  useInitiateMpesaStkPush,
+} from "@workspace/api-client-react";
 
 interface CheckoutModalProps {
   isOpen: boolean;
   onClose: () => void;
+  quickBuyItem?: CartItem | null;
 }
 
 const KENYAN_COUNTIES = [
@@ -34,8 +40,10 @@ const KENYAN_COUNTIES = [
   "Naivasha",
 ];
 
-export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
+export function CheckoutModal({ isOpen, onClose, quickBuyItem = null }: CheckoutModalProps) {
   const { cartItems, cartTotal, clearCart } = useCart();
+  const activeItems = quickBuyItem ? [quickBuyItem] : cartItems;
+  const activeTotal = quickBuyItem ? quickBuyItem.price : cartTotal;
   const [step, setStep] = useState(1);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -43,6 +51,33 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   const [county, setCounty] = useState("Nairobi");
   const [notes, setNotes] = useState("");
   const [orderRef] = useState(() => `SWE-${Date.now().toString(36).toUpperCase()}`);
+  const [checkoutRequestId, setCheckoutRequestId] = useState<string | null>(null);
+  const [stkStatus, setStkStatus] = useState<"pending" | "completed" | "failed" | null>(null);
+  const [stkError, setStkError] = useState("");
+
+  const initiateStkPush = useInitiateMpesaStkPush();
+  const paymentStatus = useGetMpesaPaymentStatus(checkoutRequestId ?? "", {
+    query: {
+      queryKey: getGetMpesaPaymentStatusQueryKey(checkoutRequestId ?? ""),
+      enabled: Boolean(checkoutRequestId) && step === 4 && stkStatus === "pending",
+      refetchInterval: 2000,
+    },
+  });
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setStep(1);
+    setCheckoutRequestId(null);
+    setStkStatus(null);
+    setStkError("");
+  }, [isOpen, quickBuyItem?.id]);
+
+  useEffect(() => {
+    const status = paymentStatus.data?.status;
+    if (status === "completed" || status === "failed") {
+      setStkStatus(status);
+    }
+  }, [paymentStatus.data?.status]);
 
   const handleNext = () => {
     if (step === 1) setStep(2);
@@ -54,16 +89,43 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   };
 
   const handleWhatsApp = () => {
-    const itemsList = cartItems
+    const itemsList = activeItems
       .map((item) => `• ${item.name} (x${item.quantity}) - KES ${(item.price * item.quantity).toLocaleString()}`)
       .join("\n");
-    const message = `Hi! I'd like to place an order:\n\nOrder Reference: ${orderRef}\n\nItems:\n${itemsList}\n\nTotal: KES ${cartTotal.toLocaleString()}\n\nDelivery Details:\nName: ${name}\nPhone: ${phone}\nAddress: ${address}\nCounty: ${county}${notes ? `\nNotes: ${notes}` : ""}\n\nI've sent the M-Pesa payment. Please confirm!`;
+    const message = `Hi! I'd like to place an order:\n\nOrder Reference: ${orderRef}\n\nItems:\n${itemsList}\n\nTotal: KES ${activeTotal.toLocaleString()}\n\nDelivery Details:\nName: ${name}\nPhone: ${phone}\nAddress: ${address}\nCounty: ${county}${notes ? `\nNotes: ${notes}` : ""}\n\nI've sent the M-Pesa payment. Please confirm!`;
     window.open(`https://wa.me/254743035900?text=${encodeURIComponent(message)}`, "_blank");
     setStep(4);
   };
 
+  const handleStkPush = async () => {
+    setStkError("");
+    try {
+      const response = await initiateStkPush.mutateAsync({
+        data: {
+          amount: activeTotal,
+          phone,
+          orderRef,
+          customerName: name,
+          deliveryAddress: address,
+          county,
+          items: activeItems.map((item) => ({
+            id: item.id,
+            name: item.name,
+            quantity: item.quantity,
+            unitPrice: item.price,
+          })),
+        },
+      });
+      setCheckoutRequestId(response.checkoutRequestId);
+      setStkStatus("pending");
+      setStep(4);
+    } catch (error) {
+      setStkError(error instanceof Error ? error.message : "M-Pesa could not start the payment prompt.");
+    }
+  };
+
   const handleDone = () => {
-    clearCart();
+    if (!quickBuyItem) clearCart();
     onClose();
     setStep(1);
     setName("");
@@ -126,7 +188,7 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                       </div>
 
                       <div className="space-y-2">
-                        {cartItems.map((item) => (
+                         {activeItems.map((item) => (
                           <div
                             key={item.id}
                             className="flex gap-3 bg-muted/30 rounded-xl p-3"
@@ -153,8 +215,8 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                       <div className="border-t border-border pt-4 mt-4">
                         <div className="flex justify-between items-center text-lg">
                           <span className="font-black text-foreground">Total</span>
-                          <span className="font-black text-secondary" data-testid="text-checkout-total">
-                            KES {cartTotal.toLocaleString()}
+                           <span className="font-black text-secondary" data-testid="text-checkout-total">
+                             KES {activeTotal.toLocaleString()}
                           </span>
                         </div>
                       </div>
@@ -282,8 +344,8 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
 
                       <div className="bg-green-600 text-white rounded-2xl p-6 text-center mb-4">
                         <p className="text-green-100 text-sm font-semibold mb-2">Send payment to:</p>
-                        <p className="text-3xl font-black mb-1">+254 743 035 900</p>
-                        <p className="text-green-200 text-sm">M-Pesa Paybill / Lipa na M-Pesa</p>
+                         <p className="text-3xl font-black mb-1">+254 743 035 900</p>
+                         <p className="text-green-200 text-sm">Manual M-Pesa / Lipa na M-Pesa</p>
                       </div>
 
                       <div className="bg-muted/30 rounded-2xl p-5 space-y-3">
@@ -293,12 +355,42 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                         </div>
                         <div className="flex justify-between text-sm">
                           <span className="text-muted-foreground">Amount to Send</span>
-                          <span className="font-black text-secondary text-lg">KES {cartTotal.toLocaleString()}</span>
+                           <span className="font-black text-secondary text-lg">KES {activeTotal.toLocaleString()}</span>
                         </div>
                       </div>
 
+                       <div className="rounded-2xl border border-primary/25 bg-primary/5 p-5">
+                         <div className="flex items-start gap-3">
+                           <Smartphone className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+                           <div className="flex-1">
+                             <p className="font-black text-foreground">Pay directly with M-Pesa</p>
+                             <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                               We’ll send an STK Push to <strong>{phone || "your phone"}</strong>. Enter your M-Pesa PIN on your phone to pay KES {activeTotal.toLocaleString()}.
+                             </p>
+                             <Button
+                               onClick={handleStkPush}
+                               disabled={initiateStkPush.isPending || !phone.trim()}
+                               className="mt-4 h-11 w-full rounded-xl bg-primary font-bold text-primary-foreground hover:bg-primary/90"
+                               data-testid="button-mpesa-stk"
+                             >
+                               {initiateStkPush.isPending ? (
+                                 <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending prompt…</>
+                               ) : (
+                                 <><Smartphone className="mr-2 h-4 w-4" /> Request STK Push</>
+                               )}
+                             </Button>
+                           </div>
+                         </div>
+                       </div>
+                       {stkError && (
+                         <div className="flex items-start gap-2 rounded-xl border border-destructive/25 bg-destructive/5 p-4 text-sm text-destructive" role="alert">
+                           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                           <span>{stkError}</span>
+                         </div>
+                       )}
+
                       <div className="bg-primary/5 border border-primary/20 rounded-2xl p-5">
-                        <p className="font-bold text-foreground mb-3 text-sm">Simple Steps:</p>
+                         <p className="font-bold text-foreground mb-3 text-sm">Or keep the current manual option:</p>
                         <ol className="space-y-2 text-sm text-muted-foreground">
                           <li className="flex gap-2">
                             <span className="font-bold text-primary shrink-0">1.</span>
@@ -306,7 +398,7 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                           </li>
                           <li className="flex gap-2">
                             <span className="font-bold text-primary shrink-0">2.</span>
-                            <span>Select Lipa na M-Pesa and send <strong>KES {cartTotal.toLocaleString()}</strong> to <strong>+254 743 035 900</strong></span>
+                             <span>Select Lipa na M-Pesa and send <strong>KES {activeTotal.toLocaleString()}</strong> to <strong>+254 743 035 900</strong></span>
                           </li>
                           <li className="flex gap-2">
                             <span className="font-bold text-primary shrink-0">3.</span>
@@ -332,20 +424,46 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                       >
                         <PartyPopper className="w-10 h-10 text-green-500" />
                       </motion.div>
-                      <h3 className="text-2xl font-black text-foreground mb-2">Order Placed!</h3>
-                      <p className="text-muted-foreground mb-1">
-                        We'll confirm your order on WhatsApp within 30 minutes.
-                      </p>
+                       {stkStatus === "pending" ? (
+                         <>
+                           <Smartphone className="mx-auto mb-4 h-12 w-12 animate-pulse text-primary" />
+                           <h3 className="text-2xl font-black text-foreground mb-2">Check your phone</h3>
+                           <p className="text-muted-foreground mb-1">An M-Pesa payment prompt is waiting on {phone}.</p>
+                           <p className="text-sm text-muted-foreground mb-6">Enter your PIN on the M-Pesa prompt. This page will update automatically.</p>
+                         </>
+                       ) : stkStatus === "completed" ? (
+                         <>
+                           <CheckCircle2 className="mx-auto mb-4 h-16 w-16 text-green-600" />
+                           <h3 className="text-2xl font-black text-foreground mb-2">Payment received!</h3>
+                           <p className="text-muted-foreground mb-1">Your M-Pesa payment was confirmed securely.</p>
+                           {paymentStatus.data?.receipt && <p className="text-sm text-muted-foreground mb-6">Receipt: <span className="font-bold text-foreground">{paymentStatus.data.receipt}</span></p>}
+                         </>
+                       ) : stkStatus === "failed" ? (
+                         <>
+                           <AlertCircle className="mx-auto mb-4 h-16 w-16 text-destructive" />
+                           <h3 className="text-2xl font-black text-foreground mb-2">Payment not completed</h3>
+                           <p className="text-muted-foreground mb-6">You can try again or use the manual M-Pesa + WhatsApp option.</p>
+                         </>
+                       ) : (
+                         <>
+                           <h3 className="text-2xl font-black text-foreground mb-2">Order placed!</h3>
+                           <p className="text-muted-foreground mb-1">
+                             We'll confirm your order on WhatsApp within 30 minutes.
+                           </p>
+                         </>
+                       )}
+                       {stkStatus === null && (
                       <p className="text-sm text-muted-foreground mb-6">
                         Order Reference: <span className="font-bold text-foreground">{orderRef}</span>
                       </p>
+                       )}
                       <div className="bg-muted/30 rounded-2xl p-5 text-left space-y-2 text-sm">
                         <p className="font-bold text-foreground">What happens next?</p>
                         <ul className="space-y-1 text-muted-foreground">
-                          <li>✓ We verify your M-Pesa payment</li>
+                           <li>✓ {stkStatus === "completed" ? "Payment confirmed" : "We verify your M-Pesa payment"}</li>
                           <li>✓ Pack your order with care</li>
-                          <li>✓ Dispatch for FREE delivery to {county}</li>
-                          <li>✓ Keep you updated on WhatsApp</li>
+                           <li>✓ Delivery is faster at a lower cost to {county}</li>
+                           <li>✓ Keep you updated on WhatsApp</li>
                         </ul>
                       </div>
                     </motion.div>

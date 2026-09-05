@@ -19,15 +19,15 @@ const steps = [
   { icon: ShoppingBag, title: "1. Pick your item", desc: "Browse and choose what you love from the collection." },
   { icon: CreditCard, title: "2. Send M-Pesa", desc: `Send payment to ${CONTACT_DISPLAY}. Screenshot your confirmation.` },
   { icon: MessageCircle, title: "3. WhatsApp us", desc: "Send us the screenshot + your delivery address on WhatsApp." },
-  { icon: Truck, title: "4. We deliver", desc: "Your order is packed and dispatched. Free delivery countrywide!" },
+  { icon: Truck, title: "4. We deliver", desc: "Your order is packed and dispatched with faster delivery at a lower cost." },
 ];
 
 const faqs = [
-  { q: "Do you deliver outside Nairobi?", a: "Yes! We offer FREE delivery countrywide across Kenya — from Mombasa to Kisumu, Nakuru to Eldoret and everywhere in between." },
+  { q: "Do you deliver outside Nairobi?", a: "Yes! We deliver countrywide across Kenya — from Mombasa to Kisumu, Nakuru to Eldoret and everywhere in between, with faster delivery at a lower cost." },
   { q: "How long does delivery take?", a: "Nairobi: 1–2 days. Other counties: 2–4 business days depending on your location." },
   { q: "Can I return an item?", a: "Yes. Contact us within 24 hours of receiving your order if there's an issue. We'll sort it out." },
   { q: "Do you accept other payment methods?", a: "Currently we accept M-Pesa only. More options coming soon." },
-  { q: "Is there a minimum order?", a: "No minimum order. Order one item or many — delivery is still free!" },
+  { q: "Is there a minimum order?", a: "No minimum order. Order one item or many — we keep delivery faster and lower cost." },
 ];
 
 export default function Payment() {
@@ -66,7 +66,7 @@ export default function Payment() {
           <p className="text-green-200 text-sm">Tap to call · Send Lipa na M-Pesa</p>
         </motion.div>
 
-        {/* Free delivery banner */}
+        {/* Faster, lower-cost delivery banner */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -77,8 +77,8 @@ export default function Payment() {
             <Truck className="w-6 h-6 text-secondary" />
           </div>
           <div>
-            <p className="font-black text-foreground text-lg">FREE Delivery Countrywide</p>
-            <p className="text-muted-foreground text-sm">We deliver to every county in Kenya at no extra charge. Nairobi same-day available.</p>
+            <p className="font-black text-foreground text-lg">Faster delivery, lower cost</p>
+            <p className="text-muted-foreground text-sm">We deliver across Kenya with practical delivery rates and faster dispatch. Nairobi same-day available.</p>
           </div>
         </motion.div>
 
@@ -151,7 +151,7 @@ export default function Payment() {
                 <MapPin className="w-6 h-6 text-muted-foreground" />
               </div>
               <p className="font-black text-foreground text-sm">Delivery</p>
-              <p className="text-xs text-muted-foreground">All 47 Counties · Free</p>
+               <p className="text-xs text-muted-foreground">All 47 Counties · Lower cost</p>
             </div>
           </div>
         </motion.div>

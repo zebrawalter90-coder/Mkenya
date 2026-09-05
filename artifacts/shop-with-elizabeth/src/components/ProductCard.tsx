@@ -8,6 +8,7 @@ import {
   Send,
   Bookmark,
   ShoppingCart,
+  Zap,
   Check,
   Share2,
 } from "lucide-react";
@@ -102,6 +103,20 @@ export function ProductCard({ product, index, readOnly = false }: ProductCardPro
     addToCart(product);
     setShowAddedFeedback(true);
     window.setTimeout(() => setShowAddedFeedback(false), 2000);
+  };
+
+  const handleBuyNow = () => {
+    window.dispatchEvent(
+      new CustomEvent("mkenya:buy-now", {
+        detail: {
+          id: product.id,
+          name: product.name,
+          imageUrl: product.imageUrl,
+          price: product.price,
+          category: product.category,
+        },
+      }),
+    );
   };
 
   const handleWishlistToggle = (event: MouseEvent) => {
@@ -287,6 +302,18 @@ export function ProductCard({ product, index, readOnly = false }: ProductCardPro
               <ShoppingCart className="h-4 w-4" /> Add to cart
             </span>
           )}
+        </Button>
+
+        <Button
+          variant="outline"
+          onClick={(event) => {
+            event.stopPropagation();
+            handleBuyNow();
+          }}
+          className="mb-4 h-10 w-full rounded-none border-primary font-bold text-primary hover:bg-primary hover:text-primary-foreground"
+          data-testid={`button-buy-now-${product.id}`}
+        >
+          <Zap className="mr-2 h-4 w-4" /> Buy now with M-Pesa
         </Button>
 
         <div className="border-t border-border pt-4">

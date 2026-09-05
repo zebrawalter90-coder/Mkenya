@@ -14,7 +14,7 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 import { useUser } from "@/hooks/useUser";
-import { useCart } from "@/hooks/useCart";
+import { createBuyNowItem, useCart, type CartItem } from "@/hooks/useCart";
 import { CartDrawer } from "@/components/CartDrawer";
 import { CheckoutModal } from "@/components/CheckoutModal";
 
@@ -27,6 +27,7 @@ export function Layout({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [quickBuyItem, setQuickBuyItem] = useState<CartItem | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
@@ -34,6 +35,19 @@ export function Layout({ children }: { children: ReactNode }) {
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    const handleBuyNow = (event: Event) => {
+      const product = (event as CustomEvent<Omit<CartItem, "quantity">>).detail;
+      if (!product) return;
+      setQuickBuyItem(createBuyNowItem(product));
+      setIsCheckoutOpen(true);
+      setIsCartOpen(false);
+    };
+
+    window.addEventListener("mkenya:buy-now", handleBuyNow);
+    return () => window.removeEventListener("mkenya:buy-now", handleBuyNow);
   }, []);
 
   const navItems = [
@@ -274,7 +288,14 @@ export function Layout({ children }: { children: ReactNode }) {
         onClose={() => setIsCartOpen(false)}
         onCheckout={() => setIsCheckoutOpen(true)}
       />
-      <CheckoutModal isOpen={isCheckoutOpen} onClose={() => setIsCheckoutOpen(false)} />
+      <CheckoutModal
+        isOpen={isCheckoutOpen}
+        quickBuyItem={quickBuyItem}
+        onClose={() => {
+          setIsCheckoutOpen(false);
+          setQuickBuyItem(null);
+        }}
+      />
     </div>
   );
 }

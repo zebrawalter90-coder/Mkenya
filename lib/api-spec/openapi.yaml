@@ -15,6 +15,8 @@ tags:
     description: Community chat operations
   - name: Storage
     description: Object storage upload and serving endpoints
+  - name: Payments
+    description: M-Pesa payment operations
 paths:
   /healthz:
     get:
@@ -316,6 +318,60 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorEnvelope"
+  /payments/mpesa/stk-push:
+    post:
+      tags: [Payments]
+      operationId: initiateMpesaStkPush
+      summary: Initiate an M-Pesa STK Push payment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MpesaStkPushBody"
+      responses:
+        "200":
+          description: STK Push initiated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MpesaStkPushResponse"
+        "400":
+          description: Invalid payment details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "503":
+          description: M-Pesa is not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /payments/mpesa/status/{checkoutRequestId}:
+    get:
+      tags: [Payments]
+      operationId: getMpesaPaymentStatus
+      summary: Get the status of an M-Pesa STK Push payment
+      parameters:
+        - name: checkoutRequestId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Payment status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MpesaPaymentStatus"
+        "404":
+          description: Payment status not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
 components:
   schemas:
     HealthStatus:
@@ -474,8 +530,76 @@ components:
       properties:
         uploadURL:
           type: string
-          format: uri
         objectPath:
+          type: string
+    MpesaStkPushBody:
+      type: object
+      required: [amount, phone, orderRef, customerName, deliveryAddress, county, items]
+      properties:
+        amount:
+          type: integer
+          minimum: 1
+        phone:
+          type: string
+          minLength: 9
+        orderRef:
+          type: string
+          minLength: 1
+        customerName:
+          type: string
+          minLength: 1
+        deliveryAddress:
+          type: string
+          minLength: 1
+        county:
+          type: string
+          minLength: 1
+        items:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/MpesaOrderItem"
+    MpesaOrderItem:
+      type: object
+      required: [id, name, quantity, unitPrice]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        quantity:
+          type: integer
+          minimum: 1
+        unitPrice:
+          type: integer
+          minimum: 0
+    MpesaStkPushResponse:
+      type: object
+      required: [merchantRequestId, checkoutRequestId, customerMessage, status]
+      properties:
+        merchantRequestId:
+          type: string
+        checkoutRequestId:
+          type: string
+        customerMessage:
+          type: string
+        status:
+          type: string
+          enum: [pending]
+    MpesaPaymentStatus:
+      type: object
+      required: [checkoutRequestId, status]
+      properties:
+        checkoutRequestId:
+          type: string
+        status:
+          type: string
+          enum: [pending, completed, failed]
+        resultCode:
+          type: integer
+        resultDescription:
+          type: string
+        receipt:
           type: string
     ErrorEnvelope:
       type: object

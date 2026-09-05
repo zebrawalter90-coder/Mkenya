@@ -9,6 +9,10 @@ export interface CartItem {
   category: string;
 }
 
+export function createBuyNowItem(product: Omit<CartItem, "quantity">): CartItem {
+  return { ...product, quantity: 1 };
+}
+
 const CART_KEY = "elizabeth_cart";
 
 export function useCart() {
