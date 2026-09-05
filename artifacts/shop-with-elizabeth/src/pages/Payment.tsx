@@ -77,7 +77,7 @@ export default function Payment() {
             <Truck className="w-6 h-6 text-secondary" />
           </div>
           <div>
-            <p className="font-black text-foreground text-lg">FREE Delivery Countrywide 🇰🇪</p>
+            <p className="font-black text-foreground text-lg">FREE Delivery Countrywide</p>
             <p className="text-muted-foreground text-sm">We deliver to every county in Kenya at no extra charge. Nairobi same-day available.</p>
           </div>
         </motion.div>

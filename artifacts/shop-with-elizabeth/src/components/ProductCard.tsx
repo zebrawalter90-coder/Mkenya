@@ -1,22 +1,33 @@
-import { useState } from "react";
+import { useState, type FormEvent, type MouseEvent } from "react";
 import { motion } from "framer-motion";
-import { Heart, MessageCircle, Trash2, Pencil, Send, Bookmark, ShoppingCart, Check, Share2 } from "lucide-react";
+import {
+  Heart,
+  MessageCircle,
+  Trash2,
+  Pencil,
+  Send,
+  Bookmark,
+  ShoppingCart,
+  Check,
+  Share2,
+} from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  getGetProductsQueryKey,
+  useAddComment,
+  useDeleteProduct,
+  useToggleLike,
+  useUpdateProduct,
+} from "@workspace/api-client-react";
+import type { Product } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useUser } from "@/hooks/useUser";
 import { useCart } from "@/hooks/useCart";
 import { useWishlist } from "@/hooks/useWishlist";
-import { ProductDetailModal } from "@/components/ProductDetailModal";
-import {
-  useToggleLike,
-  useAddComment,
-  useUpdateProduct,
-  useDeleteProduct,
-  getGetProductsQueryKey,
-} from "@workspace/api-client-react";
-import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import type { Product } from "@workspace/api-client-react";
+import { ProductDetailModal } from "@/components/ProductDetailModal";
+import { ProductImage } from "@/components/ProductImage";
 
 interface ProductCardProps {
   product: Product;
@@ -44,10 +55,17 @@ export function ProductCard({ product, index, readOnly = false }: ProductCardPro
 
   const toggleLike = useToggleLike({ mutation: { onSuccess: invalidate } });
   const addComment = useAddComment({ mutation: { onSuccess: invalidate } });
-  const updateProduct = useUpdateProduct({ mutation: { onSuccess: () => { invalidate(); setIsEditing(false); } } });
+  const updateProduct = useUpdateProduct({
+    mutation: {
+      onSuccess: () => {
+        invalidate();
+        setIsEditing(false);
+      },
+    },
+  });
   const deleteProduct = useDeleteProduct({ mutation: { onSuccess: invalidate } });
 
-  const isOwner = !readOnly && user.id && product.ownerId === user.id;
+  const isOwner = !readOnly && Boolean(user.id) && product.ownerId === user.id;
   const hasLiked = product.userLiked;
   const visibleComments = showAllComments ? product.comments : product.comments.slice(-3);
 
@@ -56,8 +74,8 @@ export function ProductCard({ product, index, readOnly = false }: ProductCardPro
     toggleLike.mutate({ id: product.id, data: { userId: user.id } });
   };
 
-  const handleCommentSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleCommentSubmit = (event: FormEvent) => {
+    event.preventDefault();
     if (!commentText.trim() || !user.id || readOnly) return;
     addComment.mutate({
       id: product.id,
@@ -66,8 +84,8 @@ export function ProductCard({ product, index, readOnly = false }: ProductCardPro
     setCommentText("");
   };
 
-  const handleEditSave = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleEditSave = (event: FormEvent) => {
+    event.preventDefault();
     if (!editName.trim() || !editPrice || !user.id) return;
     updateProduct.mutate({
       id: product.id,
@@ -83,20 +101,16 @@ export function ProductCard({ product, index, readOnly = false }: ProductCardPro
   const handleAddToCart = () => {
     addToCart(product);
     setShowAddedFeedback(true);
-    setTimeout(() => setShowAddedFeedback(false), 2000);
+    window.setTimeout(() => setShowAddedFeedback(false), 2000);
   };
 
-  const handleWishlistToggle = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleWishlistToggle = (event: MouseEvent) => {
+    event.stopPropagation();
     toggleWishlist(product);
   };
 
-  const handleOpenModal = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleShare = async (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleShare = async (event: MouseEvent) => {
+    event.stopPropagation();
     const shareText = `${product.name} · KES ${product.price.toLocaleString()} on Mkenya Shop`;
     try {
       if (navigator.share) {
@@ -112,248 +126,202 @@ export function ProductCard({ product, index, readOnly = false }: ProductCardPro
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 50 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.04, type: "spring", stiffness: 90, damping: 18 }}
-      className="bg-card border border-border rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-300 flex flex-col group"
+    <motion.article
+      initial={{ opacity: 0, y: 28 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.12 }}
+      transition={{ delay: Math.min(index * 0.045, 0.24), duration: 0.45, ease: "easeOut" }}
+      className="group flex flex-col overflow-hidden border border-border bg-card shadow-sm transition-[box-shadow,transform] duration-300 hover:-translate-y-1 hover:shadow-editorial"
       data-testid={`card-product-${product.id}`}
     >
-      <div 
-        className="relative aspect-[4/5] bg-muted overflow-hidden cursor-pointer"
-        onClick={handleOpenModal}
-      >
-        <motion.div
-          className="absolute inset-0"
-          animate={{ y: [0, -10, 0], scale: [1, 1.015, 1] }}
-          transition={{
-            repeat: Infinity,
-            duration: 3.5 + (index % 4) * 0.6,
-            ease: "easeInOut",
-            delay: (index % 5) * 0.4,
-          }}
-        >
-          <img
-            src={product.imageUrl}
-            alt={product.name}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-            loading="lazy"
-          />
-        </motion.div>
+      <div className="relative aspect-[4/5] cursor-pointer overflow-hidden bg-muted" onClick={() => setIsModalOpen(true)}>
+        <ProductImage
+          src={product.imageUrl}
+          alt={product.name}
+          priority={index < 2}
+          objectPosition={index % 3 === 1 ? "center 28%" : "center 38%"}
+          className="transition-transform duration-700 group-hover:scale-[1.035]"
+        />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-foreground/70 via-transparent to-foreground/10" />
 
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
+        <div className="absolute left-4 top-4 z-10 flex items-center gap-2">
+          <span className="bg-accent px-2.5 py-1 font-mono-ui text-[9px] font-bold uppercase tracking-[0.15em] text-accent-foreground">
+            {index < 2 ? "Fresh drop" : product.category}
+          </span>
+          {isOwner && (
+            <span className="bg-background/85 px-2.5 py-1 font-mono-ui text-[9px] font-bold uppercase tracking-[0.15em] text-foreground backdrop-blur-sm">
+              Your listing
+            </span>
+          )}
+        </div>
 
-        <div className="absolute top-3 right-3 z-10 flex flex-col gap-2">
+        <div className="absolute right-4 top-4 z-10 flex flex-col gap-2">
           <motion.button
-            whileTap={{ scale: 0.75 }}
-            whileHover={{ scale: 1.1 }}
-            onClick={(e) => {
-              e.stopPropagation();
-              handleWishlistToggle(e);
-            }}
+            type="button"
+            whileTap={{ scale: 0.82 }}
+            whileHover={{ scale: 1.07 }}
+            onClick={handleWishlistToggle}
             data-testid={`button-wishlist-${product.id}`}
-            className={`w-11 h-11 rounded-full flex items-center justify-center shadow-lg transition-colors backdrop-blur-sm ${
+            aria-label={`${isWishlisted(product.id) ? "Remove" : "Save"} ${product.name} ${isWishlisted(product.id) ? "from wishlist" : "to wishlist"}`}
+            className={`grid h-10 w-10 place-items-center shadow-lg transition-colors backdrop-blur-sm ${
               isWishlisted(product.id)
-                ? "bg-secondary text-white"
-                : "bg-white/85 text-foreground hover:bg-secondary/10"
+                ? "bg-secondary text-secondary-foreground"
+                : "bg-background/85 text-foreground hover:bg-accent"
             }`}
           >
-            <Bookmark className={`w-5 h-5 ${isWishlisted(product.id) ? "fill-white" : ""}`} />
+            <Bookmark className={`h-4 w-4 ${isWishlisted(product.id) ? "fill-current" : ""}`} />
           </motion.button>
           <motion.button
-            whileTap={{ scale: 0.75 }}
-            whileHover={{ scale: 1.1 }}
-            onClick={(e) => {
-              e.stopPropagation();
+            type="button"
+            whileTap={{ scale: 0.82 }}
+            whileHover={{ scale: 1.07 }}
+            onClick={(event) => {
+              event.stopPropagation();
               handleLike();
             }}
             disabled={readOnly || !user.id || toggleLike.isPending}
             data-testid={`button-like-${product.id}`}
-            className={`w-11 h-11 rounded-full flex items-center justify-center shadow-lg transition-colors backdrop-blur-sm ${
-              hasLiked
-                ? "bg-primary text-white"
-                : "bg-white/85 text-foreground hover:bg-primary/10"
-            } ${readOnly ? "opacity-60 cursor-default" : ""}`}
+            aria-label={`${hasLiked ? "Unlike" : "Like"} ${product.name}`}
+            className={`grid h-10 w-10 place-items-center shadow-lg transition-colors backdrop-blur-sm ${
+              hasLiked ? "bg-primary text-primary-foreground" : "bg-background/85 text-foreground hover:bg-primary/10"
+            } ${readOnly ? "cursor-default opacity-60" : ""}`}
           >
-            <Heart className={`w-5 h-5 ${hasLiked ? "fill-white" : ""}`} />
+            <Heart className={`h-4 w-4 ${hasLiked ? "fill-current" : ""}`} />
           </motion.button>
           <motion.button
-            whileTap={{ scale: 0.75 }}
-            whileHover={{ scale: 1.1 }}
+            type="button"
+            whileTap={{ scale: 0.82 }}
+            whileHover={{ scale: 1.07 }}
             onClick={handleShare}
             data-testid={`button-share-${product.id}`}
-            className="w-11 h-11 rounded-full flex items-center justify-center shadow-lg transition-colors backdrop-blur-sm bg-white/85 text-foreground hover:bg-white"
             aria-label={`Share ${product.name}`}
+            className="grid h-10 w-10 place-items-center bg-background/85 text-foreground shadow-lg backdrop-blur-sm transition-colors hover:bg-background"
           >
-            <Share2 className="w-5 h-5" />
+            <Share2 className="h-4 w-4" />
           </motion.button>
-        </div>
-
-        <div className="absolute bottom-3 left-3 z-10">
-          <motion.span
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: index * 0.04 + 0.15 }}
-            className="text-xs font-bold bg-black/60 text-white backdrop-blur-sm px-3 py-1 rounded-full"
-          >
-            {product.category}
-          </motion.span>
         </div>
 
         {isOwner && (
-          <div className="absolute top-3 left-3 z-10 flex gap-1.5">
+          <div className="absolute bottom-4 left-4 z-10 flex gap-1.5">
             <button
+              type="button"
               onClick={() => setIsEditing(true)}
-              className="w-8 h-8 rounded-full bg-white/85 backdrop-blur-sm flex items-center justify-center shadow text-foreground hover:bg-secondary hover:text-white transition-colors"
-              title="Edit"
+              aria-label={`Edit ${product.name}`}
+              className="grid h-8 w-8 place-items-center bg-background/90 text-foreground shadow backdrop-blur-sm transition-colors hover:bg-secondary hover:text-secondary-foreground"
             >
-              <Pencil className="w-3.5 h-3.5" />
+              <Pencil className="h-3.5 w-3.5" />
             </button>
             <button
+              type="button"
               onClick={handleDelete}
               disabled={deleteProduct.isPending}
-              className="w-8 h-8 rounded-full bg-white/85 backdrop-blur-sm flex items-center justify-center shadow text-foreground hover:bg-destructive hover:text-white transition-colors"
-              title="Delete"
+              aria-label={`Delete ${product.name}`}
+              className="grid h-8 w-8 place-items-center bg-background/90 text-foreground shadow backdrop-blur-sm transition-colors hover:bg-destructive hover:text-destructive-foreground"
             >
-              <Trash2 className="w-3.5 h-3.5" />
+              <Trash2 className="h-3.5 w-3.5" />
             </button>
           </div>
         )}
       </div>
 
-      <div className="p-5 flex-1 flex flex-col">
+      <div className="flex flex-1 flex-col p-5">
         {isEditing ? (
-          <form onSubmit={handleEditSave} className="space-y-3 mb-4">
-            <Input
-              value={editName}
-              onChange={(e) => setEditName(e.target.value)}
-              placeholder="Product name"
-              className="h-10 text-sm rounded-lg"
-            />
+          <form onSubmit={handleEditSave} className="mb-4 space-y-3">
+            <Input value={editName} onChange={(event) => setEditName(event.target.value)} placeholder="Product name" className="h-10 text-sm" />
             <div className="flex gap-2">
-              <Input
-                type="number"
-                value={editPrice}
-                onChange={(e) => setEditPrice(e.target.value)}
-                placeholder="Price"
-                className="h-10 text-sm rounded-lg flex-1"
-              />
-              <Button type="submit" size="sm" disabled={updateProduct.isPending} className="h-10 bg-secondary text-white rounded-lg">
+              <Input type="number" value={editPrice} onChange={(event) => setEditPrice(event.target.value)} placeholder="Price" className="h-10 flex-1 text-sm" />
+              <Button type="submit" size="sm" disabled={updateProduct.isPending} className="h-10 bg-secondary text-secondary-foreground">
                 Save
               </Button>
-              <Button type="button" size="sm" variant="outline" className="h-10 rounded-lg" onClick={() => setIsEditing(false)}>
+              <Button type="button" size="sm" variant="outline" className="h-10" onClick={() => setIsEditing(false)}>
                 Cancel
               </Button>
             </div>
           </form>
         ) : (
           <>
-            <div className="flex justify-between items-start mb-2 gap-3">
-              <motion.h3
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.04 + 0.1 }}
-                className="text-lg font-bold text-foreground line-clamp-2 leading-snug cursor-pointer hover:text-primary transition-colors"
-                onClick={handleOpenModal}
+            <div className="mb-2 flex items-start justify-between gap-3">
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(true)}
+                className="text-left font-display text-xl font-bold leading-snug text-foreground transition-colors hover:text-primary"
+                data-testid={`button-open-product-${product.id}`}
               >
                 {product.name}
-              </motion.h3>
-              <motion.span
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: index * 0.04 + 0.18, type: "spring" }}
-                className="font-black text-secondary whitespace-nowrap bg-secondary/10 px-3 py-1 rounded-lg text-sm shrink-0"
-              >
+              </button>
+              <span className="shrink-0 bg-secondary/10 px-2.5 py-1 font-mono-ui text-xs font-bold text-secondary">
                 KES {product.price.toLocaleString()}
-              </motion.span>
+              </span>
             </div>
-            {product.description && (
-              <p className="text-sm text-muted-foreground line-clamp-1 mb-3">
-                {product.description}
-              </p>
-            )}
+            {product.description && <p className="mb-3 line-clamp-1 text-sm text-muted-foreground">{product.description}</p>}
           </>
         )}
 
-        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4 font-medium">
+        <div className="mb-4 flex items-center gap-4 text-sm font-medium text-muted-foreground">
           <span className="flex items-center gap-1">
-            <Heart className={`w-4 h-4 ${hasLiked ? "fill-primary text-primary" : ""}`} />
+            <Heart className={`h-4 w-4 ${hasLiked ? "fill-primary text-primary" : ""}`} />
             {product.likesCount}
           </span>
           <span className="flex items-center gap-1">
-            <MessageCircle className="w-4 h-4" />
+            <MessageCircle className="h-4 w-4" />
             {product.comments.length}
           </span>
-          <span className="text-xs text-muted-foreground/70 ml-auto">by {product.ownerName}</span>
+          <span className="ml-auto truncate text-xs text-muted-foreground/70">by {product.ownerName}</span>
         </div>
 
         <Button
-          onClick={(e) => {
-            e.stopPropagation();
+          onClick={(event) => {
+            event.stopPropagation();
             handleAddToCart();
           }}
-          className="w-full h-10 rounded-xl font-bold bg-secondary hover:bg-secondary/90 text-white mb-4 relative overflow-hidden"
+          className="relative mb-4 h-11 w-full overflow-hidden rounded-none bg-secondary font-bold text-secondary-foreground hover:bg-secondary/90"
           data-testid={`button-add-to-cart-${product.id}`}
         >
           {showAddedFeedback ? (
-            <motion.span
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              className="flex items-center gap-2"
-            >
-              <Check className="w-4 h-4" />
-              Added!
+            <motion.span initial={{ y: 16, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="flex items-center gap-2">
+              <Check className="h-4 w-4" /> Added to cart
             </motion.span>
           ) : (
             <span className="flex items-center gap-2">
-              <ShoppingCart className="w-4 h-4" />
-              Add to Cart
+              <ShoppingCart className="h-4 w-4" /> Add to cart
             </span>
           )}
         </Button>
 
-        <div className="pt-4 border-t border-border">
+        <div className="border-t border-border pt-4">
           {product.comments.length > 0 && (
-            <div className="space-y-2 mb-3">
+            <div className="mb-3 space-y-2">
               {product.comments.length > 3 && !showAllComments && (
-                <button
-                  onClick={() => setShowAllComments(true)}
-                  className="text-xs text-primary font-semibold hover:underline"
-                >
+                <button type="button" onClick={() => setShowAllComments(true)} className="text-xs font-semibold text-primary hover:underline">
                   View all {product.comments.length} comments
                 </button>
               )}
-              {visibleComments.map((c) => (
-                <motion.div
-                  key={c.id}
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="text-sm bg-muted/50 px-3 py-2 rounded-xl"
-                >
-                  <span className="font-semibold text-foreground text-xs mr-1.5">{c.username}:</span>
-                  <span className="text-foreground/80">{c.text}</span>
+              {visibleComments.map((comment) => (
+                <motion.div key={comment.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="bg-muted/50 px-3 py-2 text-sm">
+                  <span className="mr-1.5 text-xs font-semibold text-foreground">{comment.username}:</span>
+                  <span className="text-foreground/80">{comment.text}</span>
                 </motion.div>
               ))}
             </div>
           )}
-
           {!readOnly && (
             <form onSubmit={handleCommentSubmit} className="flex gap-2">
               <Input
                 value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
+                onChange={(event) => setCommentText(event.target.value)}
                 placeholder="Leave a comment…"
-                className="h-10 bg-muted/40 border-none focus-visible:ring-1 focus-visible:ring-primary text-sm rounded-full pl-4"
+                className="h-10 rounded-none border-none bg-muted/40 pl-4 text-sm focus-visible:ring-1 focus-visible:ring-primary"
                 data-testid={`input-comment-${product.id}`}
               />
               <Button
                 type="submit"
                 size="icon"
-                className="h-10 w-10 rounded-full bg-primary hover:bg-primary/90 text-white shrink-0"
+                className="h-10 w-10 shrink-0 rounded-none bg-primary text-primary-foreground hover:bg-primary/90"
                 disabled={!commentText.trim() || addComment.isPending}
                 data-testid={`button-comment-${product.id}`}
+                aria-label={`Comment on ${product.name}`}
               >
-                <Send className="w-4 h-4" />
+                <Send className="h-4 w-4" />
               </Button>
             </form>
           )}
@@ -367,6 +335,6 @@ export function ProductCard({ product, index, readOnly = false }: ProductCardPro
         onAddToCart={addToCart}
         readOnly={readOnly}
       />
-    </motion.div>
+    </motion.article>
   );
 }

@@ -1,168 +1,163 @@
-import { Link } from "wouter";
 import { motion } from "framer-motion";
-import { BadgeCheck, Footprints, Gem, Layers3, MessageCircle, Shirt, Sparkles, Truck } from "lucide-react";
+import { Link } from "wouter";
+import {
+  ArrowDownRight,
+  ArrowRight,
+  BadgeCheck,
+  CircleDot,
+  Footprints,
+  Gem,
+  Layers3,
+  MessageCircle,
+  Search,
+  Shirt,
+  Sparkles,
+  Truck,
+} from "lucide-react";
 import { getGetProductsQueryKey, useGetProducts } from "@workspace/api-client-react";
 import { useUser } from "@/hooks/useUser";
 import { Layout } from "@/components/Layout";
 import { ProductCard } from "@/components/ProductCard";
-import { Button } from "@/components/ui/button";
+import { ProductImage } from "@/components/ProductImage";
 import { SEED_PRODUCTS } from "@/lib/seed";
 
-const heroWords = ["Your", "Trusted", "Kenyan", "Fashion", "Marketplace"];
 const categorySpotlight = [
-  { label: "Clothing", caption: "Kitenge, dresses & everyday looks", icon: Shirt, color: "bg-primary/10 text-primary" },
-  { label: "Accessories", caption: "Finish your look with local flair", icon: Gem, color: "bg-secondary/10 text-secondary" },
-  { label: "Fabric", caption: "Bold prints ready for your next piece", icon: Layers3, color: "bg-amber-100 text-amber-700" },
-  { label: "Footwear", caption: "Comfortable steps, standout style", icon: Footprints, color: "bg-sky-100 text-sky-700" },
+  { label: "Clothing", caption: "Kitenge, dresses and everyday looks", icon: Shirt, tone: "bg-primary text-primary-foreground" },
+  { label: "Accessories", caption: "Small details with a big point of view", icon: Gem, tone: "bg-accent text-accent-foreground" },
+  { label: "Fabric", caption: "Prints ready for your next chapter", icon: Layers3, tone: "bg-secondary text-secondary-foreground" },
+  { label: "Footwear", caption: "Comfortable steps, standout style", icon: Footprints, tone: "bg-foreground text-background" },
+];
+
+const trustCues = [
+  { icon: BadgeCheck, title: "Local sellers", text: "Meet the creative community behind every piece." },
+  { icon: Truck, title: "Simple ordering", text: "Pay with M-Pesa, then confirm your order on WhatsApp." },
+  { icon: MessageCircle, title: "Human help", text: "Ask a question before you buy. We are right here." },
 ];
 
 export default function Home() {
   const { user } = useUser();
   const params = user.id ? { userId: user.id } : undefined;
-  const { data: products, isLoading } = useGetProducts(
-    params,
-    { query: { enabled: true, queryKey: getGetProductsQueryKey(params) } }
-  );
+  const { data: products, isLoading, isError } = useGetProducts(params, {
+    query: { enabled: true, queryKey: getGetProductsQueryKey(params) },
+  });
 
-  const showSeeds = !isLoading && (!products || products.length === 0);
-  const displayProducts = showSeeds ? SEED_PRODUCTS : (products ?? []);
+  const showSeeds = !isLoading && !isError && (!products || products.length === 0);
+  const displayProducts = showSeeds ? SEED_PRODUCTS : products ?? [];
+  const leadProduct = displayProducts[0];
 
   return (
     <Layout>
-      <section className="relative w-full min-h-[55vh] flex items-center justify-center overflow-hidden">
-        <motion.div
-          className="absolute inset-0 bg-gradient-to-br from-foreground via-foreground/95 to-secondary"
-          animate={{ background: ["linear-gradient(135deg,#0a0a0a,#006400)", "linear-gradient(135deg,#006400,#b22222)", "linear-gradient(135deg,#b22222,#0a0a0a)"] }}
-          transition={{ repeat: Infinity, duration: 8, ease: "easeInOut" }}
-        />
-        {[...Array(8)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute rounded-full opacity-10 bg-white"
-            style={{
-              width: 60 + i * 30,
-              height: 60 + i * 30,
-              left: `${(i * 13) % 100}%`,
-              top: `${(i * 17) % 100}%`,
-            }}
-            animate={{ y: [-20, 20, -20], x: [-10, 10, -10], scale: [1, 1.1, 1] }}
-            transition={{ repeat: Infinity, duration: 4 + i * 0.8, ease: "easeInOut", delay: i * 0.3 }}
-          />
-        ))}
-
-        <div className="relative z-10 text-center px-6 max-w-4xl mx-auto py-16">
-          <div className="mb-4 overflow-hidden">
-            <motion.span
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.05 }}
-              className="text-primary font-black text-lg tracking-widest uppercase"
-            >
-              Mkenya Shop 🇰🇪
-            </motion.span>
-          </div>
-
-          <h1 className="text-5xl md:text-7xl font-black text-white mb-6 tracking-tight leading-none">
-            {heroWords.map((word, i) => (
-              <motion.span
-                key={word}
-                initial={{ opacity: 0, y: 40, rotateX: -30 }}
-                animate={{ opacity: 1, y: 0, rotateX: 0 }}
-                transition={{ delay: 0.15 + i * 0.13, type: "spring", stiffness: 130, damping: 18 }}
-                className={`inline-block mr-4 last:mr-0 drop-shadow-xl ${
-                  word === "Kenyan" ? "text-primary" : word === "Fashion" ? "text-yellow-300" : "text-white"
-                }`}
+      <section className="relative overflow-hidden border-b border-border bg-background">
+        <div className="pointer-events-none absolute -right-28 -top-28 h-80 w-80 rounded-full bg-accent/35 blur-3xl" />
+        <div className="pointer-events-none absolute bottom-0 left-[-8rem] h-64 w-64 rounded-full bg-primary/10 blur-3xl" />
+        <div className="mx-auto grid max-w-7xl gap-10 px-4 pb-12 pt-10 sm:px-6 md:grid-cols-[1.02fr_.98fr] md:items-center md:pb-16 md:pt-16 lg:px-8">
+          <motion.div initial={{ opacity: 0, x: -24 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.65 }}>
+            <div className="mb-6 flex items-center gap-3 font-mono-ui text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
+              <span className="h-px w-8 bg-primary" />
+              The local edit · 2026
+            </div>
+            <h1 className="max-w-2xl font-display text-[3.6rem] font-extrabold leading-[.92] tracking-[-0.065em] text-foreground sm:text-7xl lg:text-[6.6rem]">
+              Dress like
+              <span className="block text-primary">you mean it.</span>
+            </h1>
+            <p className="mt-6 max-w-lg text-base leading-relaxed text-muted-foreground sm:text-lg">
+              A spirited edit of Kenyan fashion and handmade finds, brought to you by the people making style move.
+            </p>
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <Link
+                href="/explore"
+                data-testid="link-hero-explore"
+                className="inline-flex h-12 items-center gap-3 bg-primary px-6 text-sm font-bold text-primary-foreground transition-transform hover:-translate-y-1"
               >
-                {word}
-              </motion.span>
-            ))}
-          </h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.9 }}
-            className="text-white/80 text-lg md:text-xl max-w-xl mx-auto mb-8 leading-relaxed"
-          >
-            Discover vibrant African fashion — beads, kangas, kitenge, and more.
-          </motion.p>
+                Shop the edit <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link
+                href="/add-product"
+                data-testid="link-hero-sell"
+                className="inline-flex h-12 items-center gap-3 border border-border bg-card px-6 text-sm font-bold text-foreground transition-colors hover:border-primary hover:text-primary"
+              >
+                Sell your work <ArrowDownRight className="h-4 w-4" />
+              </Link>
+            </div>
+            <Link
+              href="/explore"
+              data-testid="link-hero-search"
+              className="mt-10 flex max-w-md items-center gap-3 border-b border-foreground/25 pb-3 text-sm text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+            >
+              <Search className="h-4 w-4" />
+              <span>Search the marketplace by name, mood or category</span>
+              <ArrowRight className="ml-auto h-4 w-4" />
+            </Link>
+          </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 1.0, type: "spring" }}
-            className="flex gap-3 justify-center flex-wrap"
+            initial={{ opacity: 0, y: 24, rotate: 1.5 }}
+            animate={{ opacity: 1, y: 0, rotate: 0 }}
+            transition={{ duration: 0.7, delay: 0.12 }}
+            className="relative mx-auto w-full max-w-[34rem]"
           >
-            <Link href="/explore">
-              <Button size="lg" className="bg-primary hover:bg-primary/90 text-white rounded-full font-bold px-8 h-14 text-base shadow-lg shadow-primary/30">
-                Explore Collection
-              </Button>
-            </Link>
-            <Link href="/add-product">
-              <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10 rounded-full font-bold px-8 h-14 text-base">
-                List Your Item
-              </Button>
-            </Link>
+            <div className="absolute -left-3 top-8 z-10 hidden w-32 bg-accent p-4 sm:block">
+              <CircleDot className="mb-5 h-5 w-5 text-accent-foreground" />
+              <p className="font-display text-xl font-bold leading-tight text-accent-foreground">Made close to home.</p>
+            </div>
+            <div className="relative aspect-[.88] overflow-hidden bg-secondary shadow-editorial">
+              {leadProduct ? (
+                <ProductImage src={leadProduct.imageUrl} alt={leadProduct.name} priority className="opacity-95" />
+              ) : (
+                <div className="grid h-full place-items-center bg-secondary p-10 text-center text-secondary-foreground">
+                  <p className="font-display text-4xl font-bold">Find the piece that feels like you.</p>
+                </div>
+              )}
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-foreground/75 via-transparent to-transparent" />
+              <div className="absolute bottom-6 left-6 right-6 text-background">
+                <p className="font-mono-ui text-[10px] uppercase tracking-[0.2em] text-background/70">Featured now</p>
+                <p className="mt-2 max-w-xs font-display text-3xl font-bold leading-tight">
+                  {leadProduct?.name ?? "New local finds are landing"}
+                </p>
+                {leadProduct && <p className="mt-2 font-mono-ui text-sm text-accent">KES {leadProduct.price.toLocaleString()}</p>}
+              </div>
+            </div>
+            <div className="absolute -bottom-4 -right-2 hidden w-32 border border-foreground/15 bg-background p-3 shadow-float sm:block">
+              <p className="font-mono-ui text-[9px] uppercase tracking-[0.15em] text-muted-foreground">Curated for</p>
+              <p className="mt-1 text-sm font-bold">Bold, everyday living</p>
+            </div>
           </motion.div>
         </div>
       </section>
 
-      <section className="border-y border-border bg-card/80">
-        <div className="container mx-auto grid grid-cols-1 gap-4 px-4 py-5 sm:grid-cols-3">
-          {[
-            { icon: BadgeCheck, title: "Local sellers", text: "Discover pieces from Kenya's creative community" },
-            { icon: Truck, title: "Easy ordering", text: "Pay by M-Pesa and confirm your order on WhatsApp" },
-            { icon: MessageCircle, title: "Real community", text: "Ask questions and share finds with other shoppers" },
-          ].map(({ icon: Icon, title, text }, index) => (
-            <motion.div
-              key={title}
-              initial={{ opacity: 0, y: 12 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.5 }}
-              transition={{ delay: index * 0.08 }}
-              className="flex items-center gap-3 rounded-2xl px-3 py-2"
-            >
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary/10 text-secondary">
-                <Icon className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="font-black text-foreground">{title}</p>
-                <p className="text-xs leading-relaxed text-muted-foreground">{text}</p>
-              </div>
-            </motion.div>
-          ))}
+      <div className="overflow-hidden border-b border-border bg-foreground py-3 text-background">
+        <div className="flex min-w-max items-center gap-8 px-4 font-mono-ui text-[10px] font-bold uppercase tracking-[0.2em] sm:justify-center">
+          <span>Kenyan made</span><span className="text-primary">/</span><span>Good things, close to home</span><span className="text-accent">/</span><span>Wear the story</span><span className="text-primary">/</span><span>Shop local, look excellent</span>
         </div>
-      </section>
+      </div>
 
-      <section className="container mx-auto px-4 pt-14">
+      <section className="mx-auto w-full max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
         <div className="mb-7 flex items-end justify-between gap-4">
           <div>
-            <p className="mb-1 flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-primary">
-              <Sparkles className="h-4 w-4" />
-              Find your next favourite
+            <p className="mb-2 flex items-center gap-2 font-mono-ui text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
+              <Sparkles className="h-4 w-4" /> Find your lane
             </p>
-            <h2 className="text-3xl font-black text-foreground">Shop by category</h2>
+            <h2 className="font-display text-4xl font-extrabold tracking-[-0.04em] text-foreground">Shop by category</h2>
           </div>
-          <Link href="/explore" className="hidden text-sm font-black text-primary transition-colors hover:text-secondary sm:block">
-            Browse everything →
+          <Link href="/explore" data-testid="link-category-all" className="hidden items-center gap-2 text-sm font-bold text-primary hover:text-secondary sm:flex">
+            Browse all <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-          {categorySpotlight.map(({ label, caption, icon: Icon, color }, index) => (
-            <Link key={label} href={`/explore?category=${encodeURIComponent(label)}`}>
+          {categorySpotlight.map(({ label, caption, icon: Icon, tone }, index) => (
+            <Link key={label} href={`/explore?category=${encodeURIComponent(label)}`} data-testid={`link-category-${label.toLowerCase()}`}>
               <motion.div
-                initial={{ opacity: 0, y: 18 }}
+                initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.35 }}
+                viewport={{ once: true, amount: 0.3 }}
                 transition={{ delay: index * 0.07 }}
                 whileHover={{ y: -5 }}
-                whileTap={{ scale: 0.98 }}
-                className="group h-full rounded-3xl border border-border bg-card p-4 shadow-sm transition-shadow hover:shadow-lg"
+                className="group h-full border border-border bg-card p-4 transition-shadow hover:shadow-float sm:p-5"
               >
-                <div className={`mb-8 flex h-12 w-12 items-center justify-center rounded-2xl ${color}`}>
-                  <Icon className="h-6 w-6 transition-transform duration-300 group-hover:scale-110" />
+                <div className={`mb-10 grid h-11 w-11 place-items-center ${tone}`}>
+                  <Icon className="h-5 w-5 transition-transform duration-300 group-hover:rotate-6 group-hover:scale-110" />
                 </div>
-                <h3 className="font-black text-foreground">{label}</h3>
+                <h3 className="font-display text-xl font-bold text-foreground">{label}</h3>
                 <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{caption}</p>
               </motion.div>
             </Link>
@@ -170,57 +165,72 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="container mx-auto px-4 py-14">
-        <div className="flex items-center justify-between mb-8">
-          <motion.h2
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="text-3xl font-black text-foreground"
-          >
-            {showSeeds ? "Featured Items" : "Latest Arrivals"}
-          </motion.h2>
-          <Link href="/explore">
-            <Button variant="ghost" className="text-primary font-bold hover:text-primary/80">
-              See all →
-            </Button>
-          </Link>
-        </div>
-
-        {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="bg-card border border-border rounded-3xl overflow-hidden animate-pulse aspect-[4/5]" />
-            ))}
-          </div>
-        ) : (
-          <>
-            {showSeeds && (
-              <div className="mb-6 p-4 bg-muted/40 rounded-2xl text-center text-sm text-muted-foreground">
-                Upload your first product to replace these samples with your real listings
-              </div>
-            )}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {displayProducts.slice(0, 6).map((product, index) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  index={index}
-                  readOnly={showSeeds}
-                />
-              ))}
+      <section className="bg-muted/45">
+        <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+          <div className="mb-8 flex items-end justify-between gap-4">
+            <div>
+              <p className="mb-2 font-mono-ui text-[10px] font-bold uppercase tracking-[0.2em] text-secondary">Just landed</p>
+              <h2 className="font-display text-4xl font-extrabold tracking-[-0.04em] text-foreground">
+                {showSeeds ? "A first look" : "Latest from the community"}
+              </h2>
             </div>
-          </>
-        )}
-
-        {!showSeeds && displayProducts.length > 6 && (
-          <div className="text-center mt-10">
-            <Link href="/explore">
-              <Button size="lg" variant="outline" className="rounded-full font-bold px-10 border-border hover:border-primary hover:text-primary">
-                View All {displayProducts.length} Products
-              </Button>
+            <Link href="/explore" data-testid="link-latest-all" className="flex items-center gap-2 text-sm font-bold text-primary hover:text-secondary">
+              See everything <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
-        )}
+          {isLoading ? (
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {[0, 1, 2].map((item) => <div key={item} className="aspect-[4/5] animate-pulse bg-muted" />)}
+            </div>
+          ) : isError ? (
+            <div className="border border-destructive/30 bg-destructive/5 p-8 text-center">
+              <p className="font-bold text-foreground">The latest finds are taking a minute.</p>
+              <p className="mt-1 text-sm text-muted-foreground">Try Explore again to reconnect to the marketplace.</p>
+            </div>
+          ) : (
+            <>
+              {showSeeds && <p className="mb-5 text-sm text-muted-foreground">Preview pieces while local sellers add their next listings.</p>}
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {displayProducts.slice(0, 6).map((product, index) => (
+                  <ProductCard key={product.id} product={product} index={index} readOnly={showSeeds} />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      </section>
+
+      <section className="mx-auto w-full max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+        <div className="grid gap-px border border-border bg-border md:grid-cols-3">
+          {trustCues.map(({ icon: Icon, title, text }, index) => (
+            <motion.div
+              key={title}
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.08 }}
+              className="bg-background p-6 sm:p-8"
+            >
+              <Icon className="h-6 w-6 text-primary" />
+              <h3 className="mt-8 font-display text-2xl font-bold">{title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{text}</p>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      <section className="mx-auto mb-14 w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="relative overflow-hidden bg-primary px-6 py-12 text-primary-foreground sm:px-12">
+          <div className="pointer-events-none absolute -right-10 -top-20 h-56 w-56 rounded-full border-[28px] border-primary-foreground/15" />
+          <div className="relative max-w-2xl">
+            <p className="font-mono-ui text-[10px] font-bold uppercase tracking-[0.2em] text-primary-foreground/70">For makers, stylists and collectors</p>
+            <h2 className="mt-3 font-display text-4xl font-extrabold leading-none tracking-[-0.04em] sm:text-5xl">Your work deserves a window.</h2>
+            <p className="mt-4 max-w-lg text-sm leading-relaxed text-primary-foreground/80">List the piece you made, find your people, and let the right wardrobe make its way home.</p>
+            <Link href="/add-product" data-testid="link-seller-cta" className="mt-7 inline-flex items-center gap-2 bg-foreground px-5 py-3 text-sm font-bold text-background transition-transform hover:-translate-y-1">
+              List your first item <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
       </section>
     </Layout>
   );

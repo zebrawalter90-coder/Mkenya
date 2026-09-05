@@ -1,37 +1,37 @@
-import { useState, useMemo, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Search, SlidersHorizontal, Bookmark, RotateCcw } from "lucide-react";
+import { Bookmark, RotateCcw, Search, SlidersHorizontal, Sparkles, X } from "lucide-react";
 import { useLocation } from "wouter";
-import { useGetProducts } from "@workspace/api-client-react";
+import { getGetProductsQueryKey, useGetProducts } from "@workspace/api-client-react";
+import type { Product } from "@workspace/api-client-react";
 import { useUser } from "@/hooks/useUser";
 import { useWishlist } from "@/hooks/useWishlist";
 import { Layout } from "@/components/Layout";
 import { ProductCard } from "@/components/ProductCard";
 import { Input } from "@/components/ui/input";
 import { SEED_PRODUCTS } from "@/lib/seed";
-import type { Product } from "@workspace/api-client-react";
 
 type Category = "Clothing" | "Accessories" | "Fabric" | "Footwear" | "Jewelry" | "Beauty" | "Other";
+
 const CATEGORIES: (Category | "All")[] = ["All", "Clothing", "Accessories", "Fabric", "Footwear", "Jewelry", "Beauty", "Other"];
 const SORT_OPTIONS = [
-  { value: "newest", label: "Newest" },
-  { value: "oldest", label: "Oldest" },
-  { value: "mostliked", label: "Most Liked" },
-  { value: "priceasc", label: "Price: Low → High" },
-  { value: "pricedesc", label: "Price: High → Low" },
+  { value: "newest", label: "Newest first" },
+  { value: "oldest", label: "Oldest first" },
+  { value: "mostliked", label: "Most loved" },
+  { value: "priceasc", label: "Price: low to high" },
+  { value: "pricedesc", label: "Price: high to low" },
 ];
 
 export default function Explore() {
   const [location] = useLocation();
   const { user } = useUser();
   const { wishlistItems } = useWishlist();
-  const { data: products, isLoading } = useGetProducts(
-    user.id ? { userId: user.id } : undefined
-  );
+  const { data: products, isLoading, isError } = useGetProducts(user.id ? { userId: user.id } : undefined, {
+    query: { queryKey: getGetProductsQueryKey(user.id ? { userId: user.id } : undefined) },
+  });
 
-  const showSeeds = !isLoading && (!products || products.length === 0);
-  const allProducts: Product[] = showSeeds ? SEED_PRODUCTS : (products ?? []);
-
+  const showSeeds = !isLoading && !isError && (!products || products.length === 0);
+  const allProducts: Product[] = showSeeds ? SEED_PRODUCTS : products ?? [];
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<Category | "All">("All");
   const [sort, setSort] = useState("newest");
@@ -39,9 +39,10 @@ export default function Explore() {
 
   useEffect(() => {
     const categoryParam = new URLSearchParams(window.location.search).get("category");
-    const nextCategory = categoryParam && CATEGORIES.includes(categoryParam as Category | "All")
-      ? categoryParam as Category | "All"
-      : "All";
+    const nextCategory =
+      categoryParam && CATEGORIES.includes(categoryParam as Category | "All")
+        ? (categoryParam as Category | "All")
+        : "All";
     setActiveCategory(nextCategory);
   }, [location]);
 
@@ -49,20 +50,25 @@ export default function Explore() {
     let result = [...allProducts];
     if (showWishlistOnly) {
       const wishlistIds = new Set(wishlistItems.map((item) => item.id));
-      result = result.filter((p) => wishlistIds.has(p.id));
+      result = result.filter((product) => wishlistIds.has(product.id));
     }
-    if (activeCategory !== "All") result = result.filter((p) => p.category === activeCategory);
+    if (activeCategory !== "All") result = result.filter((product) => product.category === activeCategory);
     if (search.trim()) {
-      const q = search.toLowerCase();
-      result = result.filter((p) => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q) || (p.description && p.description.toLowerCase().includes(q)));
+      const query = search.toLowerCase();
+      result = result.filter(
+        (product) =>
+          product.name.toLowerCase().includes(query) ||
+          product.category.toLowerCase().includes(query) ||
+          Boolean(product.description?.toLowerCase().includes(query)),
+      );
     }
     if (sort === "newest") result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    else if (sort === "oldest") result.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-    else if (sort === "mostliked") result.sort((a, b) => b.likesCount - a.likesCount);
-    else if (sort === "priceasc") result.sort((a, b) => a.price - b.price);
-    else if (sort === "pricedesc") result.sort((a, b) => b.price - a.price);
+    if (sort === "oldest") result.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    if (sort === "mostliked") result.sort((a, b) => b.likesCount - a.likesCount);
+    if (sort === "priceasc") result.sort((a, b) => a.price - b.price);
+    if (sort === "pricedesc") result.sort((a, b) => b.price - a.price);
     return result;
-  }, [allProducts, search, activeCategory, sort, showWishlistOnly, wishlistItems]);
+  }, [activeCategory, allProducts, search, showWishlistOnly, sort, wishlistItems]);
 
   const hasFilters = Boolean(search.trim()) || activeCategory !== "All" || sort !== "newest" || showWishlistOnly;
   const clearFilters = () => {
@@ -74,134 +80,154 @@ export default function Explore() {
 
   return (
     <Layout>
-      <div className="bg-gradient-to-br from-secondary/10 to-primary/5 border-b border-border py-10 px-4">
-        <div className="container mx-auto max-w-4xl">
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-4xl font-black text-foreground mb-2"
-          >
-            Explore
-          </motion.h1>
-          <div className="flex items-center justify-between mb-6">
-            <motion.p
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.08 }}
-              className="text-muted-foreground"
-            >
-              Browse all {allProducts.length} items in the collection
-            </motion.p>
-            <motion.button
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.1 }}
-              onClick={() => setShowWishlistOnly(!showWishlistOnly)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold border transition-all ${
-                showWishlistOnly
-                  ? "bg-secondary text-white border-secondary shadow"
-                  : "bg-background text-foreground border-border hover:border-secondary hover:text-secondary"
-              }`}
+      <section className="border-b border-border bg-secondary text-secondary-foreground">
+        <div className="mx-auto max-w-7xl px-4 pb-10 pt-10 sm:px-6 lg:px-8">
+          <div className="flex flex-wrap items-end justify-between gap-6">
+            <div>
+              <p className="mb-3 flex items-center gap-2 font-mono-ui text-[10px] font-bold uppercase tracking-[0.2em] text-accent">
+                <Sparkles className="h-4 w-4" /> The open wardrobe
+              </p>
+              <motion.h1
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="font-display text-5xl font-extrabold leading-none tracking-[-0.055em] sm:text-7xl"
+              >
+                Explore.
+              </motion.h1>
+              <p className="mt-4 max-w-md text-sm leading-relaxed text-secondary-foreground/70">
+                Scroll slowly. Save loudly. Find something made by someone who cares.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowWishlistOnly((current) => !current)}
               data-testid="button-wishlist-filter"
+              className={`flex items-center gap-2 border px-4 py-3 text-sm font-bold transition-colors ${
+                showWishlistOnly
+                  ? "border-accent bg-accent text-accent-foreground"
+                  : "border-secondary-foreground/25 text-secondary-foreground hover:border-accent hover:text-accent"
+              }`}
             >
-              <Bookmark className={`w-4 h-4 ${showWishlistOnly ? "fill-white" : ""}`} />
-              Wishlist {wishlistItems.length > 0 && `(${wishlistItems.length})`}
-            </motion.button>
+              <Bookmark className={`h-4 w-4 ${showWishlistOnly ? "fill-current" : ""}`} />
+              Saved finds {wishlistItems.length > 0 && `(${wishlistItems.length})`}
+            </button>
           </div>
+        </div>
+      </section>
 
-          {hasFilters && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              className="mb-4 flex items-center justify-between rounded-xl border border-primary/15 bg-primary/5 px-3 py-2 text-xs"
-            >
-              <span className="font-semibold text-primary">Filters are active</span>
+      <section className="sticky top-[4.5rem] z-30 border-b border-border bg-background/95 backdrop-blur-xl">
+        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
+            <div className="relative flex-1">
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                type="search"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Search names, categories or descriptions"
+                className="h-12 rounded-none border-border bg-card pl-11 text-sm"
+                data-testid="input-search"
+                aria-label="Search products"
+              />
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => setSearch("")}
+                  data-testid="button-clear-search"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  aria-label="Clear search"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
+              <label htmlFor="sort-products" className="sr-only">Sort products</label>
+              <select
+                id="sort-products"
+                value={sort}
+                onChange={(event) => setSort(event.target.value)}
+                data-testid="select-sort-products"
+                className="h-12 min-w-44 border border-border bg-card px-3 text-sm font-semibold text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+              >
+                {SORT_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+              </select>
+            </div>
+          </div>
+          <div className="mt-4 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none]">
+            {CATEGORIES.map((category) => (
               <button
                 type="button"
-                onClick={clearFilters}
-                className="flex items-center gap-1 font-black text-foreground transition-colors hover:text-primary"
-                data-testid="button-clear-filters"
-              >
-                <RotateCcw className="h-3.5 w-3.5" />
-                Clear
-              </button>
-            </motion.div>
-          )}
-
-          <div className="relative mb-5">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
-            <Input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by name or category…"
-              className="h-12 pl-12 text-base rounded-2xl bg-background border-border"
-              data-testid="input-search"
-            />
-          </div>
-
-          <div className="flex gap-2 flex-wrap">
-            {CATEGORIES.map((cat) => (
-              <motion.button
-                key={cat}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setActiveCategory(cat)}
-                data-testid={`filter-${cat}`}
-                className={`px-4 py-1.5 rounded-full text-sm font-semibold border transition-all ${
-                  activeCategory === cat
-                    ? "bg-primary text-white border-primary shadow"
-                    : "bg-background text-foreground border-border hover:border-primary hover:text-primary"
+                key={category}
+                onClick={() => setActiveCategory(category)}
+                data-testid={`filter-${category}`}
+                className={`shrink-0 border px-4 py-2 text-xs font-bold transition-colors ${
+                  activeCategory === category
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border bg-card text-muted-foreground hover:border-primary hover:text-primary"
                 }`}
               >
-                {cat}
-              </motion.button>
+                {category}
+              </button>
             ))}
           </div>
         </div>
-      </div>
+      </section>
 
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
-        <div className="flex items-center justify-between mb-6">
-          <p className="text-sm text-muted-foreground font-medium">
-            {filtered.length} {filtered.length === 1 ? "item" : "items"}
-          </p>
-          <div className="flex items-center gap-2">
-            <SlidersHorizontal className="w-4 h-4 text-muted-foreground" />
-            <select
-              value={sort}
-              onChange={(e) => setSort(e.target.value)}
-              className="text-sm font-semibold bg-background border border-border rounded-lg px-3 py-1.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-            >
-              {SORT_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>{o.label}</option>
-              ))}
-            </select>
+      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p className="font-mono-ui text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+              {showSeeds ? "Preview collection" : "Marketplace collection"}
+            </p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              <span className="font-bold text-foreground">{filtered.length}</span> {filtered.length === 1 ? "piece" : "pieces"} to browse
+              {activeCategory !== "All" && <span> in <span className="font-bold text-primary">{activeCategory}</span></span>}
+            </p>
           </div>
+          {hasFilters && (
+            <button
+              type="button"
+              onClick={clearFilters}
+              data-testid="button-clear-filters"
+              className="flex items-center gap-2 text-xs font-bold text-primary hover:text-secondary"
+            >
+              <RotateCcw className="h-3.5 w-3.5" /> Reset filters
+            </button>
+          )}
         </div>
 
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="bg-card border border-border rounded-3xl overflow-hidden animate-pulse aspect-[4/5]" />
-            ))}
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {[0, 1, 2, 3, 4, 5, 6, 7].map((item) => <div key={item} className="aspect-[4/5] animate-pulse bg-muted" />)}
+          </div>
+        ) : isError ? (
+          <div className="border border-destructive/30 bg-destructive/5 px-6 py-16 text-center">
+            <p className="font-display text-3xl font-bold">We lost the thread.</p>
+            <p className="mt-2 text-sm text-muted-foreground">The marketplace could not load right now. Try refreshing the page.</p>
+            <button type="button" onClick={() => window.location.reload()} data-testid="button-retry-products" className="mt-6 bg-primary px-5 py-3 text-sm font-bold text-primary-foreground">
+              Try again
+            </button>
           </div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-24">
-            <p className="text-2xl font-black text-foreground mb-2">No results found</p>
-            <p className="text-muted-foreground">Try a different search or category</p>
+          <div className="border border-dashed border-border bg-card px-6 py-20 text-center">
+            <div className="mx-auto grid h-12 w-12 place-items-center bg-accent text-accent-foreground"><Search className="h-5 w-5" /></div>
+            <p className="mt-5 font-display text-3xl font-bold text-foreground">Nothing in this edit yet.</p>
+            <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">Try another search, category or your full saved list.</p>
+            <button type="button" onClick={clearFilters} data-testid="button-empty-clear-filters" className="mt-6 border border-primary px-5 py-3 text-sm font-bold text-primary hover:bg-primary hover:text-primary-foreground">
+              Clear all filters
+            </button>
           </div>
         ) : (
-           <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filtered.map((product, index) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                index={index}
-                readOnly={showSeeds}
-              />
-            ))}
-           </motion.div>
+          <>
+            {showSeeds && <p className="mb-5 border-l-2 border-accent pl-3 text-sm text-muted-foreground">These preview pieces will make room for real seller listings as the community grows.</p>}
+            <motion.div layout className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {filtered.map((product, index) => <ProductCard key={product.id} product={product} index={index} readOnly={showSeeds} />)}
+            </motion.div>
+          </>
         )}
-      </div>
+      </main>
     </Layout>
   );
 }
