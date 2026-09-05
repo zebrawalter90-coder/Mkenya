@@ -11,6 +11,7 @@ import {
   Zap,
   Check,
   Share2,
+  ChevronDown,
 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -43,6 +44,7 @@ export function ProductCard({ product, index, readOnly = false }: ProductCardPro
   const { isWishlisted, toggleWishlist } = useWishlist();
   const { toast } = useToast();
   const [commentText, setCommentText] = useState("");
+  const [showComments, setShowComments] = useState(false);
   const [showAllComments, setShowAllComments] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(product.name);
@@ -317,41 +319,68 @@ export function ProductCard({ product, index, readOnly = false }: ProductCardPro
         </Button>
 
         <div className="border-t border-border pt-4">
-          {product.comments.length > 0 && (
-            <div className="mb-3 space-y-2">
-              {product.comments.length > 3 && !showAllComments && (
-                <button type="button" onClick={() => setShowAllComments(true)} className="text-xs font-semibold text-primary hover:underline">
-                  View all {product.comments.length} comments
-                </button>
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              setShowComments((open) => !open);
+            }}
+            className="flex w-full items-center justify-between rounded-sm py-1 text-left text-xs font-bold text-muted-foreground transition-colors hover:text-foreground"
+            aria-expanded={showComments}
+            aria-controls={`comments-${product.id}`}
+            data-testid={`button-toggle-comments-${product.id}`}
+          >
+            <span className="flex items-center gap-2">
+              <MessageCircle className="h-4 w-4" />
+              {product.comments.length ? `${product.comments.length} comment${product.comments.length === 1 ? "" : "s"}` : "Join the conversation"}
+            </span>
+            <ChevronDown className={`h-4 w-4 transition-transform ${showComments ? "rotate-180" : ""}`} />
+          </button>
+
+          {showComments && (
+            <motion.div
+              id={`comments-${product.id}`}
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              className="mt-3 overflow-hidden"
+            >
+              {product.comments.length > 0 && (
+                <div className="mb-3 max-h-32 space-y-2 overflow-y-auto pr-1">
+                  {product.comments.length > 3 && !showAllComments && (
+                    <button type="button" onClick={() => setShowAllComments(true)} className="text-xs font-semibold text-primary hover:underline">
+                      View all {product.comments.length} comments
+                    </button>
+                  )}
+                  {visibleComments.map((comment) => (
+                    <motion.div key={comment.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="rounded-sm bg-muted/50 px-3 py-2 text-sm">
+                      <span className="mr-1.5 text-xs font-semibold text-foreground">{comment.username}:</span>
+                      <span className="text-foreground/80">{comment.text}</span>
+                    </motion.div>
+                  ))}
+                </div>
               )}
-              {visibleComments.map((comment) => (
-                <motion.div key={comment.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="bg-muted/50 px-3 py-2 text-sm">
-                  <span className="mr-1.5 text-xs font-semibold text-foreground">{comment.username}:</span>
-                  <span className="text-foreground/80">{comment.text}</span>
-                </motion.div>
-              ))}
-            </div>
-          )}
-          {!readOnly && (
-            <form onSubmit={handleCommentSubmit} className="flex gap-2">
-              <Input
-                value={commentText}
-                onChange={(event) => setCommentText(event.target.value)}
-                placeholder="Leave a comment…"
-                className="h-10 rounded-none border-none bg-muted/40 pl-4 text-sm focus-visible:ring-1 focus-visible:ring-primary"
-                data-testid={`input-comment-${product.id}`}
-              />
-              <Button
-                type="submit"
-                size="icon"
-                className="h-10 w-10 shrink-0 rounded-none bg-primary text-primary-foreground hover:bg-primary/90"
-                disabled={!commentText.trim() || addComment.isPending}
-                data-testid={`button-comment-${product.id}`}
-                aria-label={`Comment on ${product.name}`}
-              >
-                <Send className="h-4 w-4" />
-              </Button>
-            </form>
+              {!readOnly && (
+                <form onSubmit={handleCommentSubmit} className="flex gap-2">
+                  <Input
+                    value={commentText}
+                    onChange={(event) => setCommentText(event.target.value)}
+                    placeholder="Leave a comment…"
+                    className="h-10 rounded-none border-none bg-muted/40 pl-4 text-sm focus-visible:ring-1 focus-visible:ring-primary"
+                    data-testid={`input-comment-${product.id}`}
+                  />
+                  <Button
+                    type="submit"
+                    size="icon"
+                    className="h-10 w-10 shrink-0 rounded-none bg-primary text-primary-foreground hover:bg-primary/90"
+                    disabled={!commentText.trim() || addComment.isPending}
+                    data-testid={`button-comment-${product.id}`}
+                    aria-label={`Comment on ${product.name}`}
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </form>
+              )}
+            </motion.div>
           )}
         </div>
       </div>

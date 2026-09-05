@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { X, Heart, MessageCircle, Send, ShoppingCart, Check, Share2, Zap } from "lucide-react";
+import { X, Heart, MessageCircle, Send, ShoppingCart, Check, Share2, Zap, ChevronDown } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { getGetProductsQueryKey, useAddComment, useToggleLike } from "@workspace/api-client-react";
 import type { Product } from "@workspace/api-client-react";
@@ -29,6 +29,7 @@ export function ProductDetailModal({
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [commentText, setCommentText] = useState("");
+  const [showComments, setShowComments] = useState(false);
   const [showAddedFeedback, setShowAddedFeedback] = useState(false);
 
   const invalidate = () => {
@@ -40,6 +41,7 @@ export function ProductDetailModal({
 
   useEffect(() => {
     if (!isOpen) return;
+    setShowComments(false);
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
     };
@@ -231,37 +233,59 @@ export function ProductDetailModal({
                 </Button>
 
                 <div className="mt-7 border-t border-border pt-5">
-                  <h3 className="mb-3 text-sm font-bold text-foreground">Community notes ({product.comments.length})</h3>
-                  {product.comments.length > 0 && (
-                    <div className="mb-4 max-h-40 space-y-2 overflow-y-auto">
-                      {product.comments.map((comment) => (
-                        <div key={comment.id} className="bg-muted/50 px-3 py-2 text-sm">
-                          <span className="mr-1.5 text-xs font-semibold">{comment.username}:</span>
-                          <span className="text-foreground/80">{comment.text}</span>
+                  <button
+                    type="button"
+                    onClick={() => setShowComments((open) => !open)}
+                    className="flex w-full items-center justify-between text-left"
+                    aria-expanded={showComments}
+                    aria-controls="product-comments"
+                    data-testid="button-toggle-comments-modal"
+                  >
+                    <span className="flex items-center gap-2 text-sm font-bold text-foreground">
+                      <MessageCircle className="h-4 w-4 text-primary" />
+                      Community notes ({product.comments.length})
+                    </span>
+                    <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${showComments ? "rotate-180" : ""}`} />
+                  </button>
+                  {showComments && (
+                    <motion.div
+                      id="product-comments"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      className="mt-3 overflow-hidden"
+                    >
+                      {product.comments.length > 0 && (
+                        <div className="mb-4 max-h-32 space-y-2 overflow-y-auto pr-1">
+                          {product.comments.map((comment) => (
+                            <div key={comment.id} className="rounded-sm bg-muted/50 px-3 py-2 text-sm">
+                              <span className="mr-1.5 text-xs font-semibold">{comment.username}:</span>
+                              <span className="text-foreground/80">{comment.text}</span>
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
-                  )}
-                  {!readOnly && (
-                    <form onSubmit={handleCommentSubmit} className="flex gap-2">
-                      <Input
-                        value={commentText}
-                        onChange={(event) => setCommentText(event.target.value)}
-                        placeholder="Ask or share a thought…"
-                        className="h-10 rounded-none bg-muted/40 text-sm"
-                        data-testid="input-comment-modal"
-                      />
-                      <Button
-                        type="submit"
-                        size="icon"
-                        className="h-10 w-10 shrink-0 rounded-none bg-primary text-primary-foreground"
-                        disabled={!commentText.trim() || addComment.isPending}
-                        data-testid="button-comment-modal"
-                        aria-label="Post comment"
-                      >
-                        <Send className="h-4 w-4" />
-                      </Button>
-                    </form>
+                      )}
+                      {!readOnly && (
+                        <form onSubmit={handleCommentSubmit} className="flex gap-2">
+                          <Input
+                            value={commentText}
+                            onChange={(event) => setCommentText(event.target.value)}
+                            placeholder="Ask or share a thought…"
+                            className="h-10 rounded-none bg-muted/40 text-sm"
+                            data-testid="input-comment-modal"
+                          />
+                          <Button
+                            type="submit"
+                            size="icon"
+                            className="h-10 w-10 shrink-0 rounded-none bg-primary text-primary-foreground"
+                            disabled={!commentText.trim() || addComment.isPending}
+                            data-testid="button-comment-modal"
+                            aria-label="Post comment"
+                          >
+                            <Send className="h-4 w-4" />
+                          </Button>
+                        </form>
+                      )}
+                    </motion.div>
                   )}
                 </div>
               </div>
