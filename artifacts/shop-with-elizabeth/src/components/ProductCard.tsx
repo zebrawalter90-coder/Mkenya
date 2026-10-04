@@ -36,9 +36,10 @@ interface ProductCardProps {
   product: Product;
   index: number;
   readOnly?: boolean;
+  featured?: boolean;
 }
 
-export function ProductCard({ product, index, readOnly = false }: ProductCardProps) {
+export function ProductCard({ product, index, readOnly = false, featured = false }: ProductCardProps) {
   const { user } = useUser();
   const queryClient = useQueryClient();
   const { addToCart } = useCart();
@@ -150,10 +151,11 @@ export function ProductCard({ product, index, readOnly = false }: ProductCardPro
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.12 }}
       transition={{ delay: Math.min(index * 0.045, 0.24), duration: 0.45, ease: "easeOut" }}
-      className="group flex flex-col overflow-hidden rounded-[1.35rem] border border-border/75 bg-card shadow-sm transition-[box-shadow,transform] duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-editorial"
+      className={`group flex min-w-0 flex-col overflow-hidden rounded-[1.35rem] border border-border/75 bg-card shadow-sm transition-[box-shadow,transform] duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-editorial ${featured ? "col-span-2" : ""}`}
       data-testid={`card-product-${product.id}`}
+      data-product-layout={featured ? "featured" : "standard"}
     >
-      <div className="relative aspect-square overflow-hidden rounded-t-[1.35rem] bg-muted/45">
+      <div className={`relative overflow-hidden rounded-t-[1.35rem] bg-muted/45 ${featured ? "aspect-[1.28] sm:aspect-[1.48]" : "aspect-square"}`}>
         <ProductImage
           src={product.imageUrl}
           alt={product.name}
@@ -181,7 +183,7 @@ export function ProductCard({ product, index, readOnly = false }: ProductCardPro
 
         <div className="pointer-events-none absolute left-4 top-4 z-10 flex items-center gap-2">
           <span className="bg-accent px-2.5 py-1 font-mono-ui text-[9px] font-bold uppercase tracking-[0.15em] text-accent-foreground">
-            {index < 2 ? "Fresh drop" : product.category}
+             {featured ? "Featured find" : index < 2 ? "Fresh drop" : product.category}
           </span>
           {isOwner && (
             <span className="bg-background/85 px-2.5 py-1 font-mono-ui text-[9px] font-bold uppercase tracking-[0.15em] text-foreground backdrop-blur-sm">
@@ -279,7 +281,7 @@ export function ProductCard({ product, index, readOnly = false }: ProductCardPro
               <button
                 type="button"
                 onClick={() => setIsModalOpen(true)}
-                className="text-left font-display text-xl font-bold leading-snug text-foreground transition-colors hover:text-primary"
+                className={`text-left font-display font-bold leading-snug text-foreground transition-colors hover:text-primary ${featured ? "text-2xl sm:text-3xl" : "text-xl"}`}
                 data-testid={`button-open-product-${product.id}`}
               >
                 {product.name}
@@ -288,7 +290,7 @@ export function ProductCard({ product, index, readOnly = false }: ProductCardPro
                 KES {product.price.toLocaleString()}
               </span>
             </div>
-            {product.description && <p className="mb-3 line-clamp-1 text-sm text-muted-foreground">{product.description}</p>}
+            {product.description && <p className={`mb-3 text-sm text-muted-foreground ${featured ? "line-clamp-2" : "line-clamp-1"}`}>{product.description}</p>}
           </>
         )}
 
@@ -329,10 +331,10 @@ export function ProductCard({ product, index, readOnly = false }: ProductCardPro
             event.stopPropagation();
             handleBuyNow();
           }}
-          className="mb-4 h-10 w-full rounded-full border-primary font-bold text-primary hover:bg-primary hover:text-primary-foreground"
+          className="mb-4 h-10 w-fit min-w-40 max-w-full self-start rounded-full border-primary px-4 font-bold text-primary hover:bg-primary hover:text-primary-foreground"
           data-testid={`button-buy-now-${product.id}`}
         >
-          <Zap className="mr-2 h-4 w-4" /> Buy now with M-Pesa
+          <Zap className="mr-2 h-4 w-4" /> Buy with M-Pesa
         </Button>
 
         <div className="border-t border-border pt-4">

@@ -285,10 +285,10 @@ export function ProductDetailModal({
                 </div>
                 <Button
                   onClick={handleBuyNow}
-                  className="mt-2 h-12 w-full rounded-none bg-primary font-bold text-primary-foreground hover:bg-primary/90"
+                  className="mt-2 h-12 w-fit min-w-44 self-start rounded-full px-6 bg-primary font-bold text-primary-foreground hover:bg-primary/90"
                   data-testid="button-buy-now-modal"
                 >
-                  <Zap className="mr-2 h-4 w-4" /> Buy now with M-Pesa
+                  <Zap className="mr-2 h-4 w-4" /> Buy with M-Pesa
                 </Button>
 
                 <div className="mt-7 border-t border-border pt-5">

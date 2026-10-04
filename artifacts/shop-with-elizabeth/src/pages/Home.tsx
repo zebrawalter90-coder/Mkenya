@@ -23,6 +23,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { ProductImage } from "@/components/ProductImage";
 import { useActiveFlashSales } from "@/lib/flashSales";
 import { SEED_PRODUCTS } from "@/lib/seed";
+import { getFeaturedProductIds } from "@/lib/product-layout";
 
 const categorySpotlight = [
   { label: "Clothing", caption: "Kitenge, dresses and everyday looks", icon: Shirt, tone: "bg-primary text-primary-foreground" },
@@ -52,6 +53,8 @@ export default function Home() {
       ["Clothing", "Fabric", "Footwear", "Jewelry", "Beauty"].includes(product.category)
         && (product.description?.trim().length ?? 0) >= 20,
     ) ?? (showSeeds ? SEED_PRODUCTS[1] : undefined);
+  const latestProducts = displayProducts.slice(0, 6);
+  const featuredProductIds = getFeaturedProductIds(latestProducts);
 
   return (
     <Layout>
@@ -213,8 +216,14 @@ export default function Home() {
             <>
               {showSeeds && <p className="mb-5 text-sm text-muted-foreground">Preview pieces while local sellers add their next listings.</p>}
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
-                {displayProducts.slice(0, 6).map((product, index) => (
-                  <ProductCard key={product.id} product={product} index={index} readOnly={showSeeds} />
+                {latestProducts.map((product, index) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    index={index}
+                    readOnly={showSeeds}
+                    featured={featuredProductIds.has(product.id)}
+                  />
                 ))}
               </div>
             </>

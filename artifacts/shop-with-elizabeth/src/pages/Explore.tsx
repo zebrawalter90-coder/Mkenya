@@ -10,6 +10,7 @@ import { Layout } from "@/components/Layout";
 import { ProductCard } from "@/components/ProductCard";
 import { Input } from "@/components/ui/input";
 import { SEED_PRODUCTS } from "@/lib/seed";
+import { getFeaturedProductIds } from "@/lib/product-layout";
 
 type Category = "Clothing" | "Accessories" | "Fabric" | "Footwear" | "Jewelry" | "Beauty" | "Other";
 
@@ -69,6 +70,7 @@ export default function Explore() {
     if (sort === "pricedesc") result.sort((a, b) => b.price - a.price);
     return result;
   }, [activeCategory, allProducts, search, showWishlistOnly, sort, wishlistItems]);
+  const featuredProductIds = getFeaturedProductIds(filtered);
 
   const hasFilters = Boolean(search.trim()) || activeCategory !== "All" || sort !== "newest" || showWishlistOnly;
   const clearFilters = () => {
@@ -224,7 +226,15 @@ export default function Explore() {
           <>
             {showSeeds && <p className="mb-5 border-l-2 border-accent pl-3 text-sm text-muted-foreground">These preview pieces will make room for real seller listings as the community grows.</p>}
             <motion.div layout className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
-              {filtered.map((product, index) => <ProductCard key={product.id} product={product} index={index} readOnly={showSeeds} />)}
+              {filtered.map((product, index) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  index={index}
+                  readOnly={showSeeds}
+                  featured={featuredProductIds.has(product.id)}
+                />
+              ))}
             </motion.div>
           </>
         )}
