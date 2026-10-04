@@ -1,6 +1,6 @@
 import type { Product } from "@workspace/api-client-react";
 
-export const SEED_PRODUCTS: Product[] = [
+const seedProducts: Omit<Product, "imageUrls">[] = [
   { id: "seed-01", name: "Maasai Shuka Wrap", description: "Traditional red tartan shuka made from soft acrylic blend. Perfect for cultural events or everyday wrap-style wear.", price: 2500, imageUrl: "https://picsum.photos/seed/swe-shuka/400/500", category: "Clothing", likesCount: 18, userLiked: false, comments: [], ownerId: "system", ownerName: "Elizabeth", createdAt: new Date(Date.now() - 86400000 * 20).toISOString() },
   { id: "seed-02", name: "Ankara Print Dress", description: "Vibrant African print midi dress with fitted bodice and flared skirt. Size M, 100% cotton wax print fabric.", price: 3800, imageUrl: "https://picsum.photos/seed/swe-ankara/400/500", category: "Clothing", likesCount: 31, userLiked: false, comments: [], ownerId: "system", ownerName: "Elizabeth", createdAt: new Date(Date.now() - 86400000 * 19).toISOString() },
   { id: "seed-03", name: "Kitenge Shirt (Men's)", description: "Short-sleeved button-up shirt in bold kitenge print. Lightweight cotton, tailored fit, size L.", price: 1800, imageUrl: "https://picsum.photos/seed/swe-kitenge/400/500", category: "Clothing", likesCount: 12, userLiked: false, comments: [], ownerId: "system", ownerName: "Elizabeth", createdAt: new Date(Date.now() - 86400000 * 18).toISOString() },
@@ -22,3 +22,8 @@ export const SEED_PRODUCTS: Product[] = [
   { id: "seed-19", name: "Hand-Beaded Leather Belt", description: "Genuine leather belt with Maasai beadwork detail. Adjustable buckle, fits waist 28-34 inches.", price: 1750, imageUrl: "https://picsum.photos/seed/swe-belt/400/500", category: "Accessories", likesCount: 29, userLiked: false, comments: [], ownerId: "system", ownerName: "Elizabeth", createdAt: new Date(Date.now() - 86400000 * 2).toISOString() },
   { id: "seed-20", name: "Maasai Leather Sandals", description: "Handcrafted leather sandals with traditional tire-sole base. Comfortable fit, sizes 38-42 available.", price: 2200, imageUrl: "https://picsum.photos/seed/swe-sandal/400/500", category: "Footwear", likesCount: 33, userLiked: false, comments: [], ownerId: "system", ownerName: "Elizabeth", createdAt: new Date(Date.now() - 86400000 * 1).toISOString() },
 ];
+
+export const SEED_PRODUCTS: Product[] = seedProducts.map((product) => ({
+  ...product,
+  imageUrls: [product.imageUrl],
+}));

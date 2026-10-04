@@ -150,10 +150,10 @@ export function ProductCard({ product, index, readOnly = false }: ProductCardPro
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.12 }}
       transition={{ delay: Math.min(index * 0.045, 0.24), duration: 0.45, ease: "easeOut" }}
-      className="group flex flex-col overflow-hidden border border-border bg-card shadow-sm transition-[box-shadow,transform] duration-300 hover:-translate-y-1 hover:shadow-editorial"
+      className="group flex flex-col overflow-hidden rounded-[1.35rem] border border-border/75 bg-card shadow-sm transition-[box-shadow,transform] duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-editorial"
       data-testid={`card-product-${product.id}`}
     >
-      <div className="relative aspect-square cursor-pointer overflow-hidden bg-white" onClick={() => setIsModalOpen(true)}>
+      <div className="relative aspect-square overflow-hidden rounded-t-[1.35rem] bg-muted/45">
         <ProductImage
           src={product.imageUrl}
           alt={product.name}
@@ -161,16 +161,25 @@ export function ProductCard({ product, index, readOnly = false }: ProductCardPro
           priority={index < 2}
           objectPosition={index % 3 === 1 ? "center 28%" : "center 38%"}
           fit="contain"
-          className="transition-transform duration-700 group-hover:scale-[1.035]"
+          className="transition-transform duration-700 group-hover:scale-[1.065]"
         />
+        <button
+          type="button"
+          onClick={() => setIsModalOpen(true)}
+          aria-label={`View ${product.name} photos and details`}
+          data-testid={`button-open-product-image-${product.id}`}
+          className="absolute inset-0 z-[1] cursor-zoom-in"
+        >
+          <span className="sr-only">Open product photos</span>
+        </button>
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-foreground/10 to-transparent" />
         {imageCount > 1 && (
-          <span className="absolute bottom-4 right-4 z-10 flex items-center gap-1.5 bg-foreground/80 px-2.5 py-1.5 font-mono-ui text-[10px] font-bold text-background backdrop-blur-sm">
+          <span className="pointer-events-none absolute bottom-4 right-4 z-10 flex items-center gap-1.5 bg-foreground/80 px-2.5 py-1.5 font-mono-ui text-[10px] font-bold text-background backdrop-blur-sm">
             <Images className="h-3.5 w-3.5" /> {imageCount} photos
           </span>
         )}
 
-        <div className="absolute left-4 top-4 z-10 flex items-center gap-2">
+        <div className="pointer-events-none absolute left-4 top-4 z-10 flex items-center gap-2">
           <span className="bg-accent px-2.5 py-1 font-mono-ui text-[9px] font-bold uppercase tracking-[0.15em] text-accent-foreground">
             {index < 2 ? "Fresh drop" : product.category}
           </span>
@@ -191,8 +200,8 @@ export function ProductCard({ product, index, readOnly = false }: ProductCardPro
             aria-label={`${isWishlisted(product.id) ? "Remove" : "Save"} ${product.name} ${isWishlisted(product.id) ? "from wishlist" : "to wishlist"}`}
             className={`grid h-10 w-10 place-items-center shadow-lg transition-colors backdrop-blur-sm ${
               isWishlisted(product.id)
-                ? "bg-secondary text-secondary-foreground"
-                : "bg-background/85 text-foreground hover:bg-accent"
+                ? "rounded-full bg-secondary text-secondary-foreground"
+                : "rounded-full bg-background/85 text-foreground hover:bg-accent"
             }`}
           >
             <Bookmark className={`h-4 w-4 ${isWishlisted(product.id) ? "fill-current" : ""}`} />
@@ -221,7 +230,7 @@ export function ProductCard({ product, index, readOnly = false }: ProductCardPro
             onClick={handleShare}
             data-testid={`button-share-${product.id}`}
             aria-label={`Share ${product.name}`}
-            className="grid h-10 w-10 place-items-center bg-background/85 text-foreground shadow-lg backdrop-blur-sm transition-colors hover:bg-background"
+              className="grid h-10 w-10 place-items-center rounded-full bg-background/85 text-foreground shadow-lg backdrop-blur-sm transition-colors hover:bg-background"
           >
             <Share2 className="h-4 w-4" />
           </motion.button>
@@ -300,7 +309,7 @@ export function ProductCard({ product, index, readOnly = false }: ProductCardPro
             event.stopPropagation();
             handleAddToCart();
           }}
-          className="relative mb-4 h-11 w-full overflow-hidden rounded-none bg-secondary font-bold text-secondary-foreground hover:bg-secondary/90"
+          className="relative mb-4 h-11 w-full overflow-hidden rounded-full bg-secondary font-bold text-secondary-foreground hover:bg-secondary/90"
           data-testid={`button-add-to-cart-${product.id}`}
         >
           {showAddedFeedback ? (
@@ -320,7 +329,7 @@ export function ProductCard({ product, index, readOnly = false }: ProductCardPro
             event.stopPropagation();
             handleBuyNow();
           }}
-          className="mb-4 h-10 w-full rounded-none border-primary font-bold text-primary hover:bg-primary hover:text-primary-foreground"
+          className="mb-4 h-10 w-full rounded-full border-primary font-bold text-primary hover:bg-primary hover:text-primary-foreground"
           data-testid={`button-buy-now-${product.id}`}
         >
           <Zap className="mr-2 h-4 w-4" /> Buy now with M-Pesa
@@ -373,13 +382,13 @@ export function ProductCard({ product, index, readOnly = false }: ProductCardPro
                     value={commentText}
                     onChange={(event) => setCommentText(event.target.value)}
                     placeholder="Leave a comment…"
-                    className="h-10 rounded-none border-none bg-muted/40 pl-4 text-sm focus-visible:ring-1 focus-visible:ring-primary"
+                    className="h-10 rounded-xl border-none bg-muted/50 pl-4 text-sm focus-visible:ring-1 focus-visible:ring-primary"
                     data-testid={`input-comment-${product.id}`}
                   />
                   <Button
                     type="submit"
                     size="icon"
-                    className="h-10 w-10 shrink-0 rounded-none bg-primary text-primary-foreground hover:bg-primary/90"
+                    className="h-10 w-10 shrink-0 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90"
                     disabled={!commentText.trim() || addComment.isPending}
                     data-testid={`button-comment-${product.id}`}
                     aria-label={`Comment on ${product.name}`}

@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { motion } from "framer-motion";
+import { motion, MotionConfig } from "framer-motion";
 import { Link, useLocation } from "wouter";
 import {
   Home,
@@ -58,16 +58,19 @@ export function Layout({ children }: { children: ReactNode }) {
   ];
 
   return (
-    <div className="min-h-[100dvh] flex flex-col selection:bg-primary selection:text-primary-foreground">
-      <div className="hidden bg-secondary px-4 py-2 text-center font-mono-ui text-[10px] uppercase tracking-[0.22em] text-secondary-foreground md:block">
+    <MotionConfig reducedMotion="user">
+    <div className="min-h-[100dvh] flex flex-col selection:bg-primary/20 selection:text-foreground">
+      <div className="relative hidden overflow-hidden bg-secondary px-4 py-2.5 text-center font-mono-ui text-[10px] uppercase tracking-[0.22em] text-secondary-foreground md:block">
+        <span className="absolute left-[12%] top-1/2 h-20 w-20 -translate-y-1/2 rounded-full border border-secondary-foreground/10" />
         Local finds, real makers, delivered across Kenya
+        <span className="ml-3 text-accent">·</span><span className="ml-3 text-secondary-foreground/70">Shop small, wear the story</span>
       </div>
 
       <header
         className={`sticky top-0 z-50 border-b transition-[background-color,box-shadow] duration-300 ${
           isScrolled
-            ? "border-border/80 bg-background/95 shadow-float backdrop-blur-xl"
-            : "border-foreground/10 bg-background/85 backdrop-blur-md"
+             ? "border-border/80 bg-background/95 shadow-float backdrop-blur-xl"
+             : "border-foreground/10 bg-background/90 backdrop-blur-lg"
         }`}
       >
         <div className="mx-auto flex h-[4.5rem] max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
@@ -76,8 +79,9 @@ export function Layout({ children }: { children: ReactNode }) {
             className="group flex shrink-0 items-center gap-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             data-testid="link-brand-home"
           >
-            <span className="grid h-9 w-9 place-items-center bg-primary font-display text-lg font-extrabold text-primary-foreground transition-transform group-hover:-rotate-6">
+              <span className="relative grid h-10 w-10 place-items-center overflow-hidden rounded-[1.1rem] bg-primary font-display text-lg font-extrabold text-primary-foreground shadow-sm transition-transform duration-300 group-hover:-rotate-6 group-hover:scale-105">
               M
+                <span className="absolute -bottom-3 -right-3 h-7 w-7 rounded-full border border-primary-foreground/40" />
             </span>
             <span className="font-display text-xl font-extrabold tracking-[-0.04em] text-foreground sm:text-2xl">
               Mkenya<span className="text-primary">.</span>
@@ -90,10 +94,10 @@ export function Layout({ children }: { children: ReactNode }) {
                 key={href}
                 href={href}
                 data-testid={`link-nav-${label.toLowerCase().replace(/\s+/g, "-")}`}
-                className={`flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-semibold transition-colors ${
+                className={`flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold transition-[background,color] ${
                   location === href
-                    ? "border-primary text-primary"
-                    : "border-transparent text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-muted/70 hover:text-foreground"
                 }`}
               >
                 <Icon className="h-4 w-4" />
@@ -107,7 +111,7 @@ export function Layout({ children }: { children: ReactNode }) {
               href="/explore"
               aria-label="Search the marketplace"
               data-testid="link-search-marketplace"
-              className="grid h-10 w-10 place-items-center border border-border text-foreground transition-colors hover:border-primary hover:text-primary sm:w-auto sm:gap-2 sm:px-3"
+              className="grid h-10 w-10 place-items-center rounded-full border border-border/80 bg-card/70 text-foreground transition-all hover:-translate-y-0.5 hover:border-primary hover:text-primary sm:w-auto sm:gap-2 sm:px-4"
             >
               <Search className="h-4 w-4" />
               <span className="hidden text-sm font-semibold sm:inline">Search</span>
@@ -120,7 +124,7 @@ export function Layout({ children }: { children: ReactNode }) {
             )}
             <button
               onClick={() => setIsCartOpen(true)}
-              className="relative flex h-10 items-center gap-2 bg-secondary px-3 text-sm font-bold text-secondary-foreground transition-transform hover:-translate-y-0.5 sm:px-4"
+              className="relative flex h-10 items-center gap-2 rounded-full bg-secondary px-4 text-sm font-bold text-secondary-foreground shadow-sm transition-transform hover:-translate-y-0.5 sm:px-5"
               data-testid="button-open-cart"
               aria-label={`Open cart${cartCount > 0 ? `, ${cartCount} items` : ""}`}
             >
@@ -138,7 +142,7 @@ export function Layout({ children }: { children: ReactNode }) {
             <Link
               href="/add-product"
               data-testid="link-add-product"
-              className="hidden items-center gap-2 bg-foreground px-4 py-2.5 text-sm font-bold text-background transition-colors hover:bg-primary hover:text-primary-foreground md:flex"
+              className="hidden items-center gap-2 rounded-full bg-foreground px-5 py-2.5 text-sm font-bold text-background transition-all hover:-translate-y-0.5 hover:bg-primary hover:text-primary-foreground md:flex"
             >
               <PlusCircle className="h-4 w-4" />
               Sell a find
@@ -158,7 +162,7 @@ export function Layout({ children }: { children: ReactNode }) {
       </motion.main>
 
       <nav
-        className="fixed bottom-0 left-0 right-0 z-50 flex border-t border-border bg-background/95 backdrop-blur-xl md:hidden"
+        className="fixed bottom-0 left-0 right-0 z-50 flex border-t border-border/80 bg-background/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-10px_36px_hsl(var(--foreground)/.08)] backdrop-blur-xl md:hidden"
         aria-label="Mobile navigation"
       >
         {navItems.slice(0, 3).map(({ href, label, icon: Icon }) => (
@@ -200,7 +204,8 @@ export function Layout({ children }: { children: ReactNode }) {
         </button>
       </nav>
 
-      <footer className="mt-auto bg-foreground text-background">
+      <footer className="relative mt-auto overflow-hidden bg-foreground text-background">
+        <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full border-[1px] border-background/10" />
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
           <div className="grid gap-10 md:grid-cols-[1.2fr_.8fr_.8fr]">
             <div>
@@ -302,5 +307,6 @@ export function Layout({ children }: { children: ReactNode }) {
         }}
       />
     </div>
+    </MotionConfig>
   );
 }

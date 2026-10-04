@@ -162,13 +162,13 @@ export default function FlashSaleAdmin() {
 
   return (
     <Layout>
-      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-10 sm:px-6 lg:px-8">
+      <main className="market-grid mx-auto w-full max-w-7xl flex-1 px-4 py-10 sm:px-6 lg:px-8">
         <div className="mb-8 flex flex-wrap items-end justify-between gap-5">
           <div>
             <p className="mb-2 flex items-center gap-2 font-mono-ui text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
               <Flame className="h-4 w-4" /> Store control room
             </p>
-            <h1 className="font-display text-5xl font-extrabold tracking-[-0.06em] text-foreground">Flash sale manager</h1>
+            <h1 className="font-display text-4xl font-extrabold tracking-[-0.06em] text-foreground sm:text-6xl">Flash sale manager</h1>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
               Choose exactly which products appear in Flash Finds, set their reduced price, and decide when the deal goes live.
             </p>
@@ -184,7 +184,7 @@ export default function FlashSaleAdmin() {
         </div>
 
         <div className="grid gap-8 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
-          <section className="h-fit border border-border bg-card p-5 shadow-sm sm:p-7">
+            <section className="paper-panel h-fit rounded-[1.5rem] border border-border/75 p-5 sm:p-7">
             <div className="mb-6 flex items-center justify-between gap-3">
               <div>
                 <p className="font-mono-ui text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
@@ -215,7 +215,7 @@ export default function FlashSaleAdmin() {
                     const product = products.find((item) => item.id === event.target.value);
                     setForm((current) => ({ ...current, productId: event.target.value, salePrice: product && !current.salePrice ? Math.max(1, Math.floor(product.price * 0.9)) : current.salePrice }));
                   }}
-                  className="h-12 w-full border border-border bg-background px-3 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                  className="h-12 w-full rounded-xl border border-border bg-background px-4 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                   disabled={productsLoading || isSaving}
                   required
                 >
@@ -232,8 +232,8 @@ export default function FlashSaleAdmin() {
               </div>
 
               {selectedProduct && (
-                <div className="flex items-center gap-3 border border-border bg-muted/30 p-3">
-                  <div className="h-16 w-16 shrink-0 overflow-hidden bg-white">
+                <div className="flex items-center gap-3 rounded-xl border border-border bg-muted/30 p-3">
+                  <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-card">
                     <ProductImage src={selectedProduct.imageUrl} alt={selectedProduct.name} category={selectedProduct.category} fit="contain" />
                   </div>
                   <div className="min-w-0">
@@ -268,7 +268,7 @@ export default function FlashSaleAdmin() {
                 </div>
               </div>
 
-              <label className="flex items-center gap-3 border border-border bg-muted/25 p-3 text-sm font-semibold">
+                <label className="flex items-center gap-3 rounded-xl border border-border bg-muted/25 p-3 text-sm font-semibold">
                 <input
                   type="checkbox"
                   checked={form.isPublished}
@@ -278,7 +278,7 @@ export default function FlashSaleAdmin() {
                 Publish this deal on the storefront when the schedule is active
               </label>
 
-              <Button type="submit" disabled={isSaving || productsLoading || products.length === 0} className="h-12 w-full bg-primary font-bold text-primary-foreground hover:bg-primary/90">
+              <Button type="submit" disabled={isSaving || productsLoading || products.length === 0} className="h-12 w-full rounded-xl bg-primary font-bold text-primary-foreground hover:bg-primary/90">
                 {isSaving ? "Saving…" : editingSaleId ? <><Check className="mr-2 h-4 w-4" /> Save changes</> : <><Plus className="mr-2 h-4 w-4" /> Add flash sale</>}
               </Button>
             </form>
@@ -308,8 +308,8 @@ export default function FlashSaleAdmin() {
                 {sales.map((sale) => {
                   const status = statusForSale(sale);
                   return (
-                    <article key={sale.id} className="flex flex-col gap-4 border border-border bg-card p-4 shadow-sm sm:flex-row sm:items-center">
-                      <div className="h-24 w-24 shrink-0 overflow-hidden bg-white">
+                    <article key={sale.id} className="flex flex-col gap-4 rounded-2xl border border-border/75 bg-card p-4 shadow-sm transition-shadow hover:shadow-float sm:flex-row sm:items-center">
+                      <div className="h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-muted/45">
                         <ProductImage src={sale.product.imageUrl} alt={sale.product.name} category={sale.product.category} fit="contain" />
                       </div>
                       <div className="min-w-0 flex-1">

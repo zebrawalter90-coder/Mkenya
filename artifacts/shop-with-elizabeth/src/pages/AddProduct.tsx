@@ -49,8 +49,18 @@ export default function AddProduct() {
     }
 
     setError(null);
+    const currentFileKeys = new Set(
+      imageFiles.map((file) => `${file.name}:${file.size}:${file.lastModified}`),
+    );
+    const newFiles = files.filter(
+      (file) => !currentFileKeys.has(`${file.name}:${file.size}:${file.lastModified}`),
+    );
+    if (newFiles.length === 0) {
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
     const previews = await Promise.all(
-      files.map(
+      newFiles.map(
         (file) =>
           new Promise<string>((resolve, reject) => {
             const reader = new FileReader();
@@ -60,8 +70,8 @@ export default function AddProduct() {
           }),
       ),
     );
-    setImageFiles(files);
-    setImagePreviews(previews);
+    setImageFiles((current) => [...current, ...newFiles]);
+    setImagePreviews((current) => [...current, ...previews]);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -177,7 +187,7 @@ export default function AddProduct() {
                       ))}
                     </div>
                     <label htmlFor="image" className="mt-4 flex cursor-pointer items-center justify-center gap-2 border border-border bg-background px-4 py-3 text-sm font-bold transition-colors hover:border-primary hover:text-primary">
-                      <Plus className="h-4 w-4" /> Choose a new photo set
+                      <Plus className="h-4 w-4" /> Add more photos
                     </label>
                   </div>
                 ) : (

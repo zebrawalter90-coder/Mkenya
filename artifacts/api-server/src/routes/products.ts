@@ -142,28 +142,31 @@ router.post("/products", async (req, res): Promise<void> => {
     ...(imageObjectPaths ?? []),
   ]));
 
-  const [product] = await db
-    .insert(productsTable)
-    .values({
-      id: randomUUID(),
-      name,
-      description: description ?? null,
-      price,
-      imageObjectPath,
-      category,
-      ownerId,
-      ownerName,
-    })
-    .returning();
+  const product = await db.transaction(async (tx) => {
+    const [createdProduct] = await tx
+      .insert(productsTable)
+      .values({
+        id: randomUUID(),
+        name,
+        description: description ?? null,
+        price,
+        imageObjectPath,
+        category,
+        ownerId,
+        ownerName,
+      })
+      .returning();
 
-  await db.insert(productImagesTable).values(
-    resolvedImagePaths.map((objectPath, sortOrder) => ({
-      id: randomUUID(),
-      productId: product.id,
-      objectPath,
-      sortOrder,
-    })),
-  );
+    await tx.insert(productImagesTable).values(
+      resolvedImagePaths.map((objectPath, sortOrder) => ({
+        id: randomUUID(),
+        productId: createdProduct.id,
+        objectPath,
+        sortOrder,
+      })),
+    );
+    return createdProduct;
+  });
 
   const response = await buildProductResponse(product, ownerId);
   res.status(201).json(response);

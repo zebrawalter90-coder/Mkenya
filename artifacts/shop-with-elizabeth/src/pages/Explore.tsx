@@ -80,8 +80,9 @@ export default function Explore() {
 
   return (
     <Layout>
-      <section className="border-b border-border bg-secondary text-secondary-foreground">
-        <div className="mx-auto max-w-7xl px-4 pb-10 pt-10 sm:px-6 lg:px-8">
+      <section className="market-grid relative overflow-hidden border-b border-secondary-foreground/10 bg-secondary text-secondary-foreground">
+        <div className="pointer-events-none absolute -right-20 -top-32 h-80 w-80 rounded-full border-[36px] border-secondary-foreground/5" />
+        <div className="mx-auto max-w-7xl px-4 pb-12 pt-12 sm:px-6 lg:px-8">
           <div className="flex flex-wrap items-end justify-between gap-6">
             <div>
               <p className="mb-3 flex items-center gap-2 font-mono-ui text-[10px] font-bold uppercase tracking-[0.2em] text-accent">
@@ -102,7 +103,7 @@ export default function Explore() {
               type="button"
               onClick={() => setShowWishlistOnly((current) => !current)}
               data-testid="button-wishlist-filter"
-              className={`flex items-center gap-2 border px-4 py-3 text-sm font-bold transition-colors ${
+              className={`flex items-center gap-2 rounded-full border px-4 py-3 text-sm font-bold transition-colors ${
                 showWishlistOnly
                   ? "border-accent bg-accent text-accent-foreground"
                   : "border-secondary-foreground/25 text-secondary-foreground hover:border-accent hover:text-accent"
@@ -115,7 +116,7 @@ export default function Explore() {
         </div>
       </section>
 
-      <section className="sticky top-[4.5rem] z-30 border-b border-border bg-background/95 backdrop-blur-xl">
+      <section className="sticky top-[4.5rem] z-30 border-b border-border/80 bg-background/95 shadow-sm backdrop-blur-xl">
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
             <div className="relative flex-1">
@@ -125,7 +126,7 @@ export default function Explore() {
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder="Search names, categories or descriptions"
-                className="h-12 rounded-none border-border bg-card pl-11 text-sm"
+                className="h-12 rounded-xl border-border bg-card/90 pl-11 text-sm shadow-sm"
                 data-testid="input-search"
                 aria-label="Search products"
               />
@@ -149,7 +150,7 @@ export default function Explore() {
                 value={sort}
                 onChange={(event) => setSort(event.target.value)}
                 data-testid="select-sort-products"
-                className="h-12 min-w-44 border border-border bg-card px-3 text-sm font-semibold text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                className="h-12 min-w-44 rounded-xl border border-border bg-card px-4 text-sm font-semibold text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary"
               >
                 {SORT_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
               </select>
@@ -162,7 +163,7 @@ export default function Explore() {
                 key={category}
                 onClick={() => setActiveCategory(category)}
                 data-testid={`filter-${category}`}
-                className={`shrink-0 border px-4 py-2 text-xs font-bold transition-colors ${
+                className={`shrink-0 rounded-full border px-4 py-2 text-xs font-bold transition-colors ${
                   activeCategory === category
                     ? "border-primary bg-primary text-primary-foreground"
                     : "border-border bg-card text-muted-foreground hover:border-primary hover:text-primary"

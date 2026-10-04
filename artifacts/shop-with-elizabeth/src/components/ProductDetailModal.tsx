@@ -46,7 +46,17 @@ export function ProductDetailModal({
     setShowComments(false);
     setSelectedImageIndex(0);
     const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (galleryImages.length < 2) return;
+      if (event.key === "ArrowLeft") {
+        setSelectedImageIndex((index) => (index - 1 + galleryImages.length) % galleryImages.length);
+      }
+      if (event.key === "ArrowRight") {
+        setSelectedImageIndex((index) => (index + 1) % galleryImages.length);
+      }
     };
     document.addEventListener("keydown", handleEscape);
     document.body.style.overflow = "hidden";
@@ -54,7 +64,7 @@ export function ProductDetailModal({
       document.removeEventListener("keydown", handleEscape);
       document.body.style.overflow = "";
     };
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, galleryImages.length]);
 
   if (!product) return null;
 
@@ -135,7 +145,7 @@ export function ProductDetailModal({
               aria-labelledby="product-modal-name"
               data-testid="product-modal"
             >
-              <div className="relative flex min-h-[56vh] shrink-0 flex-col bg-muted sm:min-h-[680px] sm:w-[57%]">
+              <div className="relative flex h-[58vh] shrink-0 flex-col bg-muted sm:h-[min(84vh,760px)] sm:w-[57%]">
                 <div className="relative min-h-0 flex-1">
                   <ProductImage
                     src={galleryImages[selectedImageIndex] ?? product.imageUrl}

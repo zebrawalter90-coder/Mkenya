@@ -55,14 +55,14 @@ export default function Home() {
 
   return (
     <Layout>
-      <section className="relative overflow-hidden border-b border-border bg-background">
+      <section className="market-grid relative overflow-hidden border-b border-border/70 bg-background">
         <div className="pointer-events-none absolute -right-28 -top-28 h-80 w-80 rounded-full bg-accent/35 blur-3xl" />
         <div className="pointer-events-none absolute bottom-0 left-[-8rem] h-64 w-64 rounded-full bg-primary/10 blur-3xl" />
-        <div className="mx-auto grid max-w-7xl gap-10 px-4 pb-12 pt-10 sm:px-6 md:grid-cols-[1.02fr_.98fr] md:items-center md:pb-16 md:pt-16 lg:px-8">
+        <div className="mx-auto grid max-w-7xl gap-10 px-4 pb-14 pt-12 sm:px-6 md:grid-cols-[1.02fr_.98fr] md:items-center md:pb-20 md:pt-20 lg:px-8">
           <motion.div initial={{ opacity: 0, x: -24 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.65 }}>
             <div className="mb-6 flex items-center gap-3 font-mono-ui text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
               <span className="h-px w-8 bg-primary" />
-              The local edit · 2026
+              The local edit · Nairobi to everywhere
             </div>
             <h1 className="max-w-2xl font-display text-[3.6rem] font-extrabold leading-[.92] tracking-[-0.065em] text-foreground sm:text-7xl lg:text-[6.6rem]">
               Dress like
@@ -104,11 +104,11 @@ export default function Home() {
             transition={{ duration: 0.7, delay: 0.12 }}
             className="relative mx-auto w-full max-w-[34rem]"
           >
-            <div className="absolute -left-3 top-8 z-10 hidden w-32 bg-accent p-4 sm:block">
+            <div className="animate-drift absolute -left-3 top-8 z-10 hidden w-36 rotate-[-4deg] bg-accent p-4 shadow-float sm:block">
               <CircleDot className="mb-5 h-5 w-5 text-accent-foreground" />
               <p className="font-display text-xl font-bold leading-tight text-accent-foreground">Made close to home.</p>
             </div>
-            <div className="relative aspect-[.88] overflow-hidden bg-secondary shadow-editorial">
+            <div className="relative aspect-[.88] overflow-hidden rounded-[1.8rem] bg-secondary shadow-editorial">
               {leadProduct ? (
                 <ProductImage
                   src={leadProduct.imageUrl}
@@ -137,7 +137,7 @@ export default function Home() {
                 {leadProduct && <p className="mt-2 font-mono-ui text-sm text-accent">KES {leadProduct.price.toLocaleString()}</p>}
               </div>
             </div>
-            <div className="absolute -bottom-4 -right-2 hidden w-32 border border-foreground/15 bg-background p-3 shadow-float sm:block">
+            <div className="absolute -bottom-4 -right-2 hidden w-36 rotate-[3deg] rounded-xl border border-foreground/10 bg-card p-4 shadow-float sm:block">
               <p className="font-mono-ui text-[9px] uppercase tracking-[0.15em] text-muted-foreground">Curated for</p>
               <p className="mt-1 text-sm font-bold">Bold, everyday living</p>
             </div>
@@ -172,7 +172,7 @@ export default function Home() {
                 viewport={{ once: true, amount: 0.3 }}
                 transition={{ delay: index * 0.07 }}
                 whileHover={{ y: -5 }}
-                className="group h-full border border-border bg-card p-4 transition-shadow hover:shadow-float sm:p-5"
+                className="group h-full rounded-2xl border border-border/75 bg-card/90 p-4 transition-all hover:-translate-y-1 hover:border-primary/40 hover:shadow-float sm:p-5"
               >
                 <div className={`mb-10 grid h-11 w-11 place-items-center ${tone}`}>
                   <Icon className="h-5 w-5 transition-transform duration-300 group-hover:rotate-6 group-hover:scale-110" />
@@ -223,7 +223,7 @@ export default function Home() {
       </section>
 
       <section className="mx-auto w-full max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-        <div className="grid gap-px border border-border bg-border md:grid-cols-3">
+        <div className="grid gap-px overflow-hidden rounded-2xl border border-border bg-border md:grid-cols-3">
           {trustCues.map(({ icon: Icon, title, text }, index) => (
             <motion.div
               key={title}
@@ -231,7 +231,7 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.08 }}
-              className="bg-background p-6 sm:p-8"
+              className="bg-card/90 p-6 transition-colors hover:bg-card sm:p-8"
             >
               <Icon className="h-6 w-6 text-primary" />
               <h3 className="mt-8 font-display text-2xl font-bold">{title}</h3>
@@ -242,13 +242,13 @@ export default function Home() {
       </section>
 
       <section className="mx-auto mb-14 w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="relative overflow-hidden bg-primary px-6 py-12 text-primary-foreground sm:px-12">
+        <div className="relative overflow-hidden rounded-[1.8rem] bg-primary px-6 py-12 text-primary-foreground shadow-editorial sm:px-12">
           <div className="pointer-events-none absolute -right-10 -top-20 h-56 w-56 rounded-full border-[28px] border-primary-foreground/15" />
           <div className="relative max-w-2xl">
             <p className="font-mono-ui text-[10px] font-bold uppercase tracking-[0.2em] text-primary-foreground/70">For makers, stylists and collectors</p>
             <h2 className="mt-3 font-display text-4xl font-extrabold leading-none tracking-[-0.04em] sm:text-5xl">Your work deserves a window.</h2>
             <p className="mt-4 max-w-lg text-sm leading-relaxed text-primary-foreground/80">List the piece you made, find your people, and let the right wardrobe make its way home.</p>
-            <Link href="/add-product" data-testid="link-seller-cta" className="mt-7 inline-flex items-center gap-2 bg-foreground px-5 py-3 text-sm font-bold text-background transition-transform hover:-translate-y-1">
+            <Link href="/add-product" data-testid="link-seller-cta" className="mt-7 inline-flex items-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-bold text-background transition-transform hover:-translate-y-1">
               List your first item <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
