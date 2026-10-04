@@ -12,6 +12,7 @@ import {
   ShoppingCart,
   Search,
   ArrowUpRight,
+  Download,
 } from "lucide-react";
 import { useUser } from "@/hooks/useUser";
 import { createBuyNowItem, useCart, type CartItem } from "@/hooks/useCart";
@@ -222,6 +223,14 @@ export function Layout({ children }: { children: ReactNode }) {
               >
                 Start browsing <ArrowUpRight className="h-4 w-4" />
               </Link>
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new Event("mkenya:show-install-prompt"))}
+                data-testid="button-install-app-footer"
+                className="ml-5 inline-flex items-center gap-2 text-sm font-bold text-accent transition-colors hover:text-background"
+              >
+                Install Mkenya Shop <Download className="h-4 w-4" />
+              </button>
             </div>
             <div>
               <p className="font-mono-ui text-[10px] uppercase tracking-[0.2em] text-background/45">Payment desk</p>

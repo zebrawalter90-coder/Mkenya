@@ -136,17 +136,17 @@ router.post("/products", async (req, res): Promise<void> => {
     return;
   }
 
-  const { name, description, price, imageObjectPath, imageObjectPaths, category, ownerId, ownerName } = parsed.data;
+  const { id: requestedId, name, description, price, imageObjectPath, imageObjectPaths, category, ownerId, ownerName } = parsed.data;
   const resolvedImagePaths = Array.from(new Set([
     imageObjectPath,
     ...(imageObjectPaths ?? []),
   ]));
 
-  const product = await db.transaction(async (tx) => {
+  const saveResult = await db.transaction(async (tx) => {
     const [createdProduct] = await tx
       .insert(productsTable)
       .values({
-        id: randomUUID(),
+        id: requestedId ?? randomUUID(),
         name,
         description: description ?? null,
         price,
@@ -155,21 +155,59 @@ router.post("/products", async (req, res): Promise<void> => {
         ownerId,
         ownerName,
       })
+      .onConflictDoNothing({ target: productsTable.id })
       .returning();
 
-    await tx.insert(productImagesTable).values(
-      resolvedImagePaths.map((objectPath, sortOrder) => ({
-        id: randomUUID(),
-        productId: createdProduct.id,
-        objectPath,
-        sortOrder,
-      })),
-    );
-    return createdProduct;
+    if (createdProduct) {
+      await tx.insert(productImagesTable).values(
+        resolvedImagePaths.map((objectPath, sortOrder) => ({
+          id: randomUUID(),
+          productId: createdProduct.id,
+          objectPath,
+          sortOrder,
+        })),
+      );
+      return { kind: "created" as const, product: createdProduct };
+    }
+
+    if (!requestedId) return { kind: "conflict" as const };
+
+    const [existingProduct] = await tx
+      .select()
+      .from(productsTable)
+      .where(eq(productsTable.id, requestedId));
+    if (!existingProduct || existingProduct.ownerId !== ownerId) {
+      return { kind: "conflict" as const };
+    }
+
+    const existingImages = await tx
+      .select()
+      .from(productImagesTable)
+      .where(eq(productImagesTable.productId, requestedId))
+      .orderBy(asc(productImagesTable.sortOrder), asc(productImagesTable.createdAt));
+    const matchesOriginalRequest =
+      existingProduct.name === name &&
+      existingProduct.description === (description ?? null) &&
+      existingProduct.price === price &&
+      existingProduct.imageObjectPath === imageObjectPath &&
+      existingProduct.category === category &&
+      existingProduct.ownerName === ownerName &&
+      existingImages.map((image) => image.objectPath).join("\u0000") === resolvedImagePaths.join("\u0000");
+
+    return matchesOriginalRequest
+      ? { kind: "duplicate" as const, product: existingProduct }
+      : { kind: "conflict" as const };
   });
 
-  const response = await buildProductResponse(product, ownerId);
-  res.status(201).json(response);
+  if (saveResult.kind === "conflict") {
+    res.status(409).json({
+      error: "This save ID is already attached to a different listing. Check your listings before starting a new one.",
+    });
+    return;
+  }
+
+  const response = await buildProductResponse(saveResult.product, ownerId);
+  res.status(saveResult.kind === "created" ? 201 : 200).json(response);
 });
 
 router.put("/products/:id", async (req, res): Promise<void> => {
@@ -238,11 +276,13 @@ router.delete("/products/:id", async (req, res): Promise<void> => {
     return;
   }
 
-  await db.delete(commentsTable).where(eq(commentsTable.productId, params.data.id));
-  await db.delete(likesTable).where(eq(likesTable.productId, params.data.id));
-  await db.delete(productImagesTable).where(eq(productImagesTable.productId, params.data.id));
-  await db.delete(flashSalesTable).where(eq(flashSalesTable.productId, params.data.id));
-  await db.delete(productsTable).where(eq(productsTable.id, params.data.id));
+  await db.transaction(async (tx) => {
+    await tx.delete(commentsTable).where(eq(commentsTable.productId, params.data.id));
+    await tx.delete(likesTable).where(eq(likesTable.productId, params.data.id));
+    await tx.delete(productImagesTable).where(eq(productImagesTable.productId, params.data.id));
+    await tx.delete(flashSalesTable).where(eq(flashSalesTable.productId, params.data.id));
+    await tx.delete(productsTable).where(eq(productsTable.id, params.data.id));
+  });
 
   res.sendStatus(204);
 });

@@ -52,6 +52,7 @@ export const GetProductsResponse = zod.array(GetProductsResponseItem)
 /**
  * @summary Create a new product listing
  */
+export const createProductBodyIdRegExp = new RegExp('^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$');
 
 export const createProductBodyPriceMin = 0;
 
@@ -59,6 +60,7 @@ export const createProductBodyPriceMin = 0;
 
 
 export const CreateProductBody = zod.object({
+  "id": zod.string().regex(createProductBodyIdRegExp).optional().describe('Stable client-generated ID used to safely retry the same product save'),
   "name": zod.string().min(1),
   "description": zod.string().optional(),
   "price": zod.number().min(createProductBodyPriceMin),

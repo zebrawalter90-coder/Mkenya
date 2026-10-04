@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Upload, Plus, X } from "lucide-react";
 import { motion } from "framer-motion";
@@ -12,6 +12,28 @@ import { useQueryClient } from "@tanstack/react-query";
 
 type Category = "Clothing" | "Accessories" | "Fabric" | "Footwear" | "Jewelry" | "Beauty" | "Other";
 const CATEGORIES: Category[] = ["Clothing", "Accessories", "Fabric", "Footwear", "Jewelry", "Beauty", "Other"];
+
+function imageFileKey(file: File) {
+  return `${file.name}:${file.size}:${file.lastModified}`;
+}
+
+function uploadErrorMessage(error: unknown) {
+  if (error instanceof Error) {
+    const errorData = (error as Error & { data?: unknown }).data;
+    if (errorData && typeof errorData === "object" && "error" in errorData) {
+      const message = (errorData as { error?: unknown }).error;
+      if (typeof message === "string") return message;
+    }
+    try {
+      const parsed = JSON.parse(error.message) as { error?: unknown };
+      if (typeof parsed.error === "string") return parsed.error;
+    } catch {
+      // The API client may provide a plain-text error instead of a JSON body.
+    }
+    return error.message || "Something went wrong. Please try again.";
+  }
+  return "Something went wrong. Please try again.";
+}
 
 export default function AddProduct() {
   const [, setLocation] = useLocation();
@@ -29,8 +51,16 @@ export default function AddProduct() {
   const [uploadProgress, setUploadProgress] = useState("");
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const uploadedObjectPathsRef = useRef(new WeakMap<File, string>());
+  const previewUrlsRef = useRef(new Set<string>());
+  const createRequestIdRef = useRef<string | null>(null);
 
-  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  useEffect(() => () => {
+    for (const previewUrl of previewUrlsRef.current) URL.revokeObjectURL(previewUrl);
+    previewUrlsRef.current.clear();
+  }, []);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
     if (!files.length) return;
     const MAX_MB = 50;
@@ -41,7 +71,15 @@ export default function AddProduct() {
       return;
     }
 
-    const invalidFile = files.find((file) => !file.type.startsWith("image/"));
+    const emptyFile = files.find((file) => file.size === 0);
+    if (emptyFile) {
+      setError(`${emptyFile.name} is empty. Please choose another photo.`);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    const supportedImageTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
+    const invalidFile = files.find((file) => !supportedImageTypes.has(file.type.toLowerCase()));
     if (invalidFile) {
       setError(`${invalidFile.name} is not an image. Please select JPG, PNG, or WEBP files.`);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -49,27 +87,23 @@ export default function AddProduct() {
     }
 
     setError(null);
-    const currentFileKeys = new Set(
-      imageFiles.map((file) => `${file.name}:${file.size}:${file.lastModified}`),
-    );
-    const newFiles = files.filter(
-      (file) => !currentFileKeys.has(`${file.name}:${file.size}:${file.lastModified}`),
-    );
+    const currentFileKeys = new Set(imageFiles.map(imageFileKey));
+    const newFiles = files.filter((file) => !currentFileKeys.has(imageFileKey(file)));
     if (newFiles.length === 0) {
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
-    const previews = await Promise.all(
-      newFiles.map(
-        (file) =>
-          new Promise<string>((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result as string);
-            reader.onerror = () => reject(new Error(`Could not preview ${file.name}.`));
-            reader.readAsDataURL(file);
-          }),
-      ),
-    );
+
+    const previews: string[] = [];
+    try {
+      for (const file of newFiles) previews.push(URL.createObjectURL(file));
+      previews.forEach((previewUrl) => previewUrlsRef.current.add(previewUrl));
+    } catch {
+      previews.forEach((previewUrl) => URL.revokeObjectURL(previewUrl));
+      setError("Could not preview those photos. Please choose them again.");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
     setImageFiles((current) => [...current, ...newFiles]);
     setImagePreviews((current) => [...current, ...previews]);
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -85,6 +119,13 @@ export default function AddProduct() {
     try {
       const objectPaths: string[] = [];
       for (const [index, imageFile] of imageFiles.entries()) {
+        const previouslyUploadedPath = uploadedObjectPathsRef.current.get(imageFile);
+        if (previouslyUploadedPath) {
+          objectPaths.push(previouslyUploadedPath);
+          setUploadProgress(`Reusing photo ${index + 1} of ${imageFiles.length}…`);
+          continue;
+        }
+
         setUploadProgress(`Uploading photo ${index + 1} of ${imageFiles.length}…`);
         const formData = new FormData();
         formData.append("file", imageFile);
@@ -99,11 +140,17 @@ export default function AddProduct() {
           throw new Error((body as any).error ?? `Upload failed (${uploadRes.status})`);
         }
         const { objectPath } = (await uploadRes.json()) as { objectPath: string };
+        if (typeof objectPath !== "string" || !objectPath.startsWith("/objects/uploads/")) {
+          throw new Error("Photo upload returned an invalid storage path. Please retry.");
+        }
+        uploadedObjectPathsRef.current.set(imageFile, objectPath);
         objectPaths.push(objectPath);
       }
 
+      setUploadProgress("Saving your listing…");
       await createProduct.mutateAsync({
         data: {
+          id: createRequestIdRef.current ?? (createRequestIdRef.current = window.crypto.randomUUID()),
           name: name.trim(),
           description: description.trim() || undefined,
           price: Number(price),
@@ -119,7 +166,11 @@ export default function AddProduct() {
       setLocation("/");
     } catch (err: any) {
       console.error(err);
-      setError(err?.message ?? "Something went wrong. Please try again.");
+      const uploadedCount = imageFiles.filter((file) => uploadedObjectPathsRef.current.has(file)).length;
+      const retryNote = uploadedCount > 0
+        ? ` ${uploadedCount} photo${uploadedCount === 1 ? " is" : "s are"} safely uploaded and will be reused if you retry.`
+        : "";
+      setError(`${uploadErrorMessage(err)}${retryNote}`);
     } finally {
       setUploading(false);
       setUploadProgress("");
@@ -147,7 +198,7 @@ export default function AddProduct() {
           className="bg-card border border-border rounded-3xl p-6 md:p-10 shadow-sm"
         >
           {error && (
-            <div className="mb-6 p-4 bg-destructive/10 border border-destructive/30 rounded-2xl text-sm text-destructive font-medium">
+            <div role="alert" aria-live="polite" className="mb-6 p-4 bg-destructive/10 border border-destructive/30 rounded-2xl text-sm text-destructive font-medium">
               {error}
             </div>
           )}
@@ -155,7 +206,7 @@ export default function AddProduct() {
           <form onSubmit={handleSubmit} className="space-y-7">
             {/* Image Upload */}
             <div className="space-y-3">
-              <Label className="text-base font-bold">Product Image</Label>
+              <Label className="text-base font-bold">Product Photos</Label>
               <div
                 className={`border-2 border-dashed rounded-2xl overflow-hidden transition-all duration-200 ${
                   imagePreviews.length ? "border-primary/50" : "border-border hover:border-primary"
@@ -175,9 +226,14 @@ export default function AddProduct() {
                           <button
                             type="button"
                             onClick={() => {
+                              const previewUrl = imagePreviews[index];
+                              if (previewUrl && previewUrlsRef.current.delete(previewUrl)) {
+                                URL.revokeObjectURL(previewUrl);
+                              }
                               setImageFiles((current) => current.filter((_, itemIndex) => itemIndex !== index));
                               setImagePreviews((current) => current.filter((_, itemIndex) => itemIndex !== index));
                             }}
+                            disabled={uploading}
                             className="absolute right-2 top-2 grid h-8 w-8 place-items-center bg-foreground/80 text-background transition-colors hover:bg-destructive"
                             aria-label={`Remove photo ${index + 1}`}
                           >
@@ -186,26 +242,27 @@ export default function AddProduct() {
                         </div>
                       ))}
                     </div>
-                    <label htmlFor="image" className="mt-4 flex cursor-pointer items-center justify-center gap-2 border border-border bg-background px-4 py-3 text-sm font-bold transition-colors hover:border-primary hover:text-primary">
+                    <label htmlFor="image" aria-disabled={uploading} className={`mt-4 flex items-center justify-center gap-2 border border-border bg-background px-4 py-3 text-sm font-bold transition-colors ${uploading ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:border-primary hover:text-primary"}`}>
                       <Plus className="h-4 w-4" /> Add more photos
                     </label>
                   </div>
                 ) : (
-                  <label htmlFor="image" className="cursor-pointer flex flex-col items-center justify-center py-16 px-4 text-center">
+                  <label htmlFor="image" aria-disabled={uploading} className={`flex flex-col items-center justify-center py-16 px-4 text-center ${uploading ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}>
                     <div className="w-16 h-16 bg-background shadow rounded-full flex items-center justify-center mb-5">
                       <Upload className="w-7 h-7 text-primary" />
                     </div>
                     <span className="font-black text-lg mb-1 text-foreground">Click to upload product photos</span>
-                    <span className="text-sm text-muted-foreground">Select 6, 8, or more JPG, PNG, or WEBP photos (max 50MB each)</span>
+                    <span className="text-sm text-muted-foreground">Choose multiple JPG, PNG, or WEBP photos (max 50MB each)</span>
                   </label>
                 )}
                 <input
                   ref={fileInputRef}
                   id="image"
                   type="file"
-                  accept="image/*"
+                  accept="image/jpeg,image/png,image/webp"
                   multiple
                   onChange={handleImageChange}
+                  disabled={uploading}
                   className="hidden"
                 />
               </div>
@@ -223,6 +280,7 @@ export default function AddProduct() {
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                disabled={uploading}
                 placeholder="e.g. Handmade Maasai Shuka Wrap"
                 className="h-12 text-base bg-muted/30 border-border rounded-xl px-4"
                 required
@@ -236,6 +294,7 @@ export default function AddProduct() {
                 id="description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
+                disabled={uploading}
                 placeholder="Describe your item — material, size, condition, etc."
                 className="w-full h-24 text-base bg-muted/30 border border-border rounded-xl px-4 py-3 focus:outline-none focus:ring-1 focus:ring-primary resize-none"
               />
@@ -250,6 +309,7 @@ export default function AddProduct() {
                     key={cat}
                     type="button"
                     onClick={() => setCategory(cat)}
+                    disabled={uploading}
                     className={`px-4 py-2 rounded-full text-sm font-semibold border transition-all ${
                       category === cat
                         ? "bg-primary text-white border-primary"
@@ -274,6 +334,7 @@ export default function AddProduct() {
                   step="1"
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
+                  disabled={uploading}
                   placeholder="1500"
                   className="h-12 text-base pl-14 bg-muted/30 border-border rounded-xl"
                   required
@@ -289,7 +350,7 @@ export default function AddProduct() {
               {uploading || createProduct.isPending ? (
                 <span className="flex items-center gap-2">
                   <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  {uploadProgress || "Saving…"}
+                  <span aria-live="polite">{uploadProgress || "Saving…"}</span>
                 </span>
               ) : (
                 <>

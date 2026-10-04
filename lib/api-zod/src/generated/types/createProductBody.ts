@@ -7,6 +7,11 @@
  */
 
 export interface CreateProductBody {
+  /**
+     * Stable client-generated ID used to safely retry the same product save
+     * @pattern ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$
+     */
+  id?: string;
   /** @minLength 1 */
   name: string;
   description?: string;

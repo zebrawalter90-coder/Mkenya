@@ -8,12 +8,13 @@ const router: IRouter = Router();
 const objectStorageService = new ObjectStorageService();
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+const SUPPORTED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: MAX_FILE_SIZE },
   fileFilter: (_req, file, cb) => {
-    if (!file.mimetype.startsWith("image/")) {
-      cb(new Error("Only image files are allowed"));
+    if (!SUPPORTED_IMAGE_TYPES.has(file.mimetype.toLowerCase())) {
+      cb(new Error("Only JPG, PNG, or WEBP image files are allowed."));
     } else {
       cb(null, true);
     }
@@ -46,6 +47,10 @@ router.post("/storage/uploads", (req: Request, res: Response) => {
 
     if (!req.file) {
       res.status(400).json({ error: "No file provided" });
+      return;
+    }
+    if (req.file.size === 0) {
+      res.status(400).json({ error: "The selected photo is empty. Choose another image." });
       return;
     }
 
