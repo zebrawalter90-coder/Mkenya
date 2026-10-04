@@ -383,7 +383,7 @@ components:
         - status
     Product:
       type: object
-      required: [id, name, price, imageUrl, category, ownerId, ownerName, likesCount, userLiked, comments, createdAt]
+      required: [id, name, price, imageUrl, imageUrls, category, ownerId, ownerName, likesCount, userLiked, comments, createdAt]
       properties:
         id:
           type: string
@@ -395,6 +395,10 @@ components:
           type: integer
         imageUrl:
           type: string
+        imageUrls:
+          type: array
+          items:
+            type: string
         category:
           type: string
         ownerId:
@@ -441,6 +445,11 @@ components:
           minimum: 0
         imageObjectPath:
           type: string
+        imageObjectPaths:
+          type: array
+          minItems: 1
+          items:
+            type: string
         category:
           type: string
         ownerId:

@@ -8,6 +8,7 @@ import AddProduct from "@/pages/AddProduct";
 import Explore from "@/pages/Explore";
 import Chat from "@/pages/Chat";
 import Payment from "@/pages/Payment";
+import FlashSaleAdmin from "@/pages/FlashSaleAdmin";
 import { InstallAppPrompt } from "@/components/InstallAppPrompt";
 
 const queryClient = new QueryClient();
@@ -20,6 +21,7 @@ function Router() {
       <Route path="/chat" component={Chat} />
       <Route path="/add-product" component={AddProduct} />
       <Route path="/payment" component={Payment} />
+      <Route path="/admin/flash-sales" component={FlashSaleAdmin} />
       <Route component={NotFound} />
     </Switch>
   );

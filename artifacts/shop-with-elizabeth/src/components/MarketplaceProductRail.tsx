@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, Clock3, Flame, ShoppingBag } from "lucide-react";
 import { Link } from "wouter";
-import type { Product } from "@workspace/api-client-react";
 import { ProductImage } from "@/components/ProductImage";
+import type { FlashSale } from "@/lib/flashSales";
 
 interface MarketplaceProductRailProps {
-  products: Product[];
+  sales: FlashSale[];
 }
 
 function pad(value: number) {
@@ -21,12 +21,10 @@ function getRemaining(target: number) {
   };
 }
 
-export function MarketplaceProductRail({ products }: MarketplaceProductRailProps) {
+export function MarketplaceProductRail({ sales }: MarketplaceProductRailProps) {
   const saleEndsAt = useMemo(() => {
-    const end = new Date();
-    end.setHours(end.getHours() + 8, 0, 0, 0);
-    return end.getTime();
-  }, []);
+    return Math.min(...sales.map((sale) => new Date(sale.endsAt).getTime()));
+  }, [sales]);
   const [remaining, setRemaining] = useState(() => getRemaining(saleEndsAt));
 
   useEffect(() => {
@@ -34,7 +32,7 @@ export function MarketplaceProductRail({ products }: MarketplaceProductRailProps
     return () => window.clearInterval(timer);
   }, [saleEndsAt]);
 
-  if (products.length === 0) return null;
+  if (sales.length === 0) return null;
 
   return (
     <section className="overflow-hidden bg-primary text-primary-foreground">
@@ -61,18 +59,18 @@ export function MarketplaceProductRail({ products }: MarketplaceProductRailProps
         </div>
 
         <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {products.slice(0, 8).map((product, index) => (
+          {sales.slice(0, 8).map((sale, index) => (
             <Link
-              key={product.id}
-              href={`/explore?category=${encodeURIComponent(product.category)}`}
+              key={sale.id}
+              href={`/explore?category=${encodeURIComponent(sale.product.category)}`}
               className="group min-w-[172px] snap-start overflow-hidden border border-primary-foreground/15 bg-background text-foreground shadow-sm transition-transform duration-300 hover:-translate-y-1 sm:min-w-[205px]"
-              data-testid={`link-flash-product-${product.id}`}
+              data-testid={`link-flash-product-${sale.product.id}`}
             >
               <div className="relative aspect-square overflow-hidden bg-white">
                 <ProductImage
-                  src={product.imageUrl}
-                  alt={product.name}
-                  category={product.category}
+                  src={sale.product.imageUrl}
+                  alt={sale.product.name}
+                  category={sale.product.category}
                   fit="contain"
                   objectPosition={index % 2 === 0 ? "center 35%" : "center"}
                 />
@@ -81,10 +79,13 @@ export function MarketplaceProductRail({ products }: MarketplaceProductRailProps
                 </span>
               </div>
               <div className="p-3">
-                <p className="line-clamp-1 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">{product.category}</p>
-                <p className="mt-1 line-clamp-2 min-h-10 text-sm font-bold leading-snug">{product.name}</p>
+                <p className="line-clamp-1 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">{sale.product.category}</p>
+                <p className="mt-1 line-clamp-2 min-h-10 text-sm font-bold leading-snug">{sale.product.name}</p>
                 <div className="mt-3 flex items-center justify-between gap-2">
-                  <span className="font-mono-ui text-sm font-black text-primary">KES {product.price.toLocaleString()}</span>
+                  <span>
+                    <span className="block font-mono-ui text-sm font-black text-primary">KES {sale.salePrice.toLocaleString()}</span>
+                    <span className="font-mono-ui text-[10px] text-muted-foreground line-through">KES {sale.product.price.toLocaleString()}</span>
+                  </span>
                   <ShoppingBag className="h-4 w-4 text-secondary transition-transform group-hover:scale-110" />
                 </div>
               </div>

@@ -30,6 +30,7 @@ export const GetProductsResponseItem = zod.object({
   "description": zod.string().optional(),
   "price": zod.number(),
   "imageUrl": zod.string(),
+  "imageUrls": zod.array(zod.string()),
   "category": zod.string(),
   "ownerId": zod.string(),
   "ownerName": zod.string(),
@@ -56,11 +57,13 @@ export const createProductBodyPriceMin = 0;
 
 
 
+
 export const CreateProductBody = zod.object({
   "name": zod.string().min(1),
   "description": zod.string().optional(),
   "price": zod.number().min(createProductBodyPriceMin),
   "imageObjectPath": zod.string(),
+  "imageObjectPaths": zod.array(zod.string()).min(1).optional(),
   "category": zod.string(),
   "ownerId": zod.string(),
   "ownerName": zod.string()
@@ -72,6 +75,7 @@ export const CreateProductResponse = zod.object({
   "description": zod.string().optional(),
   "price": zod.number(),
   "imageUrl": zod.string(),
+  "imageUrls": zod.array(zod.string()),
   "category": zod.string(),
   "ownerId": zod.string(),
   "ownerName": zod.string(),
@@ -114,6 +118,7 @@ export const UpdateProductResponse = zod.object({
   "description": zod.string().optional(),
   "price": zod.number(),
   "imageUrl": zod.string(),
+  "imageUrls": zod.array(zod.string()),
   "category": zod.string(),
   "ownerId": zod.string(),
   "ownerName": zod.string(),

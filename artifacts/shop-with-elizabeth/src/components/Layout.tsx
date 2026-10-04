@@ -237,7 +237,7 @@ export function Layout({ children }: { children: ReactNode }) {
                 </div>
               </div>
             </div>
-            <div>
+              <div>
               <p className="font-mono-ui text-[10px] uppercase tracking-[0.2em] text-background/45">Need a hand?</p>
               <ul className="mt-4 space-y-4 text-sm">
                 <li className="flex items-center gap-2">
@@ -259,6 +259,11 @@ export function Layout({ children }: { children: ReactNode }) {
                   </a>
                 </li>
                 <li className="text-xs text-background/45">Orders · questions · returns</li>
+                <li>
+                  <Link href="/admin/flash-sales" data-testid="link-admin-flash-sales" className="text-xs font-bold text-accent hover:underline">
+                    Flash sale admin
+                  </Link>
+                </li>
               </ul>
             </div>
           </div>

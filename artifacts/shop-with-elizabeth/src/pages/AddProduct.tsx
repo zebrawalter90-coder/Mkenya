@@ -23,66 +23,82 @@ export default function AddProduct() {
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [category, setCategory] = useState<Category>("Clothing");
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState("");
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    if (!files.length) return;
     const MAX_MB = 50;
-    if (file.size > MAX_MB * 1024 * 1024) {
-      setError(`Image is too large (${(file.size / 1024 / 1024).toFixed(1)}MB). Please use an image under ${MAX_MB}MB.`);
+    const oversizedFile = files.find((file) => file.size > MAX_MB * 1024 * 1024);
+    if (oversizedFile) {
+      setError(`${oversizedFile.name} is too large (${(oversizedFile.size / 1024 / 1024).toFixed(1)}MB). Please use images under ${MAX_MB}MB.`);
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
 
-    if (!file.type.startsWith("image/")) {
-      setError("Please select an image file (JPG, PNG, WEBP, etc.)");
+    const invalidFile = files.find((file) => !file.type.startsWith("image/"));
+    if (invalidFile) {
+      setError(`${invalidFile.name} is not an image. Please select JPG, PNG, or WEBP files.`);
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
 
-    setImageFile(file);
     setError(null);
-    const reader = new FileReader();
-    reader.onloadend = () => setImagePreview(reader.result as string);
-    reader.readAsDataURL(file);
+    const previews = await Promise.all(
+      files.map(
+        (file) =>
+          new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = () => reject(new Error(`Could not preview ${file.name}.`));
+            reader.readAsDataURL(file);
+          }),
+      ),
+    );
+    setImageFiles(files);
+    setImagePreviews(previews);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !price || !imageFile || !user.id) return;
+    if (!name.trim() || !price || imageFiles.length === 0 || !user.id) return;
 
     setUploading(true);
     setError(null);
 
     try {
-      // Upload file directly to our API server (avoids CORS issues)
-      const formData = new FormData();
-      formData.append("file", imageFile);
+      const objectPaths: string[] = [];
+      for (const [index, imageFile] of imageFiles.entries()) {
+        setUploadProgress(`Uploading photo ${index + 1} of ${imageFiles.length}…`);
+        const formData = new FormData();
+        formData.append("file", imageFile);
 
-      const uploadRes = await fetch("/api/storage/uploads", {
-        method: "POST",
-        body: formData,
-      });
+        const uploadRes = await fetch("/api/storage/uploads", {
+          method: "POST",
+          body: formData,
+        });
 
-      if (!uploadRes.ok) {
-        const body = await uploadRes.json().catch(() => ({}));
-        throw new Error((body as any).error ?? `Upload failed (${uploadRes.status})`);
+        if (!uploadRes.ok) {
+          const body = await uploadRes.json().catch(() => ({}));
+          throw new Error((body as any).error ?? `Upload failed (${uploadRes.status})`);
+        }
+        const { objectPath } = (await uploadRes.json()) as { objectPath: string };
+        objectPaths.push(objectPath);
       }
-
-      const { objectPath } = await uploadRes.json() as { objectPath: string };
 
       await createProduct.mutateAsync({
         data: {
           name: name.trim(),
           description: description.trim() || undefined,
           price: Number(price),
-          imageObjectPath: objectPath,
+          imageObjectPath: objectPaths[0],
+          imageObjectPaths: objectPaths,
           category,
           ownerId: user.id,
           ownerName: user.name,
@@ -96,10 +112,11 @@ export default function AddProduct() {
       setError(err?.message ?? "Something went wrong. Please try again.");
     } finally {
       setUploading(false);
+      setUploadProgress("");
     }
   };
 
-  const canSubmit = name.trim() && price && imageFile && user.id && !uploading && !createProduct.isPending;
+  const canSubmit = name.trim() && price && imageFiles.length > 0 && user.id && !uploading && !createProduct.isPending;
 
   return (
     <Layout>
@@ -131,31 +148,45 @@ export default function AddProduct() {
               <Label className="text-base font-bold">Product Image</Label>
               <div
                 className={`border-2 border-dashed rounded-2xl overflow-hidden transition-all duration-200 ${
-                  imagePreview ? "border-primary/50" : "border-border hover:border-primary"
+                  imagePreviews.length ? "border-primary/50" : "border-border hover:border-primary"
                 }`}
               >
-                {imagePreview ? (
-                  <div className="relative aspect-video bg-muted/30 flex items-center justify-center">
-                    <img src={imagePreview} alt="Preview" className="max-w-full max-h-full object-contain p-4" />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setImagePreview(null);
-                        setImageFile(null);
-                        if (fileInputRef.current) fileInputRef.current.value = "";
-                      }}
-                      className="absolute top-3 right-3 w-9 h-9 bg-foreground/80 hover:bg-destructive text-background rounded-full flex items-center justify-center transition-colors"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
+                {imagePreviews.length ? (
+                  <div className="bg-muted/30 p-4">
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                      {imagePreviews.map((preview, index) => (
+                        <div key={`${preview.slice(0, 24)}-${index}`} className="group relative aspect-square overflow-hidden bg-white">
+                          <img src={preview} alt={`Photo ${index + 1} preview`} className="h-full w-full object-contain p-2" />
+                          {index === 0 && (
+                            <span className="absolute bottom-2 left-2 bg-primary px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-primary-foreground">
+                              Cover
+                            </span>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setImageFiles((current) => current.filter((_, itemIndex) => itemIndex !== index));
+                              setImagePreviews((current) => current.filter((_, itemIndex) => itemIndex !== index));
+                            }}
+                            className="absolute right-2 top-2 grid h-8 w-8 place-items-center bg-foreground/80 text-background transition-colors hover:bg-destructive"
+                            aria-label={`Remove photo ${index + 1}`}
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                    <label htmlFor="image" className="mt-4 flex cursor-pointer items-center justify-center gap-2 border border-border bg-background px-4 py-3 text-sm font-bold transition-colors hover:border-primary hover:text-primary">
+                      <Plus className="h-4 w-4" /> Choose a new photo set
+                    </label>
                   </div>
                 ) : (
                   <label htmlFor="image" className="cursor-pointer flex flex-col items-center justify-center py-16 px-4 text-center">
                     <div className="w-16 h-16 bg-background shadow rounded-full flex items-center justify-center mb-5">
                       <Upload className="w-7 h-7 text-primary" />
                     </div>
-                    <span className="font-black text-lg mb-1 text-foreground">Click to upload your photo</span>
-                    <span className="text-sm text-muted-foreground">JPG, PNG or WEBP (max 10MB)</span>
+                    <span className="font-black text-lg mb-1 text-foreground">Click to upload product photos</span>
+                    <span className="text-sm text-muted-foreground">Select 6, 8, or more JPG, PNG, or WEBP photos (max 50MB each)</span>
                   </label>
                 )}
                 <input
@@ -163,10 +194,16 @@ export default function AddProduct() {
                   id="image"
                   type="file"
                   accept="image/*"
+                  multiple
                   onChange={handleImageChange}
                   className="hidden"
                 />
               </div>
+              {imageFiles.length > 0 && (
+                <p className="text-xs font-semibold text-muted-foreground">
+                  {imageFiles.length} photo{imageFiles.length === 1 ? "" : "s"} selected · the first photo is your cover image
+                </p>
+              )}
             </div>
 
             {/* Product Name */}
@@ -242,7 +279,7 @@ export default function AddProduct() {
               {uploading || createProduct.isPending ? (
                 <span className="flex items-center gap-2">
                   <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Uploading…
+                  {uploadProgress || "Saving…"}
                 </span>
               ) : (
                 <>

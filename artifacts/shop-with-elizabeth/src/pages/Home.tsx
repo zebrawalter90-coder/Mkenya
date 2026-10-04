@@ -21,6 +21,7 @@ import { Layout } from "@/components/Layout";
 import { MarketplaceProductRail } from "@/components/MarketplaceProductRail";
 import { ProductCard } from "@/components/ProductCard";
 import { ProductImage } from "@/components/ProductImage";
+import { useActiveFlashSales } from "@/lib/flashSales";
 import { SEED_PRODUCTS } from "@/lib/seed";
 
 const categorySpotlight = [
@@ -42,6 +43,7 @@ export default function Home() {
   const { data: products, isLoading, isError } = useGetProducts(params, {
     query: { enabled: true, queryKey: getGetProductsQueryKey(params) },
   });
+  const { data: flashSales = [] } = useActiveFlashSales();
 
   const showSeeds = !isLoading && !isError && (!products || products.length === 0);
   const displayProducts = showSeeds ? SEED_PRODUCTS : products ?? [];
@@ -183,7 +185,7 @@ export default function Home() {
         </div>
       </section>
 
-      <MarketplaceProductRail products={displayProducts} />
+      <MarketplaceProductRail sales={flashSales} />
 
       <section className="bg-muted/45">
         <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">

@@ -24,6 +24,7 @@ export interface Product {
   description?: string;
   price: number;
   imageUrl: string;
+  imageUrls: string[];
   category: string;
   ownerId: string;
   ownerName: string;
@@ -40,6 +41,8 @@ export interface CreateProductBody {
   /** @minimum 0 */
   price: number;
   imageObjectPath: string;
+  /** @minItems 1 */
+  imageObjectPaths?: string[];
   category: string;
   ownerId: string;
   ownerName: string;

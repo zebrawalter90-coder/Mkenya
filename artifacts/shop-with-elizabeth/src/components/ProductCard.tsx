@@ -12,6 +12,7 @@ import {
   Check,
   Share2,
   ChevronDown,
+  Images,
 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -70,6 +71,7 @@ export function ProductCard({ product, index, readOnly = false }: ProductCardPro
 
   const isOwner = !readOnly && Boolean(user.id) && product.ownerId === user.id;
   const hasLiked = product.userLiked;
+  const imageCount = product.imageUrls?.length ?? 1;
   const visibleComments = showAllComments ? product.comments : product.comments.slice(-3);
 
   const handleLike = () => {
@@ -162,6 +164,11 @@ export function ProductCard({ product, index, readOnly = false }: ProductCardPro
           className="transition-transform duration-700 group-hover:scale-[1.035]"
         />
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-foreground/10 to-transparent" />
+        {imageCount > 1 && (
+          <span className="absolute bottom-4 right-4 z-10 flex items-center gap-1.5 bg-foreground/80 px-2.5 py-1.5 font-mono-ui text-[10px] font-bold text-background backdrop-blur-sm">
+            <Images className="h-3.5 w-3.5" /> {imageCount} photos
+          </span>
+        )}
 
         <div className="absolute left-4 top-4 z-10 flex items-center gap-2">
           <span className="bg-accent px-2.5 py-1 font-mono-ui text-[9px] font-bold uppercase tracking-[0.15em] text-accent-foreground">

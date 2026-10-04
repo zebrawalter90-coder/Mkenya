@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { randomUUID } from "crypto";
-import { eq, sql } from "drizzle-orm";
-import { db, productsTable, likesTable, commentsTable } from "@workspace/db";
+import { asc, eq, sql } from "drizzle-orm";
+import { db, productsTable, likesTable, commentsTable, flashSalesTable, productImagesTable } from "@workspace/db";
 import {
   CreateProductBody,
   UpdateProductBody,
@@ -21,23 +21,32 @@ function buildImageUrl(objectPath: string): string {
 }
 
 async function buildProductResponse(product: typeof productsTable.$inferSelect, userId?: string) {
-  const [comments, likes] = await Promise.all([
+  const [comments, likes, images] = await Promise.all([
     db
       .select()
       .from(commentsTable)
       .where(eq(commentsTable.productId, product.id))
       .orderBy(commentsTable.createdAt),
     db.select().from(likesTable).where(eq(likesTable.productId, product.id)),
+    db
+      .select()
+      .from(productImagesTable)
+      .where(eq(productImagesTable.productId, product.id))
+      .orderBy(asc(productImagesTable.sortOrder), asc(productImagesTable.createdAt)),
   ]);
 
   const userLiked = userId ? likes.some((l) => l.userId === userId) : false;
+  const imageUrls = images.length > 0
+    ? images.map((image) => buildImageUrl(image.objectPath))
+    : [buildImageUrl(product.imageObjectPath)];
 
   return {
     id: product.id,
     name: product.name,
     description: product.description ?? undefined,
     price: product.price,
-    imageUrl: buildImageUrl(product.imageObjectPath),
+    imageUrl: imageUrls[0],
+    imageUrls,
     category: product.category,
     ownerId: product.ownerId,
     ownerName: product.ownerName,
@@ -64,9 +73,10 @@ router.get("/products", async (req, res): Promise<void> => {
     .from(productsTable)
     .orderBy(sql`${productsTable.createdAt} DESC`);
 
-  const [allLikes, allComments] = await Promise.all([
+  const [allLikes, allComments, allImages] = await Promise.all([
     db.select().from(likesTable),
     db.select().from(commentsTable).orderBy(commentsTable.createdAt),
+    db.select().from(productImagesTable).orderBy(asc(productImagesTable.sortOrder), asc(productImagesTable.createdAt)),
   ]);
 
   const likesByProduct = new Map<string, typeof allLikes>();
@@ -81,15 +91,24 @@ router.get("/products", async (req, res): Promise<void> => {
     commentsByProduct.get(comment.productId)!.push(comment);
   }
 
+  const imagesByProduct = new Map<string, typeof allImages>();
+  for (const image of allImages) {
+    if (!imagesByProduct.has(image.productId)) imagesByProduct.set(image.productId, []);
+    imagesByProduct.get(image.productId)!.push(image);
+  }
+
   const result = products.map((p) => {
     const likes = likesByProduct.get(p.id) ?? [];
     const comments = commentsByProduct.get(p.id) ?? [];
+    const imageUrls = (imagesByProduct.get(p.id) ?? []).map((image) => buildImageUrl(image.objectPath));
+    const resolvedImageUrls = imageUrls.length > 0 ? imageUrls : [buildImageUrl(p.imageObjectPath)];
     return {
       id: p.id,
       name: p.name,
       description: p.description ?? undefined,
       price: p.price,
-      imageUrl: buildImageUrl(p.imageObjectPath),
+      imageUrl: resolvedImageUrls[0],
+      imageUrls: resolvedImageUrls,
       category: p.category,
       ownerId: p.ownerId,
       ownerName: p.ownerName,
@@ -117,7 +136,11 @@ router.post("/products", async (req, res): Promise<void> => {
     return;
   }
 
-  const { name, description, price, imageObjectPath, category, ownerId, ownerName } = parsed.data;
+  const { name, description, price, imageObjectPath, imageObjectPaths, category, ownerId, ownerName } = parsed.data;
+  const resolvedImagePaths = Array.from(new Set([
+    imageObjectPath,
+    ...(imageObjectPaths ?? []),
+  ]));
 
   const [product] = await db
     .insert(productsTable)
@@ -132,6 +155,15 @@ router.post("/products", async (req, res): Promise<void> => {
       ownerName,
     })
     .returning();
+
+  await db.insert(productImagesTable).values(
+    resolvedImagePaths.map((objectPath, sortOrder) => ({
+      id: randomUUID(),
+      productId: product.id,
+      objectPath,
+      sortOrder,
+    })),
+  );
 
   const response = await buildProductResponse(product, ownerId);
   res.status(201).json(response);
@@ -205,6 +237,8 @@ router.delete("/products/:id", async (req, res): Promise<void> => {
 
   await db.delete(commentsTable).where(eq(commentsTable.productId, params.data.id));
   await db.delete(likesTable).where(eq(likesTable.productId, params.data.id));
+  await db.delete(productImagesTable).where(eq(productImagesTable.productId, params.data.id));
+  await db.delete(flashSalesTable).where(eq(flashSalesTable.productId, params.data.id));
   await db.delete(productsTable).where(eq(productsTable.id, params.data.id));
 
   res.sendStatus(204);

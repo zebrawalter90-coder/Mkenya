@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { X, Heart, MessageCircle, Send, ShoppingCart, Check, Share2, Zap, ChevronDown } from "lucide-react";
+import { X, Heart, MessageCircle, Send, ShoppingCart, Check, Share2, Zap, ChevronDown, ChevronLeft, ChevronRight, Images } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { getGetProductsQueryKey, useAddComment, useToggleLike } from "@workspace/api-client-react";
 import type { Product } from "@workspace/api-client-react";
@@ -31,6 +31,8 @@ export function ProductDetailModal({
   const [commentText, setCommentText] = useState("");
   const [showComments, setShowComments] = useState(false);
   const [showAddedFeedback, setShowAddedFeedback] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const galleryImages = product ? (product.imageUrls?.length ? product.imageUrls : [product.imageUrl]) : [];
 
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: getGetProductsQueryKey() });
@@ -42,6 +44,7 @@ export function ProductDetailModal({
   useEffect(() => {
     if (!isOpen) return;
     setShowComments(false);
+    setSelectedImageIndex(0);
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
     };
@@ -126,34 +129,80 @@ export function ProductDetailModal({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 28 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="pointer-events-auto flex max-h-[94vh] w-full max-w-4xl flex-col overflow-hidden border border-border bg-background shadow-2xl sm:max-h-[90vh] sm:flex-row"
+              className="pointer-events-auto flex max-h-[96vh] w-full max-w-6xl flex-col overflow-hidden border border-border bg-background shadow-2xl sm:max-h-[92vh] sm:flex-row"
               role="dialog"
               aria-modal="true"
               aria-labelledby="product-modal-name"
               data-testid="product-modal"
             >
-              <div className="relative h-[42vh] shrink-0 bg-muted sm:h-auto sm:w-[48%]">
-                <ProductImage
-                  src={product.imageUrl}
-                  alt={product.name}
-                  category={product.category}
-                  className="h-full"
-                  priority
-                  objectPosition="center 32%"
-                />
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-foreground/50 via-transparent to-transparent" />
-                <span className="absolute bottom-5 left-5 bg-accent px-3 py-1.5 font-mono-ui text-[10px] font-bold uppercase tracking-[0.18em] text-accent-foreground">
-                  {product.category}
-                </span>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="absolute right-4 top-4 grid h-10 w-10 place-items-center bg-background/90 text-foreground shadow-lg transition-colors hover:bg-primary hover:text-primary-foreground"
-                  data-testid="button-close-modal"
-                  aria-label="Close product details"
-                >
-                  <X className="h-5 w-5" />
-                </button>
+              <div className="relative flex min-h-[56vh] shrink-0 flex-col bg-muted sm:min-h-[680px] sm:w-[57%]">
+                <div className="relative min-h-0 flex-1">
+                  <ProductImage
+                    src={galleryImages[selectedImageIndex] ?? product.imageUrl}
+                    alt={product.name}
+                    category={product.category}
+                    className="h-full"
+                    priority
+                    fit="contain"
+                    objectPosition="center"
+                  />
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-foreground/45 via-transparent to-transparent" />
+                  <span className="absolute bottom-5 left-5 bg-accent px-3 py-1.5 font-mono-ui text-[10px] font-bold uppercase tracking-[0.18em] text-accent-foreground">
+                    {product.category}
+                  </span>
+                  {galleryImages.length > 1 && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedImageIndex((index) => (index - 1 + galleryImages.length) % galleryImages.length)}
+                        className="absolute left-4 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center bg-background/90 text-foreground shadow-lg transition-colors hover:bg-primary hover:text-primary-foreground"
+                        aria-label="Previous product photo"
+                        data-testid="button-previous-product-photo"
+                      >
+                        <ChevronLeft className="h-5 w-5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedImageIndex((index) => (index + 1) % galleryImages.length)}
+                        className="absolute right-4 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center bg-background/90 text-foreground shadow-lg transition-colors hover:bg-primary hover:text-primary-foreground"
+                        aria-label="Next product photo"
+                        data-testid="button-next-product-photo"
+                      >
+                        <ChevronRight className="h-5 w-5" />
+                      </button>
+                      <span className="absolute bottom-5 right-5 bg-foreground/75 px-3 py-1.5 font-mono-ui text-[10px] font-bold text-background">
+                        {selectedImageIndex + 1} / {galleryImages.length}
+                      </span>
+                    </>
+                  )}
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="absolute right-4 top-4 grid h-10 w-10 place-items-center bg-background/90 text-foreground shadow-lg transition-colors hover:bg-primary hover:text-primary-foreground"
+                    data-testid="button-close-modal"
+                    aria-label="Close product details"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+                {galleryImages.length > 1 && (
+                  <div className="flex shrink-0 items-center gap-2 overflow-x-auto border-t border-border bg-background/90 p-3" aria-label="Product photo thumbnails">
+                    <Images className="ml-1 h-4 w-4 shrink-0 text-muted-foreground" />
+                    {galleryImages.map((imageUrl, index) => (
+                      <button
+                        key={`${imageUrl}-${index}`}
+                        type="button"
+                        onClick={() => setSelectedImageIndex(index)}
+                        className={`h-14 w-14 shrink-0 overflow-hidden border-2 bg-white transition-colors ${selectedImageIndex === index ? "border-primary" : "border-transparent opacity-70 hover:opacity-100"}`}
+                        aria-label={`View product photo ${index + 1}`}
+                        aria-current={selectedImageIndex === index}
+                        data-testid={`button-product-thumbnail-${index + 1}`}
+                      >
+                        <ProductImage src={imageUrl} alt={`${product.name} photo ${index + 1}`} category={product.category} fit="contain" />
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="flex min-h-0 flex-1 flex-col overflow-y-auto p-6 sm:p-8">

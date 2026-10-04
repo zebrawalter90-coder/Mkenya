@@ -13,6 +13,8 @@ export interface CreateProductBody {
   /** @minimum 0 */
   price: number;
   imageObjectPath: string;
+  /** @minItems 1 */
+  imageObjectPaths?: string[];
   category: string;
   ownerId: string;
   ownerName: string;
