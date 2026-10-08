@@ -5,6 +5,12 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@property --mkenya-background-hue-drift {
+  syntax: "<angle>";
+  inherits: true;
+  initial-value: 0deg;
+}
+
 @theme inline {
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
@@ -68,42 +74,57 @@
 }
 
 :root {
+  --mkenya-background-hue-drift: 0deg;
+  --mkenya-ambient-accent: calc(44deg + var(--mkenya-background-hue-drift)) 91% 61%;
+  --mkenya-bg-primary: calc(9deg + var(--mkenya-background-hue-drift)) 73% 53%;
+  --mkenya-bg-secondary: calc(163deg + var(--mkenya-background-hue-drift)) 40% 27%;
+  --mkenya-bg-accent: calc(44deg + var(--mkenya-background-hue-drift)) 91% 61%;
+  --mkenya-bg-destructive: calc(4deg + var(--mkenya-background-hue-drift)) 69% 48%;
+  --mkenya-bg-foreground: calc(191deg + var(--mkenya-background-hue-drift)) 38% 15%;
+  --mkenya-bg-primary-foreground: calc(42deg + var(--mkenya-background-hue-drift)) 55% 99%;
+  --mkenya-bg-secondary-foreground: calc(42deg + var(--mkenya-background-hue-drift)) 55% 99%;
+  --mkenya-bg-green-500: calc(142deg + var(--mkenya-background-hue-drift)) 71% 45%;
+  --mkenya-bg-green-600: calc(142deg + var(--mkenya-background-hue-drift)) 76% 36%;
+  --mkenya-bg-green-700: calc(142deg + var(--mkenya-background-hue-drift)) 67% 30%;
+  --mkenya-bg-gray-50: calc(210deg + var(--mkenya-background-hue-drift)) 20% 98%;
+  --mkenya-bg-white: calc(42deg + var(--mkenya-background-hue-drift)) 5% 99%;
+  --mkenya-bg-black: calc(191deg + var(--mkenya-background-hue-drift)) 25% 4%;
   --button-outline: rgba(0,0,0, .10);
   --badge-outline: rgba(0,0,0, .05);
   --opaque-button-border-intensity: -8;
   --elevate-1: rgba(0,0,0, .03);
   --elevate-2: rgba(0,0,0, .08);
 
-  --background: 39 48% 96%;
+  --background: calc(39deg + var(--mkenya-background-hue-drift)) 48% 96%;
   --foreground: 191 38% 15%;
-  --border: 35 25% 83%;
-  --card: 42 55% 99%;
+  --border: calc(35deg + var(--mkenya-background-hue-drift)) 25% 83%;
+  --card: calc(42deg + var(--mkenya-background-hue-drift)) 55% 99%;
   --card-foreground: 191 38% 15%;
-  --card-border: 35 25% 83%;
-  --sidebar: 39 48% 96%;
+  --card-border: calc(35deg + var(--mkenya-background-hue-drift)) 25% 83%;
+  --sidebar: calc(39deg + var(--mkenya-background-hue-drift)) 48% 96%;
   --sidebar-foreground: 191 38% 15%;
-  --sidebar-border: 35 25% 83%;
+  --sidebar-border: calc(35deg + var(--mkenya-background-hue-drift)) 25% 83%;
   --sidebar-primary: 191 38% 15%;
   --sidebar-primary-foreground: 42 55% 99%;
-  --sidebar-accent: 35 35% 89%;
+  --sidebar-accent: calc(35deg + var(--mkenya-background-hue-drift)) 35% 89%;
   --sidebar-accent-foreground: 191 38% 15%;
   --sidebar-ring: 9 73% 53%;
-  --popover: 42 55% 99%;
+  --popover: calc(42deg + var(--mkenya-background-hue-drift)) 55% 99%;
   --popover-foreground: 191 38% 15%;
-  --popover-border: 35 25% 83%;
+  --popover-border: calc(35deg + var(--mkenya-background-hue-drift)) 25% 83%;
 
   --primary: 9 73% 53%;
   --primary-foreground: 42 55% 99%;
   --secondary: 163 40% 27%;
   --secondary-foreground: 42 55% 99%;
 
-  --muted: 37 32% 90%;
+  --muted: calc(37deg + var(--mkenya-background-hue-drift)) 32% 90%;
   --muted-foreground: 191 15% 42%;
   --accent: 44 91% 61%;
   --accent-foreground: 191 38% 15%;
   --destructive: 4 69% 48%;
   --destructive-foreground: 42 55% 99%;
-  --input: 35 25% 83%;
+  --input: calc(35deg + var(--mkenya-background-hue-drift)) 25% 83%;
   --ring: 9 73% 53%;
 
   --chart-1: 12 76% 61%;
@@ -137,42 +158,49 @@
 }
 
 .dark {
+  --mkenya-bg-primary: calc(9deg + var(--mkenya-background-hue-drift)) 73% 60%;
+  --mkenya-bg-secondary: calc(163deg + var(--mkenya-background-hue-drift)) 40% 42%;
+  --mkenya-bg-accent: calc(44deg + var(--mkenya-background-hue-drift)) 91% 61%;
+  --mkenya-bg-destructive: calc(4deg + var(--mkenya-background-hue-drift)) 69% 58%;
+  --mkenya-bg-foreground: calc(42deg + var(--mkenya-background-hue-drift)) 42% 94%;
+  --mkenya-bg-primary-foreground: calc(191deg + var(--mkenya-background-hue-drift)) 38% 13%;
+  --mkenya-bg-secondary-foreground: calc(191deg + var(--mkenya-background-hue-drift)) 38% 13%;
   --button-outline: rgba(255,255,255, .10);
   --badge-outline: rgba(255,255,255, .05);
   --opaque-button-border-intensity: 9;
   --elevate-1: rgba(255,255,255, .04);
   --elevate-2: rgba(255,255,255, .09);
 
-  --background: 191 38% 13%;
+  --background: calc(191deg + var(--mkenya-background-hue-drift)) 38% 13%;
   --foreground: 42 42% 94%;
-  --border: 191 23% 28%;
-  --card: 191 31% 17%;
+  --border: calc(191deg + var(--mkenya-background-hue-drift)) 23% 28%;
+  --card: calc(191deg + var(--mkenya-background-hue-drift)) 31% 17%;
   --card-foreground: 42 42% 94%;
-  --card-border: 191 23% 28%;
-  --sidebar: 191 31% 17%;
+  --card-border: calc(191deg + var(--mkenya-background-hue-drift)) 23% 28%;
+  --sidebar: calc(191deg + var(--mkenya-background-hue-drift)) 31% 17%;
   --sidebar-foreground: 42 42% 94%;
-  --sidebar-border: 191 23% 28%;
+  --sidebar-border: calc(191deg + var(--mkenya-background-hue-drift)) 23% 28%;
   --sidebar-primary: 42 42% 94%;
   --sidebar-primary-foreground: 191 38% 13%;
-  --sidebar-accent: 191 23% 28%;
+  --sidebar-accent: calc(191deg + var(--mkenya-background-hue-drift)) 23% 28%;
   --sidebar-accent-foreground: 42 42% 94%;
   --sidebar-ring: 9 73% 60%;
-  --popover: 191 31% 17%;
+  --popover: calc(191deg + var(--mkenya-background-hue-drift)) 31% 17%;
   --popover-foreground: 42 42% 94%;
-  --popover-border: 191 23% 28%;
+  --popover-border: calc(191deg + var(--mkenya-background-hue-drift)) 23% 28%;
 
   --primary: 9 73% 60%;
   --primary-foreground: 191 38% 13%;
   --secondary: 163 40% 42%;
   --secondary-foreground: 191 38% 13%;
 
-  --muted: 191 23% 28%;
+  --muted: calc(191deg + var(--mkenya-background-hue-drift)) 23% 28%;
   --muted-foreground: 42 18% 70%;
   --accent: 44 91% 61%;
   --accent-foreground: 191 38% 13%;
   --destructive: 4 69% 58%;
   --destructive-foreground: 191 38% 13%;
-  --input: 191 23% 28%;
+  --input: calc(191deg + var(--mkenya-background-hue-drift)) 23% 28%;
   --ring: 9 73% 60%;
 
   --chart-1: 12 76% 61%;
@@ -189,7 +217,7 @@
   body {
     @apply font-sans antialiased bg-background text-foreground;
     background-image:
-      radial-gradient(ellipse at 12% 4%, hsl(var(--accent) / .12), transparent 28rem),
+      radial-gradient(ellipse at 12% 4%, hsl(var(--mkenya-ambient-accent) / .12), transparent 28rem),
       radial-gradient(hsl(var(--foreground) / .035) .7px, transparent .7px);
     background-size: auto, 13px 13px;
     font-feature-settings: "ss01" on;
@@ -197,6 +225,12 @@
 
   html {
     scroll-behavior: smooth;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :root {
+    animation: mkenya-background-drift 120s ease-in-out infinite;
   }
 }
 
@@ -215,6 +249,10 @@
 
 @keyframes drift { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-9px) rotate(1deg); } }
 @keyframes enter { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes mkenya-background-drift {
+  0%, 100% { --mkenya-background-hue-drift: 0deg; }
+  50% { --mkenya-background-hue-drift: 1.2deg; }
+}
 
 @layer base {
   ::selection { background: hsl(var(--primary) / .22); color: hsl(var(--foreground)); }
@@ -250,3 +288,118 @@
   .hover-elevate-2:hover:not(.no-default-hover-elevate)::after, .active-elevate-2:active:not(.no-default-active-elevate)::after { background-color: var(--elevate-2); }
   .border.hover-elevate:not(.no-hover-interaction-elevate)::after, .border.active-elevate:not(.no-active-interaction-elevate)::after, .border.hover-elevate-2:not(.no-hover-interaction-elevate)::after, .border.active-elevate-2:not(.no-active-interaction-elevate)::after, .border.hover-elevate:not(.no-hover-interaction-elevate)::after { inset: -1px; }
 }
+
+:is([class~="bg-primary"], [class~="hover:bg-primary"]:hover) {
+  background-color: hsl(var(--mkenya-bg-primary));
+}
+:is([class~="bg-primary/5"], [class~="bg-primary/10"], [class~="hover:bg-primary/10"]:hover) {
+  background-color: color-mix(in oklab, hsl(var(--mkenya-bg-primary)) 10%, transparent);
+}
+[class~="bg-primary/5"] {
+  background-color: color-mix(in oklab, hsl(var(--mkenya-bg-primary)) 5%, transparent);
+}
+[class~="bg-primary/20"], .group:hover [class~="group-hover:bg-primary/20"], .group:focus-within [class~="group-hover:bg-primary/20"] {
+  background-color: color-mix(in oklab, hsl(var(--mkenya-bg-primary)) 20%, transparent);
+}
+[class~="hover:bg-primary/90"]:hover {
+  background-color: color-mix(in oklab, hsl(var(--mkenya-bg-primary)) 90%, transparent);
+}
+
+:is([class~="bg-secondary"], [class~="hover:bg-secondary"]:hover) {
+  background-color: hsl(var(--mkenya-bg-secondary));
+}
+:is([class~="bg-secondary/10"], [class~="hover:bg-secondary/10"]:hover) {
+  background-color: color-mix(in oklab, hsl(var(--mkenya-bg-secondary)) 10%, transparent);
+}
+[class~="bg-secondary/20"], .group:hover [class~="group-hover:bg-secondary/20"], .group:focus-within [class~="group-hover:bg-secondary/20"] {
+  background-color: color-mix(in oklab, hsl(var(--mkenya-bg-secondary)) 20%, transparent);
+}
+[class~="hover:bg-secondary/90"]:hover {
+  background-color: color-mix(in oklab, hsl(var(--mkenya-bg-secondary)) 90%, transparent);
+}
+
+:is([class~="bg-accent"], [class~="hover:bg-accent"]:hover, [class~="focus:bg-accent"]:focus) {
+  background-color: hsl(var(--mkenya-bg-accent));
+}
+[class~="bg-accent/15"] {
+  background-color: color-mix(in oklab, hsl(var(--mkenya-bg-accent)) 15%, transparent);
+}
+[class~="bg-accent/20"] {
+  background-color: color-mix(in oklab, hsl(var(--mkenya-bg-accent)) 20%, transparent);
+}
+[class~="bg-accent/35"] {
+  background-color: color-mix(in oklab, hsl(var(--mkenya-bg-accent)) 35%, transparent);
+}
+:is([class~="bg-accent/50"], [class~="hover:bg-accent/50"]:hover) {
+  background-color: color-mix(in oklab, hsl(var(--mkenya-bg-accent)) 50%, transparent);
+}
+
+:is([class~="bg-destructive"], [class~="hover:bg-destructive"]:hover) {
+  background-color: hsl(var(--mkenya-bg-destructive));
+}
+[class~="bg-destructive/5"] {
+  background-color: color-mix(in oklab, hsl(var(--mkenya-bg-destructive)) 5%, transparent);
+}
+:is([class~="bg-destructive/10"], [class~="hover:bg-destructive/10"]:hover) {
+  background-color: color-mix(in oklab, hsl(var(--mkenya-bg-destructive)) 10%, transparent);
+}
+
+[class~="bg-foreground"] {
+  background-color: hsl(var(--mkenya-bg-foreground));
+}
+[class~="bg-foreground/70"] {
+  background-color: color-mix(in oklab, hsl(var(--mkenya-bg-foreground)) 70%, transparent);
+}
+[class~="bg-foreground/75"] {
+  background-color: color-mix(in oklab, hsl(var(--mkenya-bg-foreground)) 75%, transparent);
+}
+[class~="bg-foreground/80"] {
+  background-color: color-mix(in oklab, hsl(var(--mkenya-bg-foreground)) 80%, transparent);
+}
+
+:is([class~="bg-primary-foreground/10"], [class~="hover:bg-primary-foreground/10"]:hover) {
+  background-color: color-mix(in oklab, hsl(var(--mkenya-bg-primary-foreground)) 10%, transparent);
+}
+[class~="bg-secondary-foreground/5"] {
+  background-color: color-mix(in oklab, hsl(var(--mkenya-bg-secondary-foreground)) 5%, transparent);
+}
+[class~="bg-green-500/10"] {
+  background-color: color-mix(in oklab, hsl(var(--mkenya-bg-green-500)) 10%, transparent);
+}
+:is([class~="bg-green-600"], [class~="bg-green-700"], [class~="hover:bg-green-700"]:hover) {
+  background-color: hsl(var(--mkenya-bg-green-600));
+}
+[class~="bg-green-700"], [class~="hover:bg-green-700"]:hover {
+  background-color: hsl(var(--mkenya-bg-green-700));
+}
+[class~="bg-gray-50"] {
+  background-color: hsl(var(--mkenya-bg-gray-50));
+}
+[class~="bg-white"] {
+  background-color: hsl(var(--mkenya-bg-white));
+}
+[class~="bg-black/40"] {
+  background-color: color-mix(in oklab, hsl(var(--mkenya-bg-black)) 40%, transparent);
+}
+[class~="bg-black/60"] {
+  background-color: color-mix(in oklab, hsl(var(--mkenya-bg-black)) 60%, transparent);
+}
+[class~="bg-black/80"] {
+  background-color: color-mix(in oklab, hsl(var(--mkenya-bg-black)) 80%, transparent);
+}
+
+:is([class~="from-primary"], [class~="from-secondary"], [class~="from-accent"], [class~="from-foreground"], [class~="from-background"]) {
+  --tw-gradient-from: hsl(var(--mkenya-bg-accent)) var(--tw-gradient-from-position);
+  --tw-gradient-to: hsl(var(--mkenya-bg-accent) / 0) var(--tw-gradient-to-position);
+}
+[class~="from-primary"] { --tw-gradient-from: hsl(var(--mkenya-bg-primary)) var(--tw-gradient-from-position); --tw-gradient-to: hsl(var(--mkenya-bg-primary) / 0) var(--tw-gradient-to-position); }
+[class~="from-secondary"] { --tw-gradient-from: hsl(var(--mkenya-bg-secondary)) var(--tw-gradient-from-position); --tw-gradient-to: hsl(var(--mkenya-bg-secondary) / 0) var(--tw-gradient-to-position); }
+[class~="from-foreground"] { --tw-gradient-from: hsl(var(--mkenya-bg-foreground)) var(--tw-gradient-from-position); --tw-gradient-to: hsl(var(--mkenya-bg-foreground) / 0) var(--tw-gradient-to-position); }
+[class~="from-background"] { --tw-gradient-from: hsl(var(--background)) var(--tw-gradient-from-position); --tw-gradient-to: hsl(var(--background) / 0) var(--tw-gradient-to-position); }
+[class~="via-primary"] { --tw-gradient-via: hsl(var(--mkenya-bg-primary)) var(--tw-gradient-via-position); }
+[class~="via-secondary"] { --tw-gradient-via: hsl(var(--mkenya-bg-secondary)) var(--tw-gradient-via-position); }
+[class~="via-accent"] { --tw-gradient-via: hsl(var(--mkenya-bg-accent)) var(--tw-gradient-via-position); }
+[class~="via-background"] { --tw-gradient-via: hsl(var(--background)) var(--tw-gradient-via-position); }
+[class~="to-primary"] { --tw-gradient-to: hsl(var(--mkenya-bg-primary)) var(--tw-gradient-to-position); }
+[class~="to-secondary"] { --tw-gradient-to: hsl(var(--mkenya-bg-secondary)) var(--tw-gradient-to-position); }
+[class~="to-accent"] { --tw-gradient-to: hsl(var(--mkenya-bg-accent)) var(--tw-gradient-to-position); }
