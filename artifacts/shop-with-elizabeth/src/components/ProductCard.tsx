@@ -331,10 +331,10 @@ export function ProductCard({ product, index, readOnly = false, featured = false
             event.stopPropagation();
             handleBuyNow();
           }}
-          className="mb-4 h-10 w-fit min-w-40 max-w-full self-start rounded-full border-primary px-4 font-bold text-primary hover:bg-primary hover:text-primary-foreground"
+          className="mb-4 h-9 w-fit max-w-full self-start whitespace-nowrap rounded-full border-primary px-3 text-xs font-bold text-primary hover:bg-primary hover:text-primary-foreground"
           data-testid={`button-buy-now-${product.id}`}
         >
-          <Zap className="mr-2 h-4 w-4" /> Buy with M-Pesa
+          <Zap className="mr-1.5 h-3.5 w-3.5" /> Buy with M-Pesa
         </Button>
 
         <div className="border-t border-border pt-4">

@@ -2,3 +2,4 @@
 - [Vercel deployment readiness](vercel-deploy-readiness.md) — the frontend is Vercel-ready; live API features require a configured external API origin.
 - [Mobile build and publish stability](mobile-build-publish.md) — Expo builds need an isolated Metro port and a pnpm Babel dependency extension.
 - [API schema generation](api-schema-generation.md) — preserve explicit exports and avoid unsupported UUID-format output under Zod 3.
+- [Mkenya Shop product grid](mkenya-shop-product-grid.md) — keep large featured tiles mixed with smaller cards and compact M-Pesa actions.

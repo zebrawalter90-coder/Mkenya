@@ -30,6 +30,7 @@ export function Layout({ children }: { children: ReactNode }) {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [quickBuyItem, setQuickBuyItem] = useState<CartItem | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
+  const openInstallPrompt = () => window.dispatchEvent(new Event("mkenya:show-install-prompt"));
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 18);
@@ -117,6 +118,17 @@ export function Layout({ children }: { children: ReactNode }) {
               <Search className="h-4 w-4" />
               <span className="hidden text-sm font-semibold sm:inline">Search</span>
             </Link>
+            <button
+              type="button"
+              onClick={openInstallPrompt}
+              aria-label="Install Mkenya Shop on this device"
+              title="Install Mkenya Shop"
+              data-testid="button-install-app-header"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-primary/25 bg-primary/5 px-3 text-sm font-bold text-primary transition-colors hover:bg-primary/10"
+            >
+              <Download className="h-4 w-4" />
+              <span className="hidden md:inline">Install</span>
+            </button>
             {user.name && (
               <span className="hidden items-center gap-1.5 text-xs font-semibold text-muted-foreground xl:flex">
                 <User className="h-4 w-4" />
@@ -225,7 +237,7 @@ export function Layout({ children }: { children: ReactNode }) {
               </Link>
               <button
                 type="button"
-                onClick={() => window.dispatchEvent(new Event("mkenya:show-install-prompt"))}
+                onClick={openInstallPrompt}
                 data-testid="button-install-app-footer"
                 className="ml-5 inline-flex items-center gap-2 text-sm font-bold text-accent transition-colors hover:text-background"
               >

@@ -7,4 +7,4 @@ Use the browser-native PWA prompt for supported Chromium browsers, with manifest
 
 **Why:** Users may describe “install” as downloading an Android app, while the web install flow adds the site to the home screen rather than producing an APK.
 
-**How to apply:** Label the action as installing Mkenya Shop to the device/home screen, keep platform fallbacks for iOS and unsupported browsers, and never add a fake APK link.
+**How to apply:** Label the action as installing Mkenya Shop to the device/home screen, keep a visible header install control plus platform fallbacks for iOS and unsupported browsers, and never add a fake APK link.

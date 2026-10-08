@@ -162,13 +162,13 @@ export function InstallAppPrompt() {
 
   const fallbackText =
     platform === 'ios'
-      ? 'Tap Share in Safari, then choose Add to Home Screen.'
+      ? 'In Safari, tap Share, then choose Add to Home Screen.'
       : platform === 'android'
         ? 'Open your browser menu and choose Install app or Add to Home screen.'
-        : 'Open your browser menu and choose Install app or Add to home screen.';
+        : 'Open your browser menu and choose Install app or Add to Home screen.';
 
   const installLabel = installEvent
-    ? 'Install app'
+    ? 'Install on this device'
     : platform === 'ios'
       ? 'Add to Home Screen'
       : 'Show install steps';
@@ -208,7 +208,7 @@ export function InstallAppPrompt() {
           ) : (
             <>
               <p className="mt-1 text-sm leading-5 text-muted-foreground">
-                Add Mkenya Shop to your device for faster shopping and easy access to local sellers.
+                Keep Mkenya Shop on this device for quick access to local sellers.
               </p>
               <Button
                 onClick={install}
