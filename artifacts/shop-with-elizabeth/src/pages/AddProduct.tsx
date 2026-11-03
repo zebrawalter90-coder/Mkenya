@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useQueryClient } from "@tanstack/react-query";
+import { API_BASE_URL, apiUrl } from "@/lib/api-url";
 
 type Category = "Clothing" | "Accessories" | "Fabric" | "Footwear" | "Jewelry" | "Beauty" | "Other";
 const CATEGORIES: Category[] = ["Clothing", "Accessories", "Fabric", "Footwear", "Jewelry", "Beauty", "Other"];
@@ -130,7 +131,11 @@ export default function AddProduct() {
         const formData = new FormData();
         formData.append("file", imageFile);
 
-        const uploadRes = await fetch("/api/storage/uploads", {
+        if (import.meta.env.PROD && !API_BASE_URL) {
+          throw new Error("Product uploads need a hosted API. Set VITE_API_BASE_URL in Vercel to your API server origin, then redeploy.");
+        }
+
+        const uploadRes = await fetch(apiUrl("/api/storage/uploads"), {
           method: "POST",
           body: formData,
         });

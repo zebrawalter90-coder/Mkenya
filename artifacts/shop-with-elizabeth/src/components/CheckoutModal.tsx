@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCart, type CartItem } from "@/hooks/useCart";
+import { apiAssetUrl } from "@/lib/api-url";
 import {
   getGetMpesaPaymentStatusQueryKey,
   useGetMpesaPaymentStatus,
@@ -195,7 +196,7 @@ export function CheckoutModal({ isOpen, onClose, quickBuyItem = null }: Checkout
                             data-testid={`checkout-item-${item.id}`}
                           >
                             <img
-                              src={item.imageUrl}
+                              src={apiAssetUrl(item.imageUrl)}
                               alt={item.name}
                               className="w-16 h-16 object-cover rounded-lg bg-muted shrink-0"
                             />

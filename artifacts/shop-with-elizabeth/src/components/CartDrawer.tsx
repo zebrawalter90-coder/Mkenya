@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Plus, Minus, Trash2, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/useCart";
+import { apiAssetUrl } from "@/lib/api-url";
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -73,7 +74,7 @@ export function CartDrawer({ isOpen, onClose, onCheckout }: CartDrawerProps) {
                       data-testid={`cart-item-${item.id}`}
                     >
                       <img
-                        src={item.imageUrl}
+                        src={apiAssetUrl(item.imageUrl)}
                         alt={item.name}
                         className="w-20 h-20 object-cover rounded-xl bg-muted shrink-0"
                       />

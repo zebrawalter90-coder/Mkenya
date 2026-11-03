@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { apiUrl } from "@/lib/api-url";
 
 export interface FlashSaleProduct {
   id: string;
@@ -31,12 +32,6 @@ export interface FlashSaleInput {
   endsAt: string;
   isPublished: boolean;
   createdBy: string;
-}
-
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/+$/, "") ?? "";
-
-function apiUrl(path: string) {
-  return `${API_BASE_URL}${path}`;
 }
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {

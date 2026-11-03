@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { ImageOff } from "lucide-react";
+import { apiAssetUrl } from "@/lib/api-url";
 
 interface ProductImageProps {
   src: string;
@@ -29,8 +30,9 @@ export function ProductImage({
   objectPosition = "center 38%",
   fit = "cover",
 }: ProductImageProps) {
-  const isPlaceholder = src.includes("picsum.photos");
-  const safeSrc = isPlaceholder ? "" : src;
+  const resolvedSrc = apiAssetUrl(src);
+  const isPlaceholder = resolvedSrc.includes("picsum.photos");
+  const safeSrc = isPlaceholder ? "" : resolvedSrc;
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(!safeSrc);
   const initials = alt

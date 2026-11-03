@@ -64,8 +64,8 @@ catalogs:
       specifier: ^4.21.0
       version: 4.21.0
     vite:
-      specifier: ^7.3.5
-      version: 7.3.6
+      specifier: ^7.3.7
+      version: 7.3.7
     zod:
       specifier: ^3.25.76
       version: 3.25.76
@@ -157,23 +157,27 @@ overrides:
   brace-expansion@^1: 1.1.21
   brace-expansion@^2: 2.1.7
   brace-expansion@^5: 5.0.12
-  fast-uri@^3: 3.1.8
+  fast-uri@^3: 3.1.9
   form-data@^2: 2.5.6
   linkify-it: 5.0.2
   js-yaml@^3: 3.15.2
   js-yaml@^4: 4.3.2
   fast-xml-builder: 1.3.0
   fast-xml-parser: 5.7.0
-  body-parser: 2.3.0
-  qs: 6.16.0
+  body-parser: 2.4.0
+  qs: 6.16.1
+  node-forge: 1.4.1
   proxy-addr: 2.0.8
   compression: 1.8.2
   source-map-js: 1.2.2
   undici@^6: 6.29.1
   shell-quote@^1: 1.12.0
   fast-copy@^4: 4.2.0
+  http-cache-semantics: 4.3.0
+  markdown-it: 14.3.3
+  postcss-selector-parser: 6.1.5
   nanoid@^3: 3.3.18
-  decode-uri-component: 0.5.0
+  decode-uri-component: 0.5.1
   '@tootallnate/once': 2.0.1
   browserslist: 4.28.7
   yaml@^2: 2.9.0
@@ -226,8 +230,8 @@ importers:
         specifier: ^10.6.2
         version: 10.6.2
       multer:
-        specifier: ^2.4.0
-        version: 2.4.0
+        specifier: ^2.5.0
+        version: 2.5.0
       pino:
         specifier: ^9
         version: 9.14.0
@@ -489,7 +493,7 @@ importers:
         version: 0.0.6
       '@tailwindcss/vite':
         specifier: 'catalog:'
-        version: 4.2.1(vite@7.3.6(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.50.0)(tsx@4.21.0)(yaml@2.9.0))
+        version: 4.2.1(vite@7.3.7(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.50.0)(tsx@4.21.0)(yaml@2.9.0))
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
@@ -501,7 +505,7 @@ importers:
         version: 19.2.3(@types/react@19.2.14)
       '@vitejs/plugin-react':
         specifier: 'catalog:'
-        version: 5.1.4(vite@7.3.6(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.50.0)(tsx@4.21.0)(yaml@2.9.0))
+        version: 5.1.4(vite@7.3.7(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.50.0)(tsx@4.21.0)(yaml@2.9.0))
       chokidar:
         specifier: ^4.0.3
         version: 4.0.3
@@ -573,7 +577,7 @@ importers:
         version: 1.1.2(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       vite:
         specifier: 'catalog:'
-        version: 7.3.6(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.50.0)(tsx@4.21.0)(yaml@2.9.0)
+        version: 7.3.7(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.50.0)(tsx@4.21.0)(yaml@2.9.0)
       zod:
         specifier: 'catalog:'
         version: 3.25.76
@@ -678,7 +682,7 @@ importers:
         version: 0.5.19(tailwindcss@4.2.1)
       '@tailwindcss/vite':
         specifier: 'catalog:'
-        version: 4.2.1(vite@7.3.6(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.50.0)(tsx@4.21.0)(yaml@2.9.0))
+        version: 4.2.1(vite@7.3.7(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.50.0)(tsx@4.21.0)(yaml@2.9.0))
       '@tanstack/react-query':
         specifier: 'catalog:'
         version: 5.90.21(react@19.1.0)
@@ -693,7 +697,7 @@ importers:
         version: 19.2.3(@types/react@19.2.14)
       '@vitejs/plugin-react':
         specifier: 'catalog:'
-        version: 5.1.4(vite@7.3.6(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.50.0)(tsx@4.21.0)(yaml@2.9.0))
+        version: 5.1.4(vite@7.3.7(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.50.0)(tsx@4.21.0)(yaml@2.9.0))
       '@workspace/api-client-react':
         specifier: workspace:*
         version: link:../../lib/api-client-react
@@ -762,7 +766,7 @@ importers:
         version: 1.1.2(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       vite:
         specifier: 'catalog:'
-        version: 7.3.6(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.50.0)(tsx@4.21.0)(yaml@2.9.0)
+        version: 7.3.7(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.50.0)(tsx@4.21.0)(yaml@2.9.0)
       wouter:
         specifier: ^3.3.5
         version: 3.9.0(react@19.1.0)
@@ -3015,8 +3019,8 @@ packages:
   bignumber.js@9.3.1:
     resolution: {integrity: sha512-Ko0uX15oIUS7wJ3Rb30Fs6SkVbLmPBAKdlm7q9+ak9bbIeFf0MwuBsQV6z7+X768/cHsfg+WlysDWJcmthjsjQ==}
 
-  body-parser@2.3.0:
-    resolution: {integrity: sha512-2cGmJupaNgg+QUwVLAucDuWuoMZ6EX9iHDRswZ5lsNYEmwPaRknMPCLZz07yTzVq/83p4o/wzbDZbBrTvGGTIw==}
+  body-parser@2.4.0:
+    resolution: {integrity: sha512-Ifk1KcLrxaGt1occQagQNFNNOqRt1LFuehEnHHzB8Z6cRgIxRU1TBaiIsUiCdA+gy5PL7Y1IX31DNKkRmxtXjQ==}
     engines: {node: '>=18'}
 
   boolbase@1.0.0:
@@ -3388,8 +3392,8 @@ packages:
   decimal.js-light@2.5.1:
     resolution: {integrity: sha512-qIMFpTMZmny+MMIitAB6D7iVPEorVw6YQRWkvarTkT4tBeSLLiHzcwj6q0MmYSFCiVpiqPJTJEYIrpcPzVEIvg==}
 
-  decode-uri-component@0.5.0:
-    resolution: {integrity: sha512-1BiQVoK8C9gUbQU6NzAtO/tkz2qOFpEObMWpcFvhx4fYnj4Oc5yzaJN/LD36ihkVUdXyh5ZekzX+yM+ty/SrPg==}
+  decode-uri-component@0.5.1:
+    resolution: {integrity: sha512-vWHQkXgg2cE3BB4rR0c+PYw9BCQzLoNIRMI7AunIkZst74tw/vpPp7VLoYtsR/cy1f55g3XDWUslfeCZjiZJyA==}
     engines: {node: '>=14.16'}
 
   decompress-response@6.0.0:
@@ -3917,8 +3921,8 @@ packages:
   fast-safe-stringify@2.1.1:
     resolution: {integrity: sha512-W+KJc2dmILlPplD/H4K9l9LcAHAfPtP6BY84uVLXQ6Evcz9Lcg33Y2z1IVblT6xdY54PXYVHEv+0Wpq8Io6zkA==}
 
-  fast-uri@3.1.8:
-    resolution: {integrity: sha512-GZMtZUTNRpOVIECoXwLNZS5xUGE+mVNbTB8h/7Rwh2TFWcBQiPzTgyZi05BF9UMZKkLJv8XBRJTlU7zg8+ZfMg==}
+  fast-uri@3.1.9:
+    resolution: {integrity: sha512-hS/0Wt3Ya043oKXs0sIxrMpKQITXhMLIrVAKKXi4gozGC9v7YRWVnXIZzjNPTO02M9BdxLCWqK1yRXgNziVyJQ==}
 
   fast-xml-builder@1.3.0:
     resolution: {integrity: sha512-F74cZEdCvuw9P41GAC3rod4X04jjWGM1JPEv/GWSqFTWLsdyMSBMBMlm9Hk3GLBgLBbdBNY8yee0pQh2RBVESQ==}
@@ -4191,8 +4195,8 @@ packages:
   html-entities@2.6.0:
     resolution: {integrity: sha512-kig+rMn/QOVRvr7c86gQ8lWXq+Hkv6CbAH1hLu+RG338StTpE8Z0b44SDVaqVu7HGKf27frdmUYEs9hTUX/cLQ==}
 
-  http-cache-semantics@4.2.0:
-    resolution: {integrity: sha512-dTxcvPXqPvXBQpq5dUr6mEMJX4oIEFv6bwom3FDwKRDsuIjjJGANqhBuoAn9c1RQJIdAKav33ED65E2ys+87QQ==}
+  http-cache-semantics@4.3.0:
+    resolution: {integrity: sha512-M5t5LlJpS1UHMjvwRQVdFHvPISGeLAxNcrWuJkeGh0KxsqCHZ1O3NXZU/8x7cD0BDcGW8kapxMKTvwlqrNkHkA==}
 
   http-errors@2.0.1:
     resolution: {integrity: sha512-4FbRdAX+bSdmo4AUFuS0WNiPz8NgFt+r8ThgNWmlrjQjt1Q7ZR9+zTlce2859x4KSXrwIsaeTqDoKQmtP8pLmQ==}
@@ -4221,8 +4225,8 @@ packages:
   hyphenate-style-name@1.1.0:
     resolution: {integrity: sha512-WDC/ui2VVRrz3jOVi+XtjqkDjiVjTtFaAGiW37k6b+ohyQ5wYDOGkvCZa8+H0nx3gyvv0+BST9xuOgIyGQ00gw==}
 
-  iconv-lite@0.7.2:
-    resolution: {integrity: sha512-im9DjEDQ55s9fL4EYzOAv0yMqmMBSZp6G0VvFyTMPKWxiSBHUj9NW/qqLmXUwXrrM7AvqSlTCfvqRb0cM8yYqw==}
+  iconv-lite@0.7.3:
+    resolution: {integrity: sha512-IKXpvIzjnC9XTAUbVBcMfGS0EPaIXtW6v+zr+RRp+hqULEpo0owZax6wyRwPOJbWbzjYspQwusTsfVr0ifh4uQ==}
     engines: {node: '>=0.10.0'}
 
   ieee754@1.2.1:
@@ -4526,8 +4530,8 @@ packages:
   makeerror@1.0.12:
     resolution: {integrity: sha512-JmqCvUhmt43madlpFzG4BQzG2Z3m6tvQDNKdClZnO3VbIudJYmxsT0FNJMeiB2+JTSlTQTSbU8QdesVmwJcmLg==}
 
-  markdown-it@14.3.1:
-    resolution: {integrity: sha512-4Ej49aYTDFIQ+uBkfX8GBvJGccoARxxPep+7aWTs55ozbjQJpW9M26Fe53vnGgvLeVzva/amzjQQaQu9w0vMhA==}
+  markdown-it@14.3.3:
+    resolution: {integrity: sha512-L//tDAkjTjJCU6pBUSBTgs3Kg4InVaZuUZog/b6V12UKhcDQ7S78877ibbCanRExwPuYP1CZD7Gd2dxSy1GXRg==}
     hasBin: true
 
   marky@1.3.0:
@@ -4775,8 +4779,8 @@ packages:
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
 
-  multer@2.4.0:
-    resolution: {integrity: sha512-7dqa0ZcFfzbefdTuIkzOSMvZWC0J7FLqBOjJUZvDCXShIURWKxAyTT1wHhnE5q19c7jOJf43IYYKjBmZVZmvhg==}
+  multer@2.5.0:
+    resolution: {integrity: sha512-BsqOzYGVq49JcW2IzoSAxeKYRevb+dGGPPWleOR8Lrlk4igwxu1/9pwSXlByhCb7MVZDrNJFC0IBP5/O5nLYRw==}
     engines: {node: '>= 10.16.0'}
 
   mz@2.7.0:
@@ -4826,8 +4830,8 @@ packages:
     resolution: {integrity: sha512-dRB78srN/l6gqWulah9SrxeYnxeddIG30+GOqK/9OlLVyLg3HPnr6SqOWTWOXKRwC2eGYCkZ59NNuSgvSrpgOA==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
 
-  node-forge@1.4.0:
-    resolution: {integrity: sha512-LarFH0+6VfriEhqMMcLX2F7SwSXeWwnEAJEsYm5QKWchiVYVvJyV9v7UDvUv+w5HO23ZpQTXDv/GxdDdMyOuoQ==}
+  node-forge@1.4.1:
+    resolution: {integrity: sha512-w5/MfWaeMrpR/5ba6fZyAUTLSuE6aYz7H/3cYrqwZEmf5eQS3IaaLgJt4MBv7HglGFWmV22K8h4U18RJQmw/ow==}
     engines: {node: '>= 6.13.0'}
 
   node-int64@0.4.0:
@@ -5074,8 +5078,8 @@ packages:
     resolution: {integrity: sha512-NCrCHhWmnQklfH4MtJMRjZ2a8c80qXeMlQMv2uVp9ISJMTt562SbGd6n2oq0PaPgKm7Z6pL9E2UlLIhC+SHL3w==}
     engines: {node: '>=4.0.0'}
 
-  postcss-selector-parser@6.0.10:
-    resolution: {integrity: sha512-IQ7TZdoaqbT+LCpShg46jnZVlhWD2w6iQYAcYXfHARZ7X1t/UGhhceQDs5X0cGqKvYlHNOuv7Oa1xmb0oQuA3w==}
+  postcss-selector-parser@6.1.5:
+    resolution: {integrity: sha512-TEHFzb5KRDKaOgJ4TYE+0jyJtFbjLvkdVOu0fZ2b6MTWzoqZd4Le+61aEppWkvTlYePgOX4ATL1wsAIPMLTw6Q==}
     engines: {node: '>=4'}
 
   postcss-value-parser@4.2.0:
@@ -5161,8 +5165,8 @@ packages:
     resolution: {integrity: sha512-Uu7ii+FQy4Qf82G4xu7ShHhjhGahEpCWc3x8UavY3CTcWV+ufmmCtwkr7ZKsX42jdL0kr1B5FKUeqJvAn51jzQ==}
     hasBin: true
 
-  qs@6.16.0:
-    resolution: {integrity: sha512-h6fhOIaRrID2CbEY2fqs+7t+UXZo+MLAnU5gRIq85uFtdiUPCdsApMlHhXogKVM4HM2DVbIjGNTTYH2OcmP1vA==}
+  qs@6.16.1:
+    resolution: {integrity: sha512-5Px6J7rfHBAGUhNQ3es4YzcOdBBw0SDcVtThJml4RdnKw4tKs2epA0kPZ+K8X+WiHktT93RHVcQ/3ym5aTCgtg==}
     engines: {node: '>=0.6'}
 
   query-string@7.1.3:
@@ -5817,10 +5821,6 @@ packages:
   tiny-invariant@1.3.3:
     resolution: {integrity: sha512-+FbBPE1o9QAYvviau/qC5SE3caw21q3xkvWKBtja5vgqOWIHHJ3ioaq1VPfn/Szqctz2bU/oYeKd9/z5BL+PVg==}
 
-  tinyglobby@0.2.15:
-    resolution: {integrity: sha512-j2Zq4NyQYG5XMST4cbs02Ak8iJUdxRM0XI5QyxXuZOzKOINmWurp3smXu3y5wDcJrptwpSjgXHzIQxR0omXljQ==}
-    engines: {node: '>=12.0.0'}
-
   tinyglobby@0.2.17:
     resolution: {integrity: sha512-wXR/dYpcqKmfWpEdZjiKJOwCNFndD0DMnrW/cYjVGttEkBfVgcLFHoNrlj47mjOVic9yyNu65alsgF4NQyTa2g==}
     engines: {node: '>=12.0.0'}
@@ -6023,8 +6023,8 @@ packages:
   victory-vendor@36.9.2:
     resolution: {integrity: sha512-PnpQQMuxlwYdocC8fIJqVXvkeViHYzotI+NJrCuav0ZYFoq912ZHBk3mCeuj+5/VpodOjPe1z0Fk2ihgzlXqjQ==}
 
-  vite@7.3.6:
-    resolution: {integrity: sha512-4XP60spRGjSZFf1qYH+dJIkK2znL3zQfl9KkOV9MkkRR/3Dls0dxaBsQPTloEc5BLXWPL9vsOxopxyKoMmDueg==}
+  vite@7.3.7:
+    resolution: {integrity: sha512-AHEzTORMbi7/7aXp7w7KZ5+DCUdSeLsJz0grY8xHpc9DHdYb0vQu6DqJfm2tOw3gDExNgPgnJTXxM6syYFHaCA==}
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
     peerDependencies:
@@ -6929,7 +6929,7 @@ snapshots:
       glob: 13.0.6
       lan-network: 0.1.7
       minimatch: 9.0.9
-      node-forge: 1.4.0
+      node-forge: 1.4.1
       npm-package-arg: 11.0.3
       ora: 3.4.0
       picomatch: 3.0.2
@@ -7006,7 +7006,7 @@ snapshots:
       glob: 13.0.6
       lan-network: 0.2.1
       minimatch: 9.0.9
-      node-forge: 1.4.0
+      node-forge: 1.4.1
       npm-package-arg: 11.0.3
       ora: 3.4.0
       picomatch: 4.0.5
@@ -7043,7 +7043,7 @@ snapshots:
 
   '@expo/code-signing-certificates@0.0.6':
     dependencies:
-      node-forge: 1.4.0
+      node-forge: 1.4.1
 
   '@expo/config-plugins@54.0.5':
     dependencies:
@@ -8794,15 +8794,15 @@ snapshots:
 
   '@tailwindcss/typography@0.5.19(tailwindcss@4.2.1)':
     dependencies:
-      postcss-selector-parser: 6.0.10
+      postcss-selector-parser: 6.1.5
       tailwindcss: 4.2.1
 
-  '@tailwindcss/vite@4.2.1(vite@7.3.6(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.50.0)(tsx@4.21.0)(yaml@2.9.0))':
+  '@tailwindcss/vite@4.2.1(vite@7.3.7(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.50.0)(tsx@4.21.0)(yaml@2.9.0))':
     dependencies:
       '@tailwindcss/node': 4.2.1
       '@tailwindcss/oxide': 4.2.1
       tailwindcss: 4.2.1
-      vite: 7.3.6(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.50.0)(tsx@4.21.0)(yaml@2.9.0)
+      vite: 7.3.7(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.50.0)(tsx@4.21.0)(yaml@2.9.0)
 
   '@tanstack/query-core@5.90.20': {}
 
@@ -9009,7 +9009,7 @@ snapshots:
     transitivePeerDependencies:
       - graphql
 
-  '@vitejs/plugin-react@5.1.4(vite@7.3.6(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.50.0)(tsx@4.21.0)(yaml@2.9.0))':
+  '@vitejs/plugin-react@5.1.4(vite@7.3.7(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.50.0)(tsx@4.21.0)(yaml@2.9.0))':
     dependencies:
       '@babel/core': 7.29.6
       '@babel/plugin-transform-react-jsx-self': 7.27.1(@babel/core@7.29.6)
@@ -9017,7 +9017,7 @@ snapshots:
       '@rolldown/pluginutils': 1.0.0-rc.3
       '@types/babel__core': 7.20.5
       react-refresh: 0.18.0
-      vite: 7.3.6(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.50.0)(tsx@4.21.0)(yaml@2.9.0)
+      vite: 7.3.7(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.50.0)(tsx@4.21.0)(yaml@2.9.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -9062,7 +9062,7 @@ snapshots:
   ajv@8.18.0:
     dependencies:
       fast-deep-equal: 3.1.3
-      fast-uri: 3.1.8
+      fast-uri: 3.1.9
       json-schema-traverse: 1.0.0
       require-from-string: 2.0.2
 
@@ -9270,15 +9270,15 @@ snapshots:
 
   bignumber.js@9.3.1: {}
 
-  body-parser@2.3.0:
+  body-parser@2.4.0:
     dependencies:
       bytes: 3.1.2
       content-type: 2.1.0
       debug: 4.4.3
       http-errors: 2.0.1
-      iconv-lite: 0.7.2
+      iconv-lite: 0.7.3
       on-finished: 2.4.1
-      qs: 6.16.0
+      qs: 6.16.1
       raw-body: 3.0.2
       type-is: 2.1.0
     transitivePeerDependencies:
@@ -9348,7 +9348,7 @@ snapshots:
     dependencies:
       clone-response: 1.0.3
       get-stream: 5.2.0
-      http-cache-semantics: 4.2.0
+      http-cache-semantics: 4.3.0
       keyv: 4.5.4
       lowercase-keys: 2.0.0
       normalize-url: 6.1.0
@@ -9646,7 +9646,7 @@ snapshots:
 
   decimal.js-light@2.5.1: {}
 
-  decode-uri-component@0.5.0: {}
+  decode-uri-component@0.5.1: {}
 
   decompress-response@6.0.0:
     dependencies:
@@ -10073,7 +10073,7 @@ snapshots:
   express@5.2.1:
     dependencies:
       accepts: 2.0.0
-      body-parser: 2.3.0
+      body-parser: 2.4.0
       content-disposition: 1.0.1
       content-type: 1.0.5
       cookie: 0.7.2
@@ -10092,7 +10092,7 @@ snapshots:
       once: 1.4.0
       parseurl: 1.3.3
       proxy-addr: 2.0.8
-      qs: 6.16.0
+      qs: 6.16.1
       range-parser: 1.2.1
       router: 2.2.0
       send: 1.2.1
@@ -10123,7 +10123,7 @@ snapshots:
 
   fast-safe-stringify@2.1.1: {}
 
-  fast-uri@3.1.8: {}
+  fast-uri@3.1.9: {}
 
   fast-xml-builder@1.3.0:
     dependencies:
@@ -10455,7 +10455,7 @@ snapshots:
 
   html-entities@2.6.0: {}
 
-  http-cache-semantics@4.2.0: {}
+  http-cache-semantics@4.3.0: {}
 
   http-errors@2.0.1:
     dependencies:
@@ -10496,7 +10496,7 @@ snapshots:
 
   hyphenate-style-name@1.1.0: {}
 
-  iconv-lite@0.7.2:
+  iconv-lite@0.7.3:
     dependencies:
       safer-buffer: 2.1.2
 
@@ -10788,7 +10788,7 @@ snapshots:
     dependencies:
       tmpl: 1.0.5
 
-  markdown-it@14.3.1:
+  markdown-it@14.3.3:
     dependencies:
       argparse: 2.0.1
       entities: 4.5.0
@@ -11235,7 +11235,7 @@ snapshots:
 
   ms@2.1.3: {}
 
-  multer@2.4.0:
+  multer@2.5.0:
     dependencies:
       append-field: 1.0.0
       busboy: 1.6.0
@@ -11274,7 +11274,7 @@ snapshots:
       fetch-blob: 3.2.0
       formdata-polyfill: 4.0.10
 
-  node-forge@1.4.0: {}
+  node-forge@1.4.1: {}
 
   node-int64@0.4.0: {}
 
@@ -11545,7 +11545,7 @@ snapshots:
 
   pngjs@3.4.0: {}
 
-  postcss-selector-parser@6.0.10:
+  postcss-selector-parser@6.1.5:
     dependencies:
       cssesc: 3.0.0
       util-deprecate: 1.0.2
@@ -11623,14 +11623,14 @@ snapshots:
 
   qrcode-terminal@0.11.0: {}
 
-  qs@6.16.0:
+  qs@6.16.1:
     dependencies:
       es-define-property: 1.0.1
       side-channel: 1.1.1
 
   query-string@7.1.3:
     dependencies:
-      decode-uri-component: 0.5.0
+      decode-uri-component: 0.5.1
       filter-obj: 1.1.0
       split-on-first: 1.1.0
       strict-uri-encode: 2.0.0
@@ -11651,7 +11651,7 @@ snapshots:
     dependencies:
       bytes: 3.1.2
       http-errors: 2.0.1
-      iconv-lite: 0.7.2
+      iconv-lite: 0.7.3
       unpipe: 1.0.0
 
   rc@1.2.8:
@@ -12288,7 +12288,7 @@ snapshots:
       lines-and-columns: 1.2.4
       mz: 2.7.0
       pirates: 4.0.7
-      tinyglobby: 0.2.15
+      tinyglobby: 0.2.17
       ts-interface-checker: 0.1.13
 
   supports-color@5.5.0:
@@ -12373,11 +12373,6 @@ snapshots:
 
   tiny-invariant@1.3.3: {}
 
-  tinyglobby@0.2.15:
-    dependencies:
-      fdir: 6.5.0(picomatch@4.0.5)
-      picomatch: 4.0.5
-
   tinyglobby@0.2.17:
     dependencies:
       fdir: 6.5.0(picomatch@4.0.5)
@@ -12441,7 +12436,7 @@ snapshots:
     dependencies:
       '@gerrit0/mini-shiki': 3.23.0
       lunr: 2.3.9
-      markdown-it: 14.3.1
+      markdown-it: 14.3.3
       minimatch: 10.2.6
       typescript: 5.9.3
       yaml: 2.9.0
@@ -12568,14 +12563,14 @@ snapshots:
       d3-time: 3.1.0
       d3-timer: 3.0.1
 
-  vite@7.3.6(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.50.0)(tsx@4.21.0)(yaml@2.9.0):
+  vite@7.3.7(@types/node@25.3.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.50.0)(tsx@4.21.0)(yaml@2.9.0):
     dependencies:
       esbuild: 0.28.1
       fdir: 6.5.0(picomatch@4.0.5)
       picomatch: 4.0.5
       postcss: 8.5.25
       rollup: 4.59.0
-      tinyglobby: 0.2.15
+      tinyglobby: 0.2.17
     optionalDependencies:
       '@types/node': 25.3.5
       fsevents: 2.3.3
