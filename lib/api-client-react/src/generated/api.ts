@@ -21,6 +21,8 @@ import type {
 
 import type {
   AddCommentBody,
+  BlobUploadRequest,
+  BlobUploadResponse,
   ChatMessage,
   CreateProductBody,
   DeleteProductParams,
@@ -813,6 +815,77 @@ export const useRequestUploadUrl = <TError = ErrorType<ErrorEnvelope>,
         TContext
       > => {
       return useMutation(getRequestUploadUrlMutationOptions(options));
+    }
+
+export const getHandleBlobUploadUrl = () => {
+
+
+
+
+  return `/api/storage/uploads`
+}
+
+/**
+ * @summary Authorize a direct product image upload
+ */
+export const handleBlobUpload = async (blobUploadRequest: BlobUploadRequest, options?: RequestInit): Promise<BlobUploadResponse> => {
+
+  return customFetch<BlobUploadResponse>(getHandleBlobUploadUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(blobUploadRequest)
+  }
+);}
+
+
+
+
+
+export const getHandleBlobUploadMutationOptions = <TError = ErrorType<ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof handleBlobUpload>>, TError,{data: BodyType<BlobUploadRequest>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof handleBlobUpload>>, TError,{data: BodyType<BlobUploadRequest>}, TContext> => {
+
+const mutationKey = ['handleBlobUpload'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof handleBlobUpload>>, {data: BodyType<BlobUploadRequest>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  handleBlobUpload(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type HandleBlobUploadMutationResult = NonNullable<Awaited<ReturnType<typeof handleBlobUpload>>>
+    export type HandleBlobUploadMutationBody = BodyType<BlobUploadRequest>
+    export type HandleBlobUploadMutationError = ErrorType<ErrorEnvelope>
+
+    /**
+ * @summary Authorize a direct product image upload
+ */
+export const useHandleBlobUpload = <TError = ErrorType<ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof handleBlobUpload>>, TError,{data: BodyType<BlobUploadRequest>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof handleBlobUpload>>,
+        TError,
+        {data: BodyType<BlobUploadRequest>},
+        TContext
+      > => {
+      return useMutation(getHandleBlobUploadMutationOptions(options));
     }
 
 export const getGetPublicObjectUrl = (filePath: string,) => {

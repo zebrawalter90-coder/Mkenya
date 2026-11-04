@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useQueryClient } from "@tanstack/react-query";
-import { API_BASE_URL, apiUrl } from "@/lib/api-url";
+import { upload as uploadBlob } from "@vercel/blob/client";
+import { apiUrl } from "@/lib/api-url";
 
 type Category = "Clothing" | "Accessories" | "Fabric" | "Footwear" | "Jewelry" | "Beauty" | "Other";
 const CATEGORIES: Category[] = ["Clothing", "Accessories", "Fabric", "Footwear", "Jewelry", "Beauty", "Other"];
@@ -128,26 +129,44 @@ export default function AddProduct() {
         }
 
         setUploadProgress(`Uploading photo ${index + 1} of ${imageFiles.length}…`);
-        const formData = new FormData();
-        formData.append("file", imageFile);
+        let objectPath: string;
+        if (import.meta.env.PROD) {
+          const extension = imageFile.type === "image/png"
+            ? "png"
+            : imageFile.type === "image/webp"
+              ? "webp"
+              : "jpg";
+          const blob = await uploadBlob(
+            `product-images/${window.crypto.randomUUID()}.${extension}`,
+            imageFile,
+            {
+              access: "public",
+              handleUploadUrl: apiUrl("/api/storage/uploads"),
+            },
+          );
+          objectPath = blob.url;
+          if (!objectPath.startsWith("https://")) {
+            throw new Error("Photo upload returned an invalid image URL. Please retry.");
+          }
+        } else {
+          const formData = new FormData();
+          formData.append("file", imageFile);
+          const uploadRes = await fetch(apiUrl("/api/storage/uploads"), {
+            method: "POST",
+            body: formData,
+          });
 
-        if (import.meta.env.PROD && !API_BASE_URL) {
-          throw new Error("Product uploads need a hosted API. Set VITE_API_BASE_URL in Vercel to your API server origin, then redeploy.");
+          if (!uploadRes.ok) {
+            const body = await uploadRes.json().catch(() => ({}));
+            throw new Error((body as any).error ?? `Upload failed (${uploadRes.status})`);
+          }
+          const response = (await uploadRes.json()) as { objectPath: string };
+          objectPath = response.objectPath;
+          if (!objectPath.startsWith("/objects/uploads/")) {
+            throw new Error("Photo upload returned an invalid storage path. Please retry.");
+          }
         }
 
-        const uploadRes = await fetch(apiUrl("/api/storage/uploads"), {
-          method: "POST",
-          body: formData,
-        });
-
-        if (!uploadRes.ok) {
-          const body = await uploadRes.json().catch(() => ({}));
-          throw new Error((body as any).error ?? `Upload failed (${uploadRes.status})`);
-        }
-        const { objectPath } = (await uploadRes.json()) as { objectPath: string };
-        if (typeof objectPath !== "string" || !objectPath.startsWith("/objects/uploads/")) {
-          throw new Error("Photo upload returned an invalid storage path. Please retry.");
-        }
         uploadedObjectPathsRef.current.set(imageFile, objectPath);
         objectPaths.push(objectPath);
       }

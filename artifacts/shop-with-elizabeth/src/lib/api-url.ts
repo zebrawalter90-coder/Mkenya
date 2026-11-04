@@ -1,4 +1,6 @@
-const configuredApiBaseUrl = import.meta.env.VITE_API_BASE_URL as string | undefined;
+const configuredApiBaseUrl = import.meta.env.PROD
+  ? undefined
+  : import.meta.env.VITE_API_BASE_URL as string | undefined;
 
 export const API_BASE_URL = configuredApiBaseUrl?.replace(/\/+$/, "") ?? "";
 

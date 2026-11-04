@@ -107,6 +107,10 @@ export interface UploadUrlResponse {
   objectPath: string;
 }
 
+export interface BlobUploadRequest { [key: string]: unknown }
+
+export interface BlobUploadResponse { [key: string]: unknown }
+
 export interface MpesaOrderItem {
   id: string;
   name: string;

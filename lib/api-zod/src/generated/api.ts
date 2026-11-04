@@ -250,6 +250,14 @@ export const RequestUploadUrlResponse = zod.object({
 
 
 /**
+ * @summary Authorize a direct product image upload
+ */
+export const HandleBlobUploadBody = zod.record(zod.string(), zod.unknown())
+
+export const HandleBlobUploadResponse = zod.record(zod.string(), zod.unknown())
+
+
+/**
  * @summary Serve a public asset
  */
 export const GetPublicObjectParams = zod.object({

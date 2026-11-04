@@ -7,6 +7,8 @@
  */
 
 export * from './addCommentBody';
+export * from './blobUploadRequest';
+export * from './blobUploadResponse';
 export * from './chatMessage';
 export * from './createProductBody';
 export * from './deleteProductParams';

@@ -280,6 +280,36 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorEnvelope"
+  /storage/uploads:
+    post:
+      tags: [Storage]
+      operationId: handleBlobUpload
+      summary: Authorize a direct product image upload
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BlobUploadRequest"
+      responses:
+        "200":
+          description: Upload authorization or completion response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlobUploadResponse"
+        "400":
+          description: Invalid upload request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "503":
+          description: Vercel Blob is not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
   /storage/public-objects/{filePath}:
     get:
       tags: [Storage]
@@ -557,6 +587,12 @@ components:
           type: string
         objectPath:
           type: string
+    BlobUploadRequest:
+      type: object
+      additionalProperties: true
+    BlobUploadResponse:
+      type: object
+      additionalProperties: true
     MpesaStkPushBody:
       type: object
       required: [amount, phone, orderRef, customerName, deliveryAddress, county, items]

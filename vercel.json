@@ -6,6 +6,10 @@
   "outputDirectory": "artifacts/shop-with-elizabeth/dist/public",
   "rewrites": [
     {
+      "source": "/api/(.*)",
+      "destination": "/api"
+    },
+    {
       "source": "/((?!api(?:/|$)).*)",
       "destination": "/index.html"
     }

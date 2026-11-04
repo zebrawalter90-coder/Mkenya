@@ -7,11 +7,13 @@
     "dev": "export NODE_ENV=development && pnpm run build && pnpm run start",
     "build": "node ./build.mjs",
     "start": "node --enable-source-maps ./dist/index.mjs",
+    "migrate:vercel": "node ./scripts/migrate-to-vercel.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@google-cloud/storage": "^7.19.0",
     "@types/multer": "^2.1.0",
+    "@vercel/blob": "^2.8.2",
     "@workspace/api-zod": "workspace:*",
     "@workspace/db": "workspace:*",
     "cookie-parser": "^1.4.7",
@@ -20,6 +22,7 @@
     "express": "^5",
     "google-auth-library": "^10.6.2",
     "multer": "^2.5.0",
+    "pg": "^8.20.0",
     "pino": "^9",
     "pino-http": "^10"
   },

@@ -17,6 +17,7 @@ import {
 const router: IRouter = Router();
 
 function buildImageUrl(objectPath: string): string {
+  if (/^https?:\/\//i.test(objectPath)) return objectPath;
   return `/api/storage${objectPath}`;
 }
 
